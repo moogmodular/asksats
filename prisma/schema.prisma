@@ -1,0 +1,248 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgres"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+
+  previewFeatures = ["fullTextSearch", "fullTextIndex", "interactiveTransactions"]
+}
+
+generator dbml {
+  provider = "prisma-dbml-generator"
+}
+
+model User {
+  id           String          @id @default(uuid())
+  createdAt    DateTime        @default(now())
+  updatedAt    DateTime        @updatedAt
+  // props
+  lastLogin    DateTime?
+  publicKey    String          @unique
+  userName     String          @unique
+  profileImage String?
+  bio          String?
+  role         UserRole        @default(USER)
+  // rel
+  transaction  Transaction[]
+  asks         Ask[]
+  offers       Offer[]
+  bumps        Bump[]
+  askComment   AskComment[]
+  excludedTags Tag[]
+  blogItems    BlogItem[]
+  filePairs    OfferFilePair[]
+}
+
+enum UserRole {
+  USER
+  ADMIN
+}
+
+model BlogItem {
+  id        String     @id @default(uuid())
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+  // props
+  title     String?
+  body      String
+  user      User?      @relation(fields: [userId], references: [id])
+  userId    String?
+  // rel
+  parentId  String?
+  parent    BlogItem?  @relation("BlogItemRelation", fields: [parentId], references: [id])
+  children  BlogItem[] @relation("BlogItemRelation")
+}
+
+model UserAuth {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // props
+  k1Hash    String   @unique
+  publicKey String?
+}
+
+model Transaction {
+  id                String            @id @default(uuid())
+  createdAt         DateTime          @default(now())
+  updatedAt         DateTime          @updatedAt
+  // props
+  confirmedAt       DateTime?
+  maxAgeSeconds     Int
+  description       String
+  transactionKind   TransactionKind
+  transactionStatus TransactionStatus
+  hash              String            @unique
+  bolt11            String
+  lndId             String            @unique
+  k1Hash            String?           @unique
+  mSatsTarget       Int
+  mSatsSettled      Int?
+  // rel
+  user              User?             @relation(fields: [userId], references: [id])
+  userId            String?
+}
+
+enum TransactionKind {
+  INVOICE
+  WITHDRAWAL
+}
+
+enum TransactionStatus {
+  SETTLED
+  PENDING
+  FAILED
+  CANCELED
+  EXPIRED
+}
+
+model Ask {
+  id                 String       @id @default(uuid())
+  createdAt          DateTime     @default(now())
+  updatedAt          DateTime     @updatedAt
+  // props
+  userId             String?
+  deadlineAt         DateTime
+  acceptedDeadlineAt DateTime
+  askKind            AskKind
+  // rel
+  user               User?        @relation(fields: [userId], references: [id])
+  askContext         AskContext?
+  offer              Offer[]
+  comments           AskComment[]
+  favouriteOffer     Offer?       @relation("favouriteOffer")
+  bumps              Bump[]
+  tags               TagsOnAsks[]
+}
+
+model Tag {
+  id         String       @id @default(uuid())
+  createdAt  DateTime     @default(now())
+  updatedAt  DateTime     @updatedAt
+  // props
+  name       String       @unique
+  // rel
+  asks       TagsOnAsks[]
+  excludedBy User[]
+}
+
+model TagsOnAsks {
+  askId String
+  ask   Ask    @relation(fields: [askId], references: [id], onDelete: Cascade)
+  tagId String
+  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
+
+  @@id([askId, tagId])
+}
+
+enum AskKind {
+  PUBLIC
+  BUMP_PUBLIC
+  PRIVATE
+}
+
+model AskContext {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  // props
+  title         String
+  content       String
+  slug          String   @unique
+  // rel
+  ask           Ask      @relation(fields: [askId], references: [id], onDelete: Cascade)
+  askId         String   @unique
+  headerImage   File?    @relation(fields: [headerImageId], references: [id])
+  headerImageId String?  @unique
+}
+
+model AskComment {
+  id        String       @id @default(uuid())
+  createdAt DateTime     @default(now())
+  updatedAt DateTime     @updatedAt
+  // props
+  content   String
+  // rel
+  user      User?        @relation(fields: [userId], references: [id])
+  userId    String?
+  parentId  String?
+  parent    AskComment?  @relation("AskCommentRelation", fields: [parentId], references: [id])
+  children  AskComment[] @relation("AskCommentRelation")
+  ask       Ask?         @relation(fields: [askId], references: [id])
+  askId     String?
+}
+
+model Offer {
+  id             String        @id @default(uuid())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  // rel
+  ask            Ask?          @relation(fields: [askId], references: [id])
+  askId          String?
+  favouritedBy   Ask?          @relation(name: "favouriteOffer", fields: [favouritedById], references: [id])
+  favouritedById String?       @unique
+  author         User?         @relation(fields: [authorId], references: [id])
+  authorId       String?
+  offerContext   OfferContext?
+}
+
+model OfferContext {
+  id            String          @id @default(uuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  // props
+  content       String?
+  obscureMethod String
+  // rel
+  filePairs     OfferFilePair[]
+  offer         Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  offerId       String          @unique
+}
+
+model OfferFilePair {
+  id             String        @id @default(uuid())
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  // props
+  fileName       String
+  // rel
+  offerFile      File          @relation(name: "offerFilePairAsOffer", fields: [offerFileId], references: [id])
+  offerFileId    String        @unique
+  obscureFile    File          @relation(name: "offerFilePairAsObscure", fields: [obscureFileId], references: [id])
+  obscureFileId  String        @unique
+  offerContext   OfferContext? @relation(fields: [offerContextId], references: [id], onDelete: Cascade)
+  offerContextId String?
+  user           User?         @relation(fields: [userId], references: [id])
+  userId         String?
+}
+
+model File {
+  id                     String         @id @default(uuid())
+  createdAt              DateTime       @default(now())
+  updatedAt              DateTime       @updatedAt
+  // props
+  url                    String?
+  s3Key                  String?
+  // rel
+  askContext             AskContext?
+  offerFilePairAsOffer   OfferFilePair? @relation("offerFilePairAsOffer")
+  offerFilePairAsObscure OfferFilePair? @relation("offerFilePairAsObscure")
+}
+
+model Bump {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // props
+  amount    Int
+  // rel
+  bidder    User?    @relation(fields: [bidderId], references: [id])
+  bidderId  String?
+  ask       Ask?     @relation(fields: [askId], references: [id])
+  askId     String?
+}

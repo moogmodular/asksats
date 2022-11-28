@@ -1,0 +1,259 @@
+//// ------------------------------------------------------
+//// THIS FILE WAS AUTOMATICALLY GENERATED (DO NOT MODIFY)
+//// ------------------------------------------------------
+
+Table User {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  lastLogin DateTime
+  publicKey String [unique, not null]
+  userName String [unique, not null]
+  profileImage String
+  bio String
+  role UserRole [not null, default: 'USER']
+  transaction Transaction [not null]
+  asks Ask [not null]
+  offers Offer [not null]
+  bumps Bump [not null]
+  askComment AskComment [not null]
+  excludedTags Tag [not null]
+  blogItems BlogItem [not null]
+  filePairs OfferFilePair [not null]
+}
+
+Table BlogItem {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  title String
+  body String [not null]
+  user User
+  userId String
+  parentId String
+  parent BlogItem
+  children BlogItem [not null]
+}
+
+Table UserAuth {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  k1Hash String [unique, not null]
+  publicKey String
+}
+
+Table Transaction {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  confirmedAt DateTime
+  maxAgeSeconds Int [not null]
+  description String [not null]
+  transactionKind TransactionKind [not null]
+  transactionStatus TransactionStatus [not null]
+  hash String [unique, not null]
+  bolt11 String [not null]
+  lndId String [unique, not null]
+  k1Hash String [unique]
+  mSatsTarget Int [not null]
+  mSatsSettled Int
+  user User
+  userId String
+}
+
+Table Ask {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  userId String
+  deadlineAt DateTime [not null]
+  acceptedDeadlineAt DateTime [not null]
+  askKind AskKind [not null]
+  user User
+  askContext AskContext
+  offer Offer [not null]
+  comments AskComment [not null]
+  favouriteOffer Offer
+  bumps Bump [not null]
+  tags TagsOnAsks [not null]
+}
+
+Table Tag {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [unique, not null]
+  asks TagsOnAsks [not null]
+  excludedBy User [not null]
+}
+
+Table TagsOnAsks {
+  askId String [not null]
+  ask Ask [not null]
+  tagId String [not null]
+  tag Tag [not null]
+
+  indexes {
+    (askId, tagId) [pk]
+  }
+}
+
+Table AskContext {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  title String [not null]
+  content String [not null]
+  slug String [unique, not null]
+  ask Ask [not null]
+  askId String [unique, not null]
+  headerImage File
+  headerImageId String [unique]
+}
+
+Table AskComment {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  content String [not null]
+  user User
+  userId String
+  parentId String
+  parent AskComment
+  children AskComment [not null]
+  ask Ask
+  askId String
+}
+
+Table Offer {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  ask Ask
+  askId String
+  favouritedBy Ask
+  favouritedById String [unique]
+  author User
+  authorId String
+  offerContext OfferContext
+}
+
+Table OfferContext {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  content String
+  obscureMethod String [not null]
+  filePairs OfferFilePair [not null]
+  offer Offer [not null]
+  offerId String [unique, not null]
+}
+
+Table OfferFilePair {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  fileName String [not null]
+  offerFile File [not null]
+  offerFileId String [unique, not null]
+  obscureFile File [not null]
+  obscureFileId String [unique, not null]
+  offerContext OfferContext
+  offerContextId String
+  user User
+  userId String
+}
+
+Table File {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  url String
+  s3Key String
+  askContext AskContext
+  offerFilePairAsOffer OfferFilePair
+  offerFilePairAsObscure OfferFilePair
+}
+
+Table Bump {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  amount Int [not null]
+  bidder User
+  bidderId String
+  ask Ask
+  askId String
+}
+
+Table TagToUser {
+  excludedtagsId String [ref: > Tag.id]
+  excludedbyId String [ref: > User.id]
+}
+
+Enum UserRole {
+  USER
+  ADMIN
+}
+
+Enum TransactionKind {
+  INVOICE
+  WITHDRAWAL
+}
+
+Enum TransactionStatus {
+  SETTLED
+  PENDING
+  FAILED
+  CANCELED
+  EXPIRED
+}
+
+Enum AskKind {
+  PUBLIC
+  BUMP_PUBLIC
+  PRIVATE
+}
+
+Ref: BlogItem.userId > User.id
+
+Ref: BlogItem.parentId - BlogItem.id
+
+Ref: Transaction.userId > User.id
+
+Ref: Ask.userId > User.id
+
+Ref: TagsOnAsks.askId > Ask.id [delete: Cascade]
+
+Ref: TagsOnAsks.tagId > Tag.id [delete: Cascade]
+
+Ref: AskContext.askId - Ask.id [delete: Cascade]
+
+Ref: AskContext.headerImageId - File.id
+
+Ref: AskComment.userId > User.id
+
+Ref: AskComment.parentId - AskComment.id
+
+Ref: AskComment.askId > Ask.id
+
+Ref: Offer.askId > Ask.id
+
+Ref: Offer.favouritedById > Ask.id
+
+Ref: Offer.authorId > User.id
+
+Ref: OfferContext.offerId - Offer.id [delete: Cascade]
+
+Ref: OfferFilePair.offerFileId - File.id
+
+Ref: OfferFilePair.obscureFileId - File.id
+
+Ref: OfferFilePair.offerContextId > OfferContext.id [delete: Cascade]
+
+Ref: OfferFilePair.userId > User.id
+
+Ref: Bump.bidderId > User.id
+
+Ref: Bump.askId > Ask.id

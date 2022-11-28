@@ -1,0 +1,81 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100;0,400;0,700;1,100;1,600&family=Roboto+Mono:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;1,100;1,200;1,300;1,400;1,500;1,600;1,700&display=swap');
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    /* Chrome, Safari and Opera */
+    .no-scrollbar::-webkit-scrollbar {
+        display: none;
+    }
+
+    .no-scrollbar {
+        -ms-overflow-style: none; /* IE and Edge */
+        scrollbar-width: none; /* Firefox */
+    }
+    .max-h-600 {
+        height: 600px;
+    }
+}
+
+@layer base {
+    html {
+    }
+}
+
+.custom-background {
+    background-color: #e5e5f7;
+    opacity: 0.8;
+    background: repeating-linear-gradient(45deg, #e1e2f5, #ff9900 5px, #e5e5f7 5px, #e5e5f7 25px);
+    /*@apply bg-white;*/
+}
+
+.global-rounded {
+    @apply rounded-global;
+}
+
+.global-glass {
+    @apply border border-gray-700 bg-white bg-opacity-50 backdrop-blur-sm backdrop-filter;
+}
+
+.opaque-glass {
+    @apply border border-gray-700 bg-white bg-opacity-60 backdrop-blur-lg backdrop-filter;
+}
+
+@layer components {
+    .index-background {
+        @apply custom-background min-h-screen;
+    }
+    .primary-container {
+        @apply global-rounded global-glass p-4 shadow-2xl;
+    }
+    .secondary-container {
+        @apply global-rounded global-glass p-4 shadow-lg transition hover:bg-opacity-60 hover:shadow-2xl;
+    }
+    .card-container {
+        @apply global-rounded global-glass shadow-lg transition hover:bg-opacity-60 hover:shadow-2xl;
+    }
+    .modal-container {
+        @apply global-rounded opaque-glass shadow-lg transition;
+    }
+    .comment-container {
+        @apply global-rounded global-glass p-4 shadow-lg;
+    }
+    .card-status-indicator {
+        @apply flex h-full flex-col items-center justify-center rounded-b-global bg-white bg-opacity-20 text-xs backdrop-blur-lg backdrop-filter;
+    }
+    .content-block {
+        @apply global-rounded global-glass p-4 shadow-lg;
+    }
+    .ask-header-block {
+        @apply global-rounded global-glass shadow-lg;
+    }
+}
+
+.input {
+    @apply rounded-none;
+}
+
+.select {
+    @apply rounded-none;
+}
