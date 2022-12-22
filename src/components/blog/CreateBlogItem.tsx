@@ -12,6 +12,7 @@ import { RouterInput, trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import useMessageStore from '~/store/messageStore'
 import useBlogUXStore from '~/store/blogUXStore'
+import { Button } from '@mui/material'
 
 type CreateBlogItemInput = RouterInput['blog']['addBlogItem']
 
@@ -174,9 +175,9 @@ export const CreateBlogItem = ({ parentId }: CreateBlogItemProps) => {
                     }
                 </div>
             </div>
-            <button className={'btn-md btn'} type={'submit'}>
+            <Button variant={'contained'} type={'submit'}>
                 Create Blog Post
-            </button>
+            </Button>
         </form>
     )
 }

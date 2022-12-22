@@ -44,6 +44,7 @@ export const authRouter = t.router({
                             updatedAt: true,
                             userName: true,
                             role: true,
+                            lastLogin: true,
                         },
                     })
                 }
@@ -58,7 +59,7 @@ export const authRouter = t.router({
             await prisma.userAuth.deleteMany({
                 where: { OR: [{ k1Hash }, { createdAt: { lt: sub(new Date(), { seconds: 90 }) } }] },
             })
-            return { user: jwt.sign({ ...user }, process.env.JWT_SECRET ?? '') }
+            return { user: jwt.sign({ ...user }, process.env.JWT_SECRET ?? ''), lastLogin: user.lastLogin }
         }),
     authenticate: t.procedure
         .meta({ openapi: { method: 'GET', path: '/authenticate' } })
@@ -104,6 +105,11 @@ export const authRouter = t.router({
                                     },
                                     profileImage: `data:image/png;base64,${image}`,
                                 },
+                            })
+                        } else {
+                            await transactionPrisma.user.update({
+                                where: { id: innerUser.id },
+                                data: { lastLogin: new Date() },
                             })
                         }
 

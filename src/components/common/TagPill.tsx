@@ -1,4 +1,6 @@
 import Link from 'next/link'
+import CircleIcon from '@mui/icons-material/Circle'
+import { Chip } from '@mui/material'
 
 interface TagPillProps {
     tagValue: string
@@ -13,8 +15,18 @@ const getColor = (str: string) => {
 
 export const TagPill = ({ tagValue }: TagPillProps) => {
     return (
-        <span className="max-h-8 shrink rounded-small px-3" style={{ backgroundColor: getColor(tagValue) }}>
-            <Link href={`/ask/tag/${tagValue}`}>{`#${tagValue}`}</Link>
-        </span>
+        <Link href={`/ask/tag/${tagValue}`}>
+            <Chip
+                className={'cursor-pointer'}
+                icon={
+                    <div
+                        className={`aspect-square w-6 rounded-full`}
+                        style={{ backgroundColor: getColor(tagValue) }}
+                    ></div>
+                }
+                color={'secondary'}
+                label={'#' + tagValue}
+            />
+        </Link>
     )
 }

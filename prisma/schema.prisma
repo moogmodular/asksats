@@ -9,7 +9,7 @@ datasource db {
 generator client {
   provider = "prisma-client-js"
 
-  previewFeatures = ["fullTextSearch", "fullTextIndex", "interactiveTransactions"]
+  previewFeatures = ["fullTextSearch", "fullTextIndex", "clientExtensions"]
 }
 
 generator dbml {
@@ -74,14 +74,14 @@ model Transaction {
   // props
   confirmedAt       DateTime?
   maxAgeSeconds     Int
-  description       String
+  description       String?
   transactionKind   TransactionKind
   transactionStatus TransactionStatus
-  hash              String            @unique
-  bolt11            String
-  lndId             String            @unique
+  hash              String?           @unique
+  bolt11            String?
+  lndId             String?           @unique
   k1Hash            String?           @unique
-  mSatsTarget       Int
+  mSatsTarget       Int?
   mSatsSettled      Int?
   // rel
   user              User?             @relation(fields: [userId], references: [id])
@@ -192,16 +192,15 @@ model Offer {
 }
 
 model OfferContext {
-  id            String          @id @default(uuid())
-  createdAt     DateTime        @default(now())
-  updatedAt     DateTime        @updatedAt
+  id        String          @id @default(uuid())
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
   // props
-  content       String?
-  obscureMethod String
+  content   String?
   // rel
-  filePairs     OfferFilePair[]
-  offer         Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
-  offerId       String          @unique
+  filePairs OfferFilePair[]
+  offer     Offer           @relation(fields: [offerId], references: [id], onDelete: Cascade)
+  offerId   String          @unique
 }
 
 model OfferFilePair {
@@ -210,10 +209,11 @@ model OfferFilePair {
   updatedAt      DateTime      @updatedAt
   // props
   fileName       String
+  obscureMethod  String        @default("BLUR")
   // rel
-  offerFile      File          @relation(name: "offerFilePairAsOffer", fields: [offerFileId], references: [id])
+  offerFile      File          @relation(name: "offerFilePairAsOffer", fields: [offerFileId], references: [id], onDelete: Cascade)
   offerFileId    String        @unique
-  obscureFile    File          @relation(name: "offerFilePairAsObscure", fields: [obscureFileId], references: [id])
+  obscureFile    File          @relation(name: "offerFilePairAsObscure", fields: [obscureFileId], references: [id], onDelete: Cascade)
   obscureFileId  String        @unique
   offerContext   OfferContext? @relation(fields: [offerContextId], references: [id], onDelete: Cascade)
   offerContextId String?
@@ -245,4 +245,13 @@ model Bump {
   bidderId  String?
   ask       Ask?     @relation(fields: [askId], references: [id])
   askId     String?
+}
+
+model StaticData {
+  id        String   @id @default(uuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  // props
+  key       String   @unique
+  value     Json
 }

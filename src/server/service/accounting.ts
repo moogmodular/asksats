@@ -4,6 +4,7 @@ import {
     BUMP_PUBLIC_MIN_BUMP_FACTOR,
     GLOBAL_MIN_BUMP_SATS,
     INVOICE_LIMIT,
+    MSATS_UNIT_FACTOR,
     TRANSACTION_FREQUENCY_SECONDS_LIMIT,
     TRANSACTION_MAX_AGE,
 } from '~/server/service/constants'
@@ -72,7 +73,7 @@ export const userBalance = async (prisma: PrismaClient, userId: string) => {
                     INVOICE: cur.mSatsSettled,
                     WITHDRAWAL: -cur.mSatsSettled,
                 }[cur.transactionKind]
-                return acc + transactionValue / 1000
+                return acc + transactionValue / MSATS_UNIT_FACTOR
             }
             return acc
         }, 0) ?? 0

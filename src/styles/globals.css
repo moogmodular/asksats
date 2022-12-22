@@ -18,15 +18,11 @@
     }
 }
 
-@layer base {
-    html {
-    }
-}
-
 .custom-background {
-    background-color: #e5e5f7;
-    opacity: 0.8;
-    background: repeating-linear-gradient(45deg, #e1e2f5, #ff9900 5px, #e5e5f7 5px, #e5e5f7 25px);
+    background-color: #c0adad;
+    /*background-color: #e5e5f7;*/
+    /*opacity: 0.8;*/
+    /*background: repeating-linear-gradient(45deg, #e1e2f5, #efefef 5px, #e5e5f7 5px, #e5e5f7 25px);*/
     /*@apply bg-white;*/
 }
 
@@ -35,11 +31,13 @@
 }
 
 .global-glass {
-    @apply border border-gray-700 bg-white bg-opacity-50 backdrop-blur-sm backdrop-filter;
+    @apply border-4 border-gray-100 bg-white;
+    /*@apply border border-gray-700 bg-white bg-opacity-50 backdrop-blur-sm backdrop-filter;*/
 }
 
 .opaque-glass {
-    @apply border border-gray-700 bg-white bg-opacity-60 backdrop-blur-lg backdrop-filter;
+    @apply border-4 border-gray-100 bg-white;
+    /*@apply border border-gray-700 bg-white bg-opacity-60 backdrop-blur-lg backdrop-filter;*/
 }
 
 @layer components {
@@ -58,11 +56,29 @@
     .modal-container {
         @apply global-rounded opaque-glass shadow-lg transition;
     }
+    .editor-container {
+        @apply border border-gray-600 shadow-lg transition;
+    }
     .comment-container {
         @apply global-rounded global-glass p-4 shadow-lg;
     }
+    .emphasis-container {
+        @apply global-rounded border-4 border-gray-100 p-4 shadow-lg;
+    }
+    .card-status-indicator-running {
+        @apply flex h-32 flex-row items-center justify-between border-t bg-gray-50 p-2;
+    }
     .card-status-indicator {
-        @apply flex h-full flex-col items-center justify-center rounded-b-global bg-white bg-opacity-20 text-xs backdrop-blur-lg backdrop-filter;
+        @apply flex h-32 flex-col items-center justify-center rounded-b-global text-xs;
+    }
+    .card-status-indicator-expired {
+        @apply card-status-indicator bg-red-400 text-white;
+    }
+    .card-status-indicator-pending {
+        @apply card-status-indicator bg-yellow-400 text-white;
+    }
+    .card-status-indicator-settled {
+        @apply card-status-indicator bg-green-400 text-white;
     }
     .content-block {
         @apply global-rounded global-glass p-4 shadow-lg;
@@ -70,12 +86,4 @@
     .ask-header-block {
         @apply global-rounded global-glass shadow-lg;
     }
-}
-
-.input {
-    @apply rounded-none;
-}
-
-.select {
-    @apply rounded-none;
 }

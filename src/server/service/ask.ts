@@ -57,7 +57,7 @@ export const getSearch = (filter: string) => {
         ? {
               askContext: {
                   title: {
-                      search: filter,
+                      search: filter.trim().split(' ').join(' <-> '),
                   },
               },
           }
@@ -90,14 +90,29 @@ export const equalsList = (list: Array<string>) => {
     })
 }
 
-export const byTags = (tags: Array<Partial<Tag>>, role: 'USER' | 'GUEST' | 'ADMIN') => {
-    return {
-        tags: {
-            none: {
-                tag: {
-                    OR: equalsList(tags.map((tag) => tag.name ?? '')),
-                },
-            },
-        },
-    }
+export const byTags = (tags: Array<Partial<Tag>>, role: 'USER' | 'GUEST' | 'ADMIN', singleTag?: string | null) => {
+    return singleTag
+        ? {
+              tags: {
+                  some: {
+                      tag: {
+                          name: singleTag,
+                      },
+                  },
+                  none: {
+                      tag: {
+                          OR: equalsList(tags.map((tag) => tag.name ?? '')),
+                      },
+                  },
+              },
+          }
+        : {
+              tags: {
+                  none: {
+                      tag: {
+                          OR: equalsList(tags.map((tag) => tag.name ?? '')),
+                      },
+                  },
+              },
+          }
 }

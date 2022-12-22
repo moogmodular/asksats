@@ -63,6 +63,7 @@ export const taxonomyRouter = t.router({
                         return { ...tag, askCount: tag.asks.length }
                     })
                     .sort((a, b) => b.askCount - a.askCount)
+                    .slice(0, 5)
             })
     }),
 })

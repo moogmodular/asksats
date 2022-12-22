@@ -1,8 +1,8 @@
 import { QRCodeSVG } from 'qrcode.react'
 import { useEffect, useState } from 'react'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
-import { Spinner } from '~/components/common/Spinner'
 import { requestProvider } from 'webln'
+import { Button, CircularProgress } from '@mui/material'
 
 interface PollingQRCodeProps {
     bolt11: string
@@ -44,7 +44,7 @@ export const PollingQRCode = ({ bolt11 }: PollingQRCodeProps) => {
     return (
         <div ref={parent} className={'flex flex-col items-center justify-center gap-8'}>
             <QRCodeSVG value={bolt11} level={'Q'} size={250} />
-            <Spinner />
+            <CircularProgress />
             <div id={'bolt11-text'} className={'max-w-3xl break-all text-center'} onClick={handleUrlStringClick}>
                 {bolt11}
             </div>
@@ -52,12 +52,9 @@ export const PollingQRCode = ({ bolt11 }: PollingQRCodeProps) => {
             {showCopied && <div>ln-url copied to clipboard!</div>}
             {webLNAvailable && (
                 <a href={`lightning:${bolt11}`}>
-                    <button
-                        type="button"
-                        className="mr-2 mb-2 rounded-global bg-gradient-to-br from-pink-500 to-orange-400 px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-gradient-to-bl focus:outline-none focus:ring-4 focus:ring-pink-200 dark:focus:ring-pink-800"
-                    >
+                    <Button variant={'contained'} type="button">
                         WebLN
-                    </button>
+                    </Button>
                 </a>
             )}
         </div>

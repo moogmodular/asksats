@@ -3,7 +3,7 @@ import { TRPCError } from '@trpc/server'
 
 export const isAuthed = t.middleware(async ({ ctx, next }) => {
     if (!ctx.user) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated. Please log in.' })
     }
     return next({
         ctx: {
@@ -15,7 +15,7 @@ export const isAuthed = t.middleware(async ({ ctx, next }) => {
 export const isAdmin = t.middleware(async ({ ctx, next }) => {
     console.log('isAdmin', ctx)
     if (!ctx.user) {
-        throw new TRPCError({ code: 'UNAUTHORIZED' })
+        throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated. Please log in.' })
     }
 
     if (ctx.user.role !== 'ADMIN') {

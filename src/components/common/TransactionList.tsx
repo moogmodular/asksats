@@ -6,31 +6,25 @@ export const TransactionList = ({}) => {
     const { data: transactionData } = trpc.accounting.transactions.useQuery()
 
     return (
-        <div className={'no-scrollbar max-h-600 overflow-y-scroll'}>
+        <div className={'no-scrollbar overflow-y-scroll'}>
             <div>My transactions:</div>
             {transactionData
-                ? transactionData.map((transaction) => {
+                ? transactionData.map((transaction, index) => {
                       return (
                           <div
-                              key={transaction.id}
+                              key={index}
                               className={
                                   'my-2 flex flex-row rounded-tl-global border-2 border-gray-400 p-1 text-sm transition duration-150 ease-in-out hover:-translate-y-1 hover:drop-shadow-lg'
                               }
                           >
                               <div className={'w-80'}>
                                   <div>
-                                      <b>id:</b>
-                                      {transaction.id}
+                                      <b>amount:</b>
+                                      {transaction.mSatsSettled}
                                   </div>
-                                  <div className={'flex flex-row gap-1'}>
-                                      <div>
-                                          <b>amount:</b>
-                                          {transaction.mSatsTarget}
-                                      </div>
-                                      <div>
-                                          <b>status:</b>
-                                          {transaction.transactionStatus}
-                                      </div>
+                                  <div>
+                                      <b>status:</b>
+                                      {transaction.transactionStatus}
                                   </div>
                               </div>
                               <div>

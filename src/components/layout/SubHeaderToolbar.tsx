@@ -1,13 +1,72 @@
-import useListStore from '~/store/listStore'
+import useListStore, { FilterForInput, OrderByDirectionInput, OrderByInput } from '~/store/listStore'
 import { useEffect, useState } from 'react'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useRouter } from 'next/router'
+import { Button, ButtonGroup, IconButton, InputAdornment, Menu, MenuItem, TextField, Tooltip } from '@mui/material'
+import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
+import SearchIcon from '@mui/icons-material/Search'
+import Link from 'next/link'
+import QueueOutlinedIcon from '@mui/icons-material/QueueOutlined'
+import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
+import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined'
+import PermMediaOutlinedIcon from '@mui/icons-material/PermMediaOutlined'
+import useAuthStore from '~/store/useAuthStore'
+import SouthIcon from '@mui/icons-material/South'
+import NorthIcon from '@mui/icons-material/North'
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 interface SubHeaderToolbarHeaderProps {}
 
 export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
-    const { setFilterFor, setOrderBy, setOrderByDirection, setSearchTerm, orderBy, filterFor, setTemplate } =
-        useListStore()
+    const {
+        setFilterFor,
+        setOrderBy,
+        setOrderByDirection,
+        setSearchTerm,
+        orderBy,
+        filterFor,
+        orderByDirection,
+        setTemplate,
+    } = useListStore()
+    const { user } = useAuthStore()
+
+    const [anchorElFilterFor, setAnchorElFilterFor] = useState<null | HTMLElement>(null)
+    const [anchorElOrderBy, setAnchorElOrderBy] = useState<null | HTMLElement>(null)
+    const [anchorElDirection, setAnchorElDirection] = useState<null | HTMLElement>(null)
+
+    const openFilterFor = Boolean(anchorElFilterFor)
+    const openOrderBy = Boolean(anchorElOrderBy)
+    const openDirection = Boolean(anchorElDirection)
+    const handleClickFilterFor = (event: any) => {
+        setAnchorElFilterFor(event.currentTarget)
+    }
+    const handleClickOrderBy = (event: any) => {
+        setAnchorElOrderBy(event.currentTarget)
+    }
+    const handleClickDirection = (event: any) => {
+        setAnchorElDirection(event.currentTarget)
+    }
+    const handleCloseFilterFor = () => {
+        setAnchorElFilterFor(null)
+    }
+    const handleCloseOrderBy = () => {
+        setAnchorElOrderBy(null)
+    }
+    const handleCloseDirection = () => {
+        setAnchorElDirection(null)
+    }
+    const handleFilterFor = (filterFor: FilterForInput) => {
+        setFilterFor(filterFor)
+        handleCloseFilterFor()
+    }
+    const handleOrderBy = (orderBy: OrderByInput) => {
+        setOrderBy(orderBy)
+        handleCloseOrderBy()
+    }
+    const handleDirection = (direction: OrderByDirectionInput) => {
+        setOrderByDirection(direction)
+        handleCloseDirection()
+    }
 
     const router = useRouter()
     const [hideForSingle, setHideForSingle] = useState(false)
@@ -29,135 +88,143 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
     return (
         <>
             {!hideForSingle ? (
-                <div ref={parent} className={'flex h-full cursor-pointer flex-col flex-wrap gap-2'}>
-                    <div className="flex flex-row items-center gap-2">
-                        <input
-                            type="text"
-                            placeholder=""
-                            className="input-bordered input-primary input input-xs w-full lg:input-sm"
+                <div ref={parent} className={'flex cursor-pointer flex-col flex-wrap gap-2'}>
+                    <div className="flex flex-col items-center gap-2 lg:flex-row">
+                        <TextField
+                            fullWidth
+                            id="input-with-icon-adornment"
+                            variant="outlined"
+                            placeholder="Search for asks"
                             onChange={(e) => setSearchTerm(e.target.value)}
+                            InputProps={{
+                                startAdornment: (
+                                    <InputAdornment position="start">
+                                        <SearchIcon />
+                                    </InputAdornment>
+                                ),
+                            }}
                         />
-                        <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            fill="none"
-                            viewBox="0 0 24 24"
-                            strokeWidth={1.5}
-                            stroke="currentColor"
-                            className="h-4 w-4"
+                        <div className={'flex flex-row items-center'}>
+                            <Tooltip title="My asks">
+                                <IconButton>
+                                    <Link className={'flex items-center'} href={`/ask/user/${user?.userName}`}>
+                                        <QueueOutlinedIcon fontSize={'medium'} />
+                                    </Link>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="My bumps">
+                                <IconButton>
+                                    <Link className={'flex items-center'} href={`/ask/bumps`}>
+                                        <RocketLaunchOutlinedIcon fontSize={'medium'} />
+                                    </Link>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="My offers">
+                                <IconButton>
+                                    <Link className={'flex items-center'} href={`/ask/offers`}>
+                                        <HandshakeOutlinedIcon fontSize={'medium'} />
+                                    </Link>
+                                </IconButton>
+                            </Tooltip>
+                            <Tooltip title="My files">
+                                <IconButton id={'files-button'}>
+                                    <Link href={`/ask/files`}>
+                                        <PermMediaOutlinedIcon fontSize={'medium'} />
+                                    </Link>
+                                </IconButton>
+                            </Tooltip>
+                        </div>
+                    </div>
+                    <div className={'flex flex-col gap-2 lg:flex-row'}>
+                        <ButtonGroup size="small" aria-label="small button group">
+                            <Button key="one" onClick={() => setTemplate('newest')}>
+                                new
+                            </Button>
+                            <Button key="two" onClick={() => setTemplate('public_settled')}>
+                                public settled
+                            </Button>
+                            <Button key="three" onClick={() => setTemplate('ending_soon')}>
+                                ending
+                            </Button>
+                        </ButtonGroup>
+
+                        <Button
+                            id="demo-customized-button"
+                            size="small"
+                            variant="outlined"
+                            disableElevation
+                            onClick={(e) => handleClickFilterFor(e)}
+                            endIcon={<KeyboardArrowDownIcon />}
                         >
-                            <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
-                            />
-                        </svg>
-                    </div>
-                    <div className={'mr-1 flex flex-row gap-1'}>
-                        <button className={'btn-xs btn'} onClick={() => setTemplate('newest')}>
-                            new
-                        </button>
-                        <button className={'btn-xs btn'} onClick={() => setTemplate('public_settled')}>
-                            public settled
-                        </button>
-                        <button className={'btn-xs btn'} onClick={() => setTemplate('ending_soon')}>
-                            ending
-                        </button>
-                    </div>
-                    <div className={'flex flex-row'}>
-                        <div className="dropdown">
-                            <label tabIndex={0} className="btn-xs btn m-1">
-                                {filterFor}
-                            </label>
-                            <ul tabIndex={0} className="dropdown-content menu rounded-box bg-base-100 p-2">
-                                <li>
-                                    <a onClick={() => setFilterFor('all')}>All</a>
-                                </li>
-                                <li>
-                                    <a onClick={() => setFilterFor('active')}>Active</a>
-                                </li>
-                                <li>
-                                    <a onClick={() => setFilterFor('pending_acceptance')}>Acceptance pending</a>
-                                </li>
-                                <li>
-                                    <a onClick={() => setFilterFor('settled')}>Settled</a>
-                                </li>
-                                <li>
-                                    <a onClick={() => setFilterFor('expired')}>Expired</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="dropdown">
-                            <label tabIndex={0} className="btn-xs btn m-1">
-                                {orderBy}
-                            </label>
-                            <ul tabIndex={0} className="dropdown-content menu rounded-box bg-base-100 p-2 shadow">
-                                <li>
-                                    <a onClick={() => setOrderBy('deadline')}>Deadline</a>
-                                </li>
-                                <li>
-                                    <a onClick={() => setOrderBy('acceptance')}>Acceptance</a>
-                                </li>
-                                <li>
-                                    <a onClick={() => setOrderBy('creation')}>Creation</a>
-                                </li>
-                            </ul>
-                        </div>
-                        <div className="dropdown">
-                            <label tabIndex={0} className="btn-xs btn m-1">
-                                <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    fill="none"
-                                    viewBox="0 0 24 24"
-                                    strokeWidth={1.5}
-                                    stroke="currentColor"
-                                    className="h-4 w-4"
-                                >
-                                    <path
-                                        strokeLinecap="round"
-                                        strokeLinejoin="round"
-                                        d="M3 7.5L7.5 3m0 0L12 7.5M7.5 3v13.5m13.5 0L16.5 21m0 0L12 16.5m4.5 4.5V7.5"
-                                    />
-                                </svg>
-                            </label>
-                            <ul tabIndex={0} className="dropdown-content menu rounded-box bg-base-100 p-2 shadow">
-                                <li>
-                                    <a onClick={() => setOrderByDirection('asc')}>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            strokeWidth={1.5}
-                                            stroke="currentColor"
-                                            className="h-4 w-4"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M3 4.5h14.25M3 9h9.75M3 13.5h9.75m4.5-4.5v12m0 0l-3.75-3.75M17.25 21L21 17.25"
-                                            />
-                                        </svg>
-                                    </a>
-                                </li>
-                                <li>
-                                    <a onClick={() => setOrderByDirection('desc')}>
-                                        <svg
-                                            xmlns="http://www.w3.org/2000/svg"
-                                            fill="none"
-                                            viewBox="0 0 24 24"
-                                            strokeWidth={1.5}
-                                            stroke="currentColor"
-                                            className="h-4 w-4"
-                                        >
-                                            <path
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                                d="M3 4.5h14.25M3 9h9.75M3 13.5h5.25m5.25-.75L17.25 9m0 0L21 12.75M17.25 9v12"
-                                            />
-                                        </svg>
-                                    </a>
-                                </li>
-                            </ul>
-                        </div>
+                            {filterFor}
+                        </Button>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorElFilterFor}
+                            open={openFilterFor}
+                            onClose={handleCloseFilterFor}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                            }}
+                        >
+                            <MenuItem onClick={() => handleFilterFor('all')}>All</MenuItem>
+                            <MenuItem onClick={() => handleFilterFor('active')}>Active</MenuItem>
+                            <MenuItem onClick={() => handleFilterFor('pending_acceptance')}>
+                                Acceptance pending
+                            </MenuItem>
+                            <MenuItem onClick={() => handleFilterFor('settled')}>Settled</MenuItem>
+                            <MenuItem onClick={() => handleFilterFor('expired')}>Expired</MenuItem>
+                        </Menu>
+                        <Button
+                            id="demo-customized-button"
+                            size="small"
+                            variant="outlined"
+                            disableElevation
+                            onClick={handleClickOrderBy}
+                            endIcon={<KeyboardArrowDownIcon />}
+                        >
+                            {orderBy}
+                        </Button>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorElOrderBy}
+                            open={openOrderBy}
+                            onClose={handleCloseOrderBy}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                            }}
+                        >
+                            <MenuItem onClick={() => handleOrderBy('deadline')}>Deadline</MenuItem>
+                            <MenuItem onClick={() => handleOrderBy('acceptance')}>Acceptance</MenuItem>
+                            <MenuItem onClick={() => handleOrderBy('creation')}>Creation</MenuItem>
+                        </Menu>
+
+                        <Button
+                            id="demo-customized-button"
+                            size="small"
+                            variant="outlined"
+                            disableElevation
+                            onClick={handleClickDirection}
+                            endIcon={<KeyboardArrowDownIcon />}
+                        >
+                            {orderByDirection}
+                        </Button>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorElDirection}
+                            open={openDirection}
+                            onClose={handleCloseDirection}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                            }}
+                        >
+                            <MenuItem onClick={() => handleDirection('asc')}>
+                                <SouthIcon />
+                            </MenuItem>
+                            <MenuItem onClick={() => handleDirection('desc')}>
+                                <NorthIcon />
+                            </MenuItem>
+                        </Menu>
                     </div>
                 </div>
             ) : null}

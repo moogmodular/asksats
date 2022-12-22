@@ -1,6 +1,5 @@
 import { differenceInMilliseconds } from 'date-fns'
 import { RouterOutput } from '~/utils/trpc'
-import { Countdown } from '~/components/common/Countdown'
 
 export type AskStatus = RouterOutput['ask']['list']['items'][0]['status']
 
@@ -15,13 +14,13 @@ export const CountdownProgress = ({ endDate, creationDate, acceptedDate, status 
     const timeForActive = () => {
         const oneHundred = differenceInMilliseconds(creationDate, endDate)
         const part = differenceInMilliseconds(new Date(), endDate)
-        return 100 - (Math.abs(part) / Math.abs(oneHundred)) * 100
+        return (100 - (Math.abs(part) / Math.abs(oneHundred)) * 100).toFixed(2)
     }
 
     const timeForPendingAcceptance = () => {
         const oneHundred = differenceInMilliseconds(endDate, acceptedDate)
         const part = differenceInMilliseconds(new Date(), acceptedDate)
-        return 100 - (Math.abs(part) / Math.abs(oneHundred)) * 100
+        return (100 - (Math.abs(part) / Math.abs(oneHundred)) * 100).toFixed(2)
     }
 
     const getProgressValue = () => {
@@ -45,7 +44,7 @@ export const CountdownProgress = ({ endDate, creationDate, acceptedDate, status 
     }
 
     return (
-        <div className={'w-full bg-white bg-opacity-10 backdrop-filter'}>
+        <div className={'black w-full bg-white bg-opacity-10 backdrop-filter'}>
             <div
                 style={{
                     width: getProgressValue() + '%',

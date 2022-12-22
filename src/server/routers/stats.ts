@@ -1,15 +1,31 @@
 import { t } from '../trpc'
 import { prisma } from '~/server/prisma'
 import { ACTIVE_SELECT, SETTLED_SELECT } from '~/server/service/selects'
+import { isAuthed } from '~/server/middlewares/authed'
+import { getAskStatus } from '~/server/service/ask'
 
 export const statsRouter = t.router({
     endingSoon: t.procedure.query(async ({ ctx }) => {
-        return await prisma.ask.findMany({
-            where: ACTIVE_SELECT,
-            orderBy: { deadlineAt: 'asc' },
-            include: { askContext: true },
-            take: 5,
-        })
+        return await prisma.ask
+            .findMany({
+                where: ACTIVE_SELECT,
+                orderBy: { deadlineAt: 'asc' },
+                include: { askContext: true, offer: true, favouriteOffer: true },
+                take: 5,
+            })
+            .then((list) =>
+                list.map((ask) => {
+                    return {
+                        ...ask,
+                        status: getAskStatus(
+                            ask.deadlineAt,
+                            ask.acceptedDeadlineAt,
+                            Boolean(ask.offer.length),
+                            Boolean(ask.favouriteOffer),
+                        ),
+                    }
+                }),
+            )
     }),
     topEarners: t.procedure.query(async ({ ctx }) => {
         const test = await prisma.user.findMany({
@@ -21,6 +37,7 @@ export const statsRouter = t.router({
                 return {
                     userName: user.userName,
                     publicKey: user.publicKey,
+                    createdAt: user.createdAt,
                     totalEarned: user.bumps.reduce((acc, offer) => acc + offer.amount, 0),
                 }
             })
@@ -36,6 +53,7 @@ export const statsRouter = t.router({
                 return {
                     userName: user.userName,
                     publicKey: user.publicKey,
+                    createdAt: user.createdAt,
                     totalEarned: user.bumps.reduce((acc, offer) => acc + offer.amount, 0),
                 }
             })
@@ -55,5 +73,51 @@ export const statsRouter = t.router({
                 }
             })
             .sort((a, b) => b.grossed - a.grossed)
+    }),
+    myStats: t.procedure.use(isAuthed).query(async ({ ctx }) => {
+        const user = await prisma.user.findUnique({
+            where: { id: ctx.user.id },
+            include: {
+                asks: { where: SETTLED_SELECT },
+                offers: { where: { ask: SETTLED_SELECT }, include: { ask: { include: { bumps: true } } } },
+                bumps: true,
+            },
+        })
+
+        const myAsks = await prisma.ask.findMany({
+            where: { userId: ctx.user.id },
+        })
+
+        const myOffers = await prisma.offer.findMany({
+            where: { authorId: ctx.user.id },
+        })
+
+        return {
+            userName: user?.userName,
+            publicKey: user?.publicKey,
+            totalEarned: user?.offers.reduce(
+                (acc, offer) => acc + (offer?.ask?.bumps.reduce((acc, offer) => acc + offer.amount ?? 0, 0) ?? 0),
+                0,
+            ),
+            totalSpent: user?.bumps.reduce((acc, offer) => acc + offer.amount, 0),
+            totalAsks: myAsks.length,
+            settledAsks: user?.asks.length,
+            totalOffers: myOffers.length,
+            settledOffers: user?.offers.length,
+        }
+    }),
+    siteStats: t.procedure.query(async ({ ctx }) => {
+        const userCount = await prisma.user.count()
+        const askCount = await prisma.ask.count()
+        const offerCount = await prisma.offer.count()
+        const bumps = await prisma.bump.findMany()
+
+        return {
+            userCount,
+            askCount,
+            offerCount,
+            bumpCount: bumps.length,
+            totalEarned: bumps.reduce((acc, offer) => acc + offer.amount, 0),
+        }
     }),
 })

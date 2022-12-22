@@ -5,13 +5,8 @@ import { createOfferForAskInput } from '~/components/offer/CreateOffer'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { s3Client } from '~/server/service/s3-client'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
-import sharp from 'sharp'
-import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
-import FormData from 'form-data'
 import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
-import * as fs from 'fs'
-import path from 'path'
 import { getAskStatus } from '~/server/service/ask'
 
 export const offerRouter = t.router({
@@ -55,102 +50,102 @@ export const offerRouter = t.router({
                 throw new Error('This ask si not active')
             }
 
-            const imagePairs = await Promise.all(
-                input.files.map(async (file) => {
-                    const uploadedImageUrl = await getSignedUrl(
-                        s3Client,
-                        new GetObjectCommand({
-                            Bucket: `${process.env.DO_API_NAME}`,
-                            Key: `${ctx.user.id}/${file.id}`,
-                        }),
-                    )
-
-                    const sourceImage = await fetch(uploadedImageUrl, { method: 'GET' }).then((res) =>
-                        res.arrayBuffer(),
-                    )
-
-                    const imageMetadata = await sharp(Buffer.from(sourceImage)).metadata()
-
-                    const imageBuffer = Buffer.from(sourceImage)
-                    let checkerBuffer
-
-                    await new Promise((resolve, reject) => {
-                        fs.readFile(
-                            path.join(process.cwd(), './src/assets/checker_obfuscation.png'),
-                            function (err, data) {
-                                checkerBuffer = data
-                                resolve(data)
-                            },
-                        )
-                    })
-
-                    const cropped = await sharp(checkerBuffer)
-                        .resize(imageMetadata.width, imageMetadata.height, {
-                            fit: sharp.fit.inside,
-                            withoutEnlargement: true,
-                        })
-                        .toBuffer()
-
-                    const obfuscatedImage = {
-                        BLUR: await sharp(imageBuffer)
-                            .blur(parseInt(input.blurLevel ?? '5'))
-                            .toBuffer(),
-                        CHECKER: await sharp(imageBuffer)
-                            .composite([
-                                {
-                                    input: cropped,
-                                    tile: true,
-                                    blend: 'atop',
-                                },
-                            ])
-                            .toBuffer(),
-                    }[input.obscureMethod]
-
-                    const blurredDbImage = await prisma.file.create({ data: {} })
-                    const blurredImageKey = `${ctx.user.id}/${blurredDbImage.id}`
-
-                    const uploadUrl = await createPresignedPost(s3Client, {
-                        Fields: {
-                            key: blurredImageKey,
-                        },
-                        Conditions: [
-                            ['content-length-range', 0, 9999999],
-                            ['starts-with', '$Content-Type', 'image/'],
-                        ],
-                        Expires: 60,
-                        Bucket: `${process.env.DO_API_NAME}`,
-                        Key: blurredImageKey,
-                    })
-
-                    await prisma.file.update({
-                        where: { id: blurredDbImage.id },
-                        data: {
-                            s3Key: blurredImageKey,
-                        },
-                    })
-
-                    const ulData = { ...uploadUrl.fields, 'Content-Type': 'image/', file: obfuscatedImage } as Record<
-                        string,
-                        any
-                    >
-
-                    const formData = new FormData()
-                    for (const name in ulData) {
-                        formData.append(name, ulData[name])
-                    }
-
-                    await fetch(uploadUrl.url.replace('//', '//asksats.'), {
-                        method: 'POST',
-                        body: formData as unknown as BodyInit,
-                    })
-
-                    return {
-                        fileName: 'test',
-                        offerFile: { connect: { id: file.id } },
-                        obscureFile: { connect: { id: blurredDbImage.id } },
-                    }
-                }),
-            )
+            // const imagePairs = await Promise.all(
+            //     input.filePairs.map(async (file) => {
+            //         const uploadedImageUrl = await getSignedUrl(
+            //             s3Client,
+            //             new GetObjectCommand({
+            //                 Bucket: `${process.env.DO_API_NAME}`,
+            //                 Key: `${ctx.user.id}/${file.id}`,
+            //             }),
+            //         )
+            //
+            //         const sourceImage = await fetch(uploadedImageUrl, { method: 'GET' }).then((res) =>
+            //             res.arrayBuffer(),
+            //         )
+            //
+            //         const imageMetadata = await sharp(Buffer.from(sourceImage)).metadata()
+            //
+            //         const imageBuffer = Buffer.from(sourceImage)
+            //         let checkerBuffer
+            //
+            //         await new Promise((resolve, reject) => {
+            //             fs.readFile(
+            //                 path.join(process.cwd(), './src/assets/checker_obfuscation.png'),
+            //                 function (err, data) {
+            //                     checkerBuffer = data
+            //                     resolve(data)
+            //                 },
+            //             )
+            //         })
+            //
+            //         const cropped = await sharp(checkerBuffer)
+            //             .resize(imageMetadata.width, imageMetadata.height, {
+            //                 fit: sharp.fit.inside,
+            //                 withoutEnlargement: true,
+            //             })
+            //             .toBuffer()
+            //
+            //         const obfuscatedImage = {
+            //             BLUR: await sharp(imageBuffer)
+            //                 .blur(parseInt(input.blurLevel ?? '5'))
+            //                 .toBuffer(),
+            //             CHECKER: await sharp(imageBuffer)
+            //                 .composite([
+            //                     {
+            //                         input: cropped,
+            //                         tile: true,
+            //                         blend: 'atop',
+            //                     },
+            //                 ])
+            //                 .toBuffer(),
+            //         }[input.obscureMethod]
+            //
+            //         const blurredDbImage = await prisma.file.create({ data: {} })
+            //         const blurredImageKey = `${ctx.user.id}/${blurredDbImage.id}`
+            //
+            //         const uploadUrl = await createPresignedPost(s3Client, {
+            //             Fields: {
+            //                 key: blurredImageKey,
+            //             },
+            //             Conditions: [
+            //                 ['content-length-range', 0, 9999999],
+            //                 ['starts-with', '$Content-Type', 'image/'],
+            //             ],
+            //             Expires: 60,
+            //             Bucket: `${process.env.DO_API_NAME}`,
+            //             Key: blurredImageKey,
+            //         })
+            //
+            //         await prisma.file.update({
+            //             where: { id: blurredDbImage.id },
+            //             data: {
+            //                 s3Key: blurredImageKey,
+            //             },
+            //         })
+            //
+            //         const ulData = { ...uploadUrl.fields, 'Content-Type': 'image/', file: obfuscatedImage } as Record<
+            //             string,
+            //             any
+            //         >
+            //
+            //         const formData = new FormData()
+            //         for (const name in ulData) {
+            //             formData.append(name, ulData[name])
+            //         }
+            //
+            //         await fetch(uploadUrl.url.replace('//', '//asksats.'), {
+            //             method: 'POST',
+            //             body: formData as unknown as BodyInit,
+            //         })
+            //
+            //         return {
+            //             fileName: 'test',
+            //             offerFile: { connect: { id: file.id } },
+            //             obscureFile: { connect: { id: blurredDbImage.id } },
+            //         }
+            //     }),
+            // )
 
             return prisma.offer.create({
                 data: {
@@ -160,9 +155,8 @@ export const offerRouter = t.router({
                         create: {
                             content: input.content,
                             filePairs: {
-                                create: imagePairs,
+                                connect: input.filePairs.map((file) => ({ id: file.id })),
                             },
-                            obscureMethod: input.obscureMethod,
                         },
                     },
                 },

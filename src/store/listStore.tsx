@@ -20,9 +20,9 @@ export const askListProps = z.object({
     tagName: z.string().nullish(),
 })
 
-type FilterForInput = RouterInput['ask']['list']['filterFor']
-type OrderByInput = RouterInput['ask']['list']['orderBy']
-type OrderByDirectionInput = RouterInput['ask']['list']['orderByDirection']
+export type FilterForInput = RouterInput['ask']['list']['filterFor']
+export type OrderByInput = RouterInput['ask']['list']['orderBy']
+export type OrderByDirectionInput = RouterInput['ask']['list']['orderByDirection']
 
 type ListTemplate = 'ending_soon' | 'newest' | 'public_settled'
 

@@ -7,6 +7,7 @@ import { CreateBlogItem } from '~/components/blog/CreateBlogItem'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { MDRender } from '~/components/common/MDRender'
+import { Button, Divider } from '@mui/material'
 
 type CommentOutput = RouterOutput['comment']['commentTreeForAsk'][0]
 
@@ -22,6 +23,7 @@ export const CommentDisplay = ({ comment }: CommentDisplayProps) => {
             <div className={'flex flex-col'}>
                 <i>author: {comment.user.userName}</i>
                 <i>created: {format(comment.createdAt ?? 0, standardDateFormat)}</i>
+                <Divider />
                 <MDRender content={comment.content ?? ''} />
             </div>
             {comment.children.map((comment) => {
@@ -33,9 +35,9 @@ export const CommentDisplay = ({ comment }: CommentDisplayProps) => {
                     <CreateComment commentId={comment.id} />
                 </div>
             ) : (
-                <button onClick={() => setCurrentOpenQuestionIdId(comment.id)} className={'btn-xs btn mt-4 w-32'}>
+                <Button onClick={() => setCurrentOpenQuestionIdId(comment.id)} component="label">
                     Add comment
-                </button>
+                </Button>
             )}
         </div>
     )

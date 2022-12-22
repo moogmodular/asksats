@@ -86,6 +86,10 @@ const randomDate = (start: Date, end: Date) =>
 
 const randomIntFromTo = (from: number, to: number) => Math.floor(Math.random() * (to - from + 1) + from)
 
+function getIdOfOtherUser(index: number, newUsers: Awaited<any>[]) {
+    return index !== 0 ? newUsers?.[index - 1]?.id ?? '' : newUsers?.[newUsers.length - 1]?.id ?? ''
+}
+
 async function main() {
     await Promise.all([
         await prisma.ask.deleteMany(),
@@ -342,19 +346,20 @@ async function main() {
                     create: {
                         author: {
                             connect: {
-                                id:
-                                    index !== 0
-                                        ? newUsers?.[index - 1]?.id ?? ''
-                                        : newUsers?.[newUsers.length - 1]?.id ?? '',
+                                id: getIdOfOtherUser(index, newUsers),
                             },
                         },
                         offerContext: {
                             create: {
                                 content: markdown[0]!.content!,
-                                obscureMethod: 'BLUR',
                                 filePairs: {
                                     create: {
                                         fileName: 'testfile.txt',
+                                        user: {
+                                            connect: {
+                                                id: getIdOfOtherUser(index, newUsers),
+                                            },
+                                        },
                                         obscureFile: {
                                             create: {
                                                 s3Key: 'test/testimage.png',
@@ -365,6 +370,7 @@ async function main() {
                                                 s3Key: 'test/testimage.png',
                                             },
                                         },
+                                        obscureMethod: 'BLUR',
                                     },
                                 },
                             },
@@ -388,15 +394,20 @@ async function main() {
             data: {
                 author: {
                     connect: {
-                        id: index !== 0 ? newUsers?.[index - 1]?.id ?? '' : newUsers?.[newUsers.length - 1]?.id ?? '',
+                        id: getIdOfOtherUser(index, newUsers),
                     },
                 },
                 offerContext: {
                     create: {
                         content: markdown[0]!.content!,
-                        obscureMethod: 'BLUR',
+
                         filePairs: {
                             create: {
+                                user: {
+                                    connect: {
+                                        id: getIdOfOtherUser(index, newUsers),
+                                    },
+                                },
                                 fileName: 'testfile.txt',
                                 obscureFile: {
                                     create: {
@@ -408,6 +419,7 @@ async function main() {
                                         s3Key: 'test/testimage.png',
                                     },
                                 },
+                                obscureMethod: 'BLUR',
                             },
                         },
                     },
@@ -419,15 +431,20 @@ async function main() {
             data: {
                 author: {
                     connect: {
-                        id: index !== 0 ? newUsers?.[index - 1]?.id ?? '' : newUsers?.[newUsers.length - 1]?.id ?? '',
+                        id: getIdOfOtherUser(index, newUsers),
                     },
                 },
                 offerContext: {
                     create: {
                         content: markdown[0]!.content!,
-                        obscureMethod: 'BLUR',
+
                         filePairs: {
                             create: {
+                                user: {
+                                    connect: {
+                                        id: getIdOfOtherUser(index, newUsers),
+                                    },
+                                },
                                 fileName: 'testfile.txt',
                                 obscureFile: {
                                     create: {
@@ -439,6 +456,7 @@ async function main() {
                                         s3Key: 'test/testimage.png',
                                     },
                                 },
+                                obscureMethod: 'BLUR',
                             },
                         },
                     },
@@ -450,15 +468,19 @@ async function main() {
             data: {
                 author: {
                     connect: {
-                        id: index !== 0 ? newUsers?.[index - 1]?.id ?? '' : newUsers?.[newUsers.length - 1]?.id ?? '',
+                        id: getIdOfOtherUser(index, newUsers),
                     },
                 },
                 offerContext: {
                     create: {
                         content: markdown[0]!.content!,
-                        obscureMethod: 'BLUR',
                         filePairs: {
                             create: {
+                                user: {
+                                    connect: {
+                                        id: getIdOfOtherUser(index, newUsers),
+                                    },
+                                },
                                 fileName: 'testfile.txt',
                                 obscureFile: {
                                     create: {
@@ -470,6 +492,7 @@ async function main() {
                                         s3Key: 'test/testimage.png',
                                     },
                                 },
+                                obscureMethod: 'BLUR',
                             },
                         },
                     },

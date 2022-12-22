@@ -1,6 +1,6 @@
 import create from 'zustand'
 
-type Modals = 'none' | 'authenticate' | 'transact' | 'editUser' | 'createAsk' | 'addOffer' | 'viewImage'
+type Modals = 'none' | 'authenticate' | 'transact' | 'editUser' | 'createAsk' | 'addOffer' | 'viewImage' | 'welcome'
 
 interface Action {
     currentModal: Modals

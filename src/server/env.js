@@ -20,7 +20,10 @@ const envSchema = z.object({
     LND_MACAROON: z.string(),
     LND_PORT: z.string(),
     LN_AUTH_URL: z.string().url(),
+    LN_INVO_CREATE_URL: z.string().url(),
+    LN_INVO_DO_URL: z.string().url(),
     LN_WITH_CREATE_URL: z.string().url(),
+    LN_WITH_DO_URL: z.string().url(),
     NODE_ENV: z.enum(['development', 'test', 'production']),
 })
 

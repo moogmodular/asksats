@@ -27,6 +27,8 @@ export const askRouter = t.router({
                 ? await prisma.user.findUnique({ where: { id: ctx?.user?.id } }).excludedTags()
                 : undefined
 
+            console.log('excludedTags', { ...getSearch(input.searchTerm) })
+
             const listWithStatus = await prisma.ask
                 .findMany({
                     where: {
@@ -34,7 +36,7 @@ export const askRouter = t.router({
                         ...getFilter(input.filterFor),
                         ...byUser(input.userName),
                         ...(byAskKind(input.askKind) as Prisma.EnumAskKindFilter),
-                        ...byTags(excludedTags ?? DEFAULT_EXCLUDED_TAG, ctx?.user?.role ?? 'USER'),
+                        ...byTags(excludedTags ?? DEFAULT_EXCLUDED_TAG, ctx?.user?.role ?? 'USER', input.tagName),
                     },
                     orderBy: getOrder(input.orderBy, input.orderByDirection),
                     take: input.pageSize + 1,
@@ -157,14 +159,14 @@ export const askRouter = t.router({
                             title: input.title,
                             slug: slugify(input.title),
                             content: input.content,
-                            headerImage: { connect: { id: input.headerImageId } },
+                            headerImage: input.headerImageId ? { connect: { id: input.headerImageId } } : undefined,
                         },
                     },
                 },
             })
         }),
     byContextSlug: t.procedure
-        .use(isAuthed)
+        // .use(isAuthed)
         .input(z.object({ slug: z.string() }))
         .query(async ({ ctx, input }) => {
             const askContext = await prisma.askContext.findUnique({

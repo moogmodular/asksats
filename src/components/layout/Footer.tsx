@@ -1,11 +1,36 @@
 import { trpc } from '~/utils/trpc'
+import useNodeConnectionStore from '~/store/nodeConnectionStore'
+import { Skeleton, Typography } from '@mui/material'
+import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 
 export const Footer = ({}) => {
-    const { data: nodeConnectionData } = trpc.nodeUtils.nodeConnection.useQuery()
+    const { connectionAddress, setConnectionAddress } = useNodeConnectionStore()
+
+    trpc.nodeUtils.nodeConnection.useQuery(
+        {},
+        {
+            refetchInterval: (data) => {
+                if (data) {
+                    setConnectionAddress(data)
+                } else {
+                    setConnectionAddress('')
+                }
+
+                return 5000
+            },
+        },
+    )
 
     return (
-        <div className={'flex flex-row justify-center gap-1 break-all border-2 border-black p-2 text-sm'}>
-            {nodeConnectionData}
+        <div>
+            {connectionAddress ? (
+                <div className={' break-all p-2 text-center text-sm'}>{connectionAddress}</div>
+            ) : (
+                <Typography variant="body1">
+                    <HighlightOffIcon /> No connection to node
+                    <Skeleton />
+                </Typography>
+            )}
         </div>
     )
 }

@@ -5,6 +5,7 @@ import { CreateBlogItem } from '~/components/blog/CreateBlogItem'
 import useBlogUXStore from '~/store/blogUXStore'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
+import { Button } from '@mui/material'
 
 type BlogItemViewInput = RouterOutput['blog']['listBlogItems'][0]
 
@@ -45,9 +46,9 @@ export const BlogItemView = ({ blogItem }: BlogItemViewProps) => {
             {currentOpenModalId === blogItem.id ? (
                 <CreateBlogItem parentId={blogItem.id} />
             ) : (
-                <button onClick={() => setCurrentOpenModalId(blogItem.id)} className={'btn-xs btn mt-4'}>
+                <Button variant={'contained'} component="label" onClick={() => setCurrentOpenModalId(blogItem.id)}>
                     Add comment
-                </button>
+                </Button>
             )}
         </div>
     )

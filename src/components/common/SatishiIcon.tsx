@@ -1,15 +1,13 @@
+import { SvgIcon } from '@mui/material'
+
 export const SatoshiIcon = () => (
-    <svg
-        xmlns="http://www.w3.org/2000/svg"
-        viewBox="0 0 360 360"
-        strokeWidth={1.5}
-        stroke="currentColor"
-        className="h-4 w-4"
-    >
-        <rect x="166.06" y="2.83" width="27.89" height="47.65" />
-        <rect x="166.06" y="310.35" width="27.89" height="47.65" />
-        <rect x="166.06" y="6.84" width="27.89" height="198.86" transform="translate(286.28 -73.74) rotate(90)" />
-        <rect x="166.06" y="80.5" width="27.89" height="198.86" transform="translate(359.94 -0.08) rotate(90)" />
-        <rect x="166.06" y="152.08" width="27.89" height="198.86" transform="translate(431.52 71.5) rotate(90)" />
-    </svg>
+    <SvgIcon fontSize={'small'}>
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 360 360" strokeWidth={1.5} stroke="currentColor">
+            <rect x="166.06" y="2.83" width="27.89" height="47.65" />
+            <rect x="166.06" y="310.35" width="27.89" height="47.65" />
+            <rect x="166.06" y="6.84" width="27.89" height="198.86" transform="translate(286.28 -73.74) rotate(90)" />
+            <rect x="166.06" y="80.5" width="27.89" height="198.86" transform="translate(359.94 -0.08) rotate(90)" />
+            <rect x="166.06" y="152.08" width="27.89" height="198.86" transform="translate(431.52 71.5) rotate(90)" />
+        </svg>
+    </SvgIcon>
 )

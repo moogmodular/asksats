@@ -53,6 +53,10 @@ module.exports = getConfig({
                 destination: '/',
             },
             {
+                source: '/ask/files',
+                destination: '/',
+            },
+            {
                 source: '/ask/timeline',
                 destination: '/',
             },

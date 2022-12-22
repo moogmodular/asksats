@@ -1,6 +1,5 @@
 import { trpc } from '~/utils/trpc'
 import { MDRender } from '~/components/common/MDRender'
-import { StandardButton } from '~/components/common/StandardButton'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
@@ -10,8 +9,8 @@ import { useState } from 'react'
 import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThemeClasses } from 'lexical'
 import { $rootTextContent } from '@lexical/text'
 import useMessageStore from '~/store/messageStore'
-import useBlogUXStore from '~/store/blogUXStore'
 import useQuestionsUXStore from '~/store/askQuestionsUXStore'
+import { Button } from '@mui/material'
 
 interface CreateCommentProps {
     askId?: string
@@ -129,16 +128,12 @@ export const CreateComment = ({ askId, commentId }: CreateCommentProps) => {
             }
 
             <div className={'flex justify-between'}>
-                <button onClick={() => handleCreateComment()} className={'btn-primary btn-xs btn'} type={'submit'}>
+                <Button variant={'outlined'} onClick={() => handleCreateComment()} color={'success'} type={'submit'}>
                     Post question
-                </button>
-                <button
-                    onClick={() => setCurrentOpenQuestionIdId('')}
-                    className={'btn-error btn-xs btn'}
-                    type={'submit'}
-                >
+                </Button>
+                <Button component="label" variant={'contained'} onClick={() => setCurrentOpenQuestionIdId('')}>
                     Close
-                </button>
+                </Button>
             </div>
         </div>
     )

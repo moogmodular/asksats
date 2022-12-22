@@ -1,9 +1,11 @@
 import { SubHeaderToolbarHeader } from '~/components/layout/SubHeaderToolbar'
 import { useState } from 'react'
-import { SidebarStats } from '~/components/layout/SidebarStats'
-import { SidebarTaxonomy } from '~/components/layout/SidebarTaxonomy'
-import { SidebarMyStats } from '~/components/layout/SidebarMyStats'
-import { SidebarAbout } from '~/components/layout/SidebarAbout'
+import { SidebarStats } from '~/components/stats/SidebarStats'
+import { SidebarTaxonomy } from '~/components/stats/SidebarTaxonomy'
+import { SidebarMyStats } from '~/components/stats/SidebarMyStats'
+import { SidebarAbout } from '~/components/stats/SidebarAbout'
+import { Box, Tabs } from '@mui/material'
+import Tab from '@mui/material/Tab'
 
 interface SidebarProps {}
 
@@ -24,37 +26,38 @@ const tabs = {
 
 type Tab = keyof typeof tabs
 
+const a11yProps = (index: number) => ({
+    id: `simple-tab-${index}`,
+    'aria-controls': `simple-tabpanel-${index}`,
+})
+
 export const Sidebar = ({}: SidebarProps) => {
     const [currentTab, setCurrentTab] = useState<Tab>('stats')
 
     return (
-        <div className={'no-scrollbar flex flex-col justify-center gap-2 overflow-y-scroll'}>
+        <div className={'no-scrollbar flex h-full flex-col justify-center gap-2 overflow-y-scroll'}>
             <SubHeaderToolbarHeader />
-            <div className="divider"></div>
-            <div className="tabs w-full">
-                {Object.entries(tabs).map((tab, index) => {
-                    return tab[0] === currentTab ? (
-                        <a
-                            onClick={() => setCurrentTab(tab[0] as Tab)}
-                            className="tab tab-bordered tab-active tab-md md:tab-lg"
-                        >
-                            {tab[1].label}
-                        </a>
-                    ) : (
-                        <a onClick={() => setCurrentTab(tab[0] as Tab)} className="tab tab-bordered tab-md md:tab-lg">
-                            {tab[1].label}
-                        </a>
-                    )
-                })}
-            </div>
-            {
+            <div className={'grow'}>
+                <Tabs
+                    value={currentTab}
+                    variant={'fullWidth'}
+                    onChange={(event, value) => setCurrentTab(value)}
+                    aria-label="basic tabs example"
+                >
+                    <Tab value={'stats'} label="Stats" />
+                    <Tab value={'taxonomy'} label="Taxonomy" />
+                    <Tab value={'myStats'} label="My Stats" />
+                    <Tab value={'about'} label="About" />
+                </Tabs>
                 {
-                    stats: <SidebarStats />,
-                    about: <SidebarAbout />,
-                    taxonomy: <SidebarTaxonomy />,
-                    myStats: <SidebarMyStats />,
-                }[currentTab]
-            }
+                    {
+                        stats: <SidebarStats />,
+                        about: <SidebarAbout />,
+                        taxonomy: <SidebarTaxonomy />,
+                        myStats: <SidebarMyStats />,
+                    }[currentTab]
+                }
+            </div>
         </div>
     )
 }

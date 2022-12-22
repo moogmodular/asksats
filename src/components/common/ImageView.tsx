@@ -5,9 +5,5 @@ interface ImageViewProps {}
 export const ImageView = ({}: ImageViewProps) => {
     const { imageUrl } = useActionStore()
 
-    return (
-        <div>
-            <img src={imageUrl} alt={'preview image'} />
-        </div>
-    )
+    return <img src={imageUrl} alt={'preview image'} className={'max-w-6xl'} />
 }

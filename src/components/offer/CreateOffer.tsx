@@ -4,16 +4,19 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThemeClasses } from 'lexical'
-import { useImperativeHandle, useState } from 'react'
+import { useState } from 'react'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
 import { RouterInput, trpc } from '~/utils/trpc'
-import { OfferImageView } from '~/components/offer/OfferImageView'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import useActionStore from '~/store/actionStore'
 import useMessageStore from '~/store/messageStore'
 import { offerTextDefault } from '~/server/service/constants'
+import { AssetPreview } from '~/components/offer/AssetPreview'
+import { useForm } from 'react-hook-form'
+import { Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import CheckIcon from '@mui/icons-material/Check'
 
 type CreateOfferInput = RouterInput['offer']['create']
 
@@ -22,15 +25,16 @@ export type BlurLevels = '2' | '5' | '10' | '20'
 export const createOfferForAskInput = z.object({
     askId: z.string().uuid(),
     content: z.string(),
-    files: z.array(z.object({ id: z.string().uuid(), name: z.string() })),
-    obscureMethod: z.enum(['BLUR', 'CHECKER']),
-    blurLevel: z.enum(['2', '5', '10', '20']).optional(),
+    filePairs: z.array(z.object({ id: z.string().uuid() })).max(3),
 })
 
 export const createFilePair = z.object({
-    file: z.object({ id: z.string().uuid(), name: z.string() }),
-    obscureMethod: z.enum(['BLUR', 'CHECKER']),
+    offerFileId: z.string().uuid(),
     blurLevel: z.enum(['2', '5', '10', '20']).optional(),
+})
+
+export const preSignedUrl = z.object({
+    obscureMethod: z.enum(['NONE', 'BLUR', 'CHECKER']).optional(),
 })
 
 interface CreateOfferProps {}
@@ -40,11 +44,12 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     const { showToast } = useMessageStore()
     const [tempEditorState, setTempEditorState] = useState<string>(offerTextDefault)
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
-    const [uploadedImages, setUploadedImages] = useState<{ id: string; name: string; url: string }[]>([
-        { id: '', name: '', url: '' },
-    ])
+
+    const [assetsForThisAsk, setAssetsForThisAsk] = useState<{ id: string }[]>([])
 
     const createOfferMutation = trpc.offer.create.useMutation()
+    const createFilePairMutation = trpc.asset.doFilePair.useMutation()
+    const deleteImagePairMutation = trpc.asset.deleteImagePair.useMutation()
     const utils = trpc.useContext()
 
     const {
@@ -60,11 +65,16 @@ export const CreateOffer = ({}: CreateOfferProps) => {
         defaultValues: {
             askId: askId,
             content: '',
-            obscureMethod: 'BLUR',
-            files: [],
-            blurLevel: '5',
+            filePairs: [],
         },
     })
+
+    const {
+        register: registerItem,
+        getValues: getPairValue,
+        watch: watchPair,
+        formState: { errors: pairErrors },
+    } = useForm()
 
     const onError = (error: Error) => {
         console.error(error)
@@ -86,51 +96,51 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     }
 
     const onSubmit = async (data: CreateOfferInput) => {
-        await createOfferMutation
-            .mutateAsync({
+        try {
+            await createOfferMutation.mutateAsync({
                 askId,
-                obscureMethod: data.obscureMethod,
-                blurLevel: data.blurLevel,
                 content: tempEditorState,
-                files: uploadedImages.filter((image) => image.id).map((image) => ({ id: image.id, name: image.name })),
+                filePairs: assetsForThisAsk,
             })
-            .catch((error) => {
-                showToast('error', error.message)
-            })
-            .then((result) => {
-                console.log(result)
-            })
-            .then(() => {
-                showToast('success', 'Offer created')
-            })
-        utils.ask.invalidate()
-        utils.offer.listForAsk.invalidate()
-        closeModal()
+            showToast('success', 'Offer created')
+            utils.ask.invalidate()
+            utils.offer.listForAsk.invalidate()
+            closeModal()
+        } catch (error: any) {
+            showToast('error', error.message)
+            utils.ask.invalidate()
+            utils.offer.listForAsk.invalidate()
+        }
     }
 
-    const handleFileChange = async (data: File | undefined) => {
+    const handleCreateFilePair = async (data: File | undefined) => {
         if (data) {
-            const url = await utils.asset.preSignedUrl.fetch()
+            const url = await utils.asset.preSignedUrlPair.fetch({ obscureMethod: getPairValue('obscureMethod') })
 
-            const ulData = { ...url.uploadUrl.fields, 'Content-Type': data.type, file: data } as Record<string, any>
+            const ulData = { ...url.offerFileUploadUrl.fields, 'Content-Type': data.type, file: data } as Record<
+                string,
+                any
+            >
 
             const formData = new FormData()
             for (const name in ulData) {
                 formData.append(name, ulData[name])
             }
 
-            await fetch(url.uploadUrl.url.replace('//', '//asksats.'), {
+            await fetch(url.offerFileUploadUrl.url.replace('//', '//asksats.'), {
                 method: 'POST',
                 body: formData,
             })
 
-            const uploadedImage = await utils.asset.uploadedImageById.fetch({
-                imageId: url.imageId,
-            })
-
-            console.log(uploadedImage)
-
-            setUploadedImages([...uploadedImages, { id: url.imageId, name: '', url: uploadedImage }])
+            await createFilePairMutation
+                .mutateAsync({
+                    offerFileId: url.offerFileId,
+                    blurLevel: getPairValue().blurLevel,
+                })
+                .then((result) => {
+                    console.log(result)
+                    setAssetsForThisAsk([...assetsForThisAsk, { id: result?.id ?? '' }])
+                })
 
             return
         }
@@ -142,48 +152,69 @@ export const CreateOffer = ({}: CreateOfferProps) => {
         })
     }
 
+    const handleDeleteFilePair = async (id: string) => {
+        await deleteImagePairMutation.mutateAsync({ imagePairId: id })
+        setAssetsForThisAsk(assetsForThisAsk.filter((pair) => pair.id !== id))
+    }
+
     return (
         <form className={'flex h-modal-height w-modal-width flex-col gap-8'} onSubmit={handleSubmit(onSubmit)}>
-            <div className={'flex w-full flex-row gap-6'}>
-                <div>
-                    <label
-                        htmlFor="obscureMethod"
-                        className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-400"
-                    >
-                        Select an obscure method
-                    </label>
-                    <select
-                        id="obscureMethod"
-                        {...register('obscureMethod', { required: true })}
-                        className="block w-full rounded-global border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                    >
-                        <option value="BLUR">Blur</option>
-                        <option value="CHECKER">Checker</option>
-                    </select>
+            <b>Add up to 3 images to your offer</b>
+            {assetsForThisAsk.length < 4 && (
+                <div className={'flex w-1/5 flex-col gap-4'}>
+                    <div className={'flex flex-row justify-between'}>
+                        <FormControl className={'w-96'}>
+                            <InputLabel id="obscure-method-select-helper-label">Select an obscure method</InputLabel>
+                            <Select
+                                error={!!pairErrors.obscureMethod?.message}
+                                label={'Select an obscure method'}
+                                id="obscure-method-select-helper"
+                                {...registerItem('obscureMethod', { required: true })}
+                            >
+                                <MenuItem value={'BLUR'}>Blur</MenuItem>
+                                <MenuItem value={'CHECKER'}>Checker</MenuItem>
+                                <MenuItem value={'NONE'}>None</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <FormControl className={'w-64'}>
+                            <InputLabel id="obscure-method-level-select-helper-label">Select a blur level</InputLabel>
+                            <Select
+                                label={'Select a blur level'}
+                                id="obscure-method-level-select-helper"
+                                {...registerItem('blurLevel', {
+                                    required: true,
+                                    disabled: watchPair('obscureMethod') !== 'BLUR',
+                                })}
+                            >
+                                <MenuItem value={'2'}>2</MenuItem>
+                                <MenuItem value={'5'}>5</MenuItem>
+                                <MenuItem value={'10'}>10</MenuItem>
+                                <MenuItem value={'20'}>20</MenuItem>
+                            </Select>
+                        </FormControl>
+                    </div>
+                    <Button variant="contained" component="label">
+                        Upload File
+                        <input
+                            type="file"
+                            accept="image/png, image/jpeg, image/svg+xml"
+                            disabled={assetsForThisAsk.length >= 3 || watchPair('obscureMethod') === undefined}
+                            id="fileupload"
+                            onChange={(e) => handleCreateFilePair(e?.target?.files?.[0])}
+                        />
+                    </Button>
                 </div>
-
-                <div>
-                    <label
-                        htmlFor="obscureMethod"
-                        className="mb-2 block text-sm font-medium text-gray-900 dark:text-gray-400"
-                    >
-                        Select a blur level
-                    </label>
-                    <select
-                        id="blurLevel"
-                        {...register('blurLevel', { required: true, disabled: watch('obscureMethod') !== 'BLUR' })}
-                        className="block w-full rounded-global border border-gray-300 bg-gray-50 p-2.5 text-sm text-gray-900 focus:border-blue-500 focus:ring-blue-500 dark:border-gray-600 dark:bg-gray-700 dark:text-white dark:placeholder-gray-400 dark:focus:border-blue-500 dark:focus:ring-blue-500"
-                    >
-                        <option value="2">2</option>
-                        <option value="5">5</option>
-                        <option value="10">10</option>
-                        <option value="20">20</option>
-                    </select>
-                </div>
-            </div>
+            )}
             <div className={'flex flex-row gap-2'}>
-                {uploadedImages.map((image, index) => {
-                    return <OfferImageView key={index} {...image} doUpload={handleFileChange} />
+                {assetsForThisAsk.map((asset, index) => {
+                    return (
+                        <AssetPreview
+                            key={index}
+                            id={asset.id}
+                            deletable={true}
+                            deleteFilePair={(id) => handleDeleteFilePair(id)}
+                        />
+                    )
                 })}
             </div>
             <nav className="flex border-b border-gray-100 text-sm font-medium">
@@ -215,7 +246,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                         <div className={'grow overflow-y-scroll'}>
                             <LexicalComposer initialConfig={initialConfig}>
                                 <PlainTextPlugin
-                                    contentEditable={<ContentEditable className={'h-full'} />}
+                                    contentEditable={<ContentEditable className={'editor-container h-full'} />}
                                     placeholder={getValues('content')}
                                     ErrorBoundary={LexicalErrorBoundary}
                                 />
@@ -230,26 +261,10 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                     ),
                 }[editorView]
             }
-
-            <div className={'flex flex-row justify-between'}>
-                <button
-                    id={'edit-profile-submit'}
-                    type="submit"
-                    className="dark:focus:ring-[#4285F4]/55 mr-2 mb-2 inline-flex items-center rounded-global bg-[#4285F4] px-5 py-2.5 text-center text-sm font-medium text-white hover:bg-[#4285F4]/90 focus:outline-none focus:ring-4 focus:ring-[#4285F4]/50"
-                >
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-6 w-6"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                    Submit
-                </button>
-            </div>
+            <Button id={'edit-profile-submit'} variant="outlined" type={'submit'}>
+                <CheckIcon fontSize={'medium'} />
+                Submit
+            </Button>
         </form>
     )
 }

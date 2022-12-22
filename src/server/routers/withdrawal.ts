@@ -5,7 +5,12 @@ import { encodedUrl, getK1Hash, k1 } from '~/server/service/lnurl'
 import { z } from 'zod'
 import { decodePaymentRequest, subscribeToPayViaRequest } from 'lightning'
 import { lnd } from '~/server/service/lnd'
-import { SINGLE_TRANSACTION_CAP, TRANSACTION_MAX_AGE } from '~/server/service/constants'
+import {
+    MIN_WITHDRAWAL_FLOOR,
+    MSATS_UNIT_FACTOR,
+    SINGLE_TRANSACTION_CAP,
+    TRANSACTION_MAX_AGE,
+} from '~/server/service/constants'
 import { recentSettledTransaction, userBalance } from '~/server/service/accounting'
 import { isAuthed } from '~/server/middlewares/authed'
 
@@ -73,8 +78,8 @@ export const withdrawalRouter = t.router({
                             defaultDescription: `Withdrawal for @${user?.userName} on ${
                                 process.env.DOMAIN
                             } for maximum ${maxAmount - 1}`,
-                            minWithdrawable: 10,
-                            maxWithdrawable: cappedAmount * 1000 - 1000,
+                            minWithdrawable: MIN_WITHDRAWAL_FLOOR,
+                            maxWithdrawable: cappedAmount * MSATS_UNIT_FACTOR - 1000,
                         }
                         await prisma.transaction.update({
                             where: { id: lnWithdrawal.id },
@@ -126,7 +131,7 @@ export const withdrawalRouter = t.router({
                 throw new TRPCError({ code: 'UNAUTHORIZED', message: 'could not decode invoice' })
             }
 
-            if (decoded.mtokens > SINGLE_TRANSACTION_CAP * 1000) {
+            if (decoded.mtokens > SINGLE_TRANSACTION_CAP * MSATS_UNIT_FACTOR) {
                 throw new TRPCError({
                     code: 'BAD_REQUEST',
                     message: `you can only withdraw up to ${SINGLE_TRANSACTION_CAP} in a single transaction`,
@@ -143,7 +148,7 @@ export const withdrawalRouter = t.router({
                 return new TRPCError({ code: 'BAD_REQUEST', message: 'user not found' })
             }
 
-            if (decoded.mtokens > maxAmount * 1000) {
+            if (decoded.mtokens > maxAmount * MSATS_UNIT_FACTOR) {
                 return { status: 'ERROR', reason: 'insufficient balance' }
             }
 

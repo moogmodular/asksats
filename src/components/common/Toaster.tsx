@@ -1,26 +1,23 @@
 import useMessageStore, { MessageTypes } from '~/store/messageStore'
+import { Alert, Snackbar } from '@mui/material'
 
 interface ToasterDisplayProps {}
 
 export const ToasterDisplay = ({}: ToasterDisplayProps) => {
     const { currentMessage, currentMessageType } = useMessageStore()
 
-    const toastType = (type: MessageTypes) => {
+    const toastType = (type: MessageTypes, msg) => {
         return {
-            error: 'alert-error',
-            success: 'alert-success',
-            info: 'alert-info',
-            warning: 'alert-warning',
+            error: <Alert severity="error">{msg}</Alert>,
+            success: <Alert severity="success">{msg}</Alert>,
+            info: <Alert severity="info">{msg}</Alert>,
+            warning: <Alert severity="warning">{msg}</Alert>,
         }[type]
     }
 
     return (
-        <div className="toast-start toast-bottom toast">
-            <div className={`alert ${toastType(currentMessageType)}`}>
-                <div>
-                    <span>{currentMessage}</span>
-                </div>
-            </div>
-        </div>
+        <Snackbar open={true} autoHideDuration={6000} message={currentMessage}>
+            {toastType(currentMessageType, currentMessage)}
+        </Snackbar>
     )
 }

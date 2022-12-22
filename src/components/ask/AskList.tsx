@@ -4,6 +4,7 @@ import useListStore from '~/store/listStore'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { useBottomScrollListener } from 'react-bottom-scroll-listener'
+import { Button } from '@mui/material'
 
 interface AskListProps {}
 
@@ -65,7 +66,7 @@ export const AskList = ({}: AskListProps) => {
         <div
             ref={containerRef}
             className={
-                'no-scrollbar grid max-h-screen w-full grid-cols-1 gap-4 overflow-x-hidden overflow-y-scroll overscroll-auto pb-12 md:grid-cols-2 2xl:grid-cols-3'
+                'no-scrollbar grid max-h-screen w-full grid-cols-1 gap-2 overflow-x-hidden overflow-y-scroll overscroll-auto pb-12 md:grid-cols-2 lg:gap-4 2xl:grid-cols-3'
             }
         >
             {infiniteQuery?.data?.pages.map((item) => {
@@ -73,9 +74,9 @@ export const AskList = ({}: AskListProps) => {
                     return <AskPreview key={ask.id} ask={ask} />
                 })
             })}
-            <button className={'btn-lg btn'} onClick={() => handleLoadMore()}>
+            <Button variant="contained" component="label" onClick={() => handleLoadMore()}>
                 load more...
-            </button>
+            </Button>
         </div>
     )
 }

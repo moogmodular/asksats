@@ -11,20 +11,32 @@ import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
 import { RouterInput, trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
-import { StandardButton } from '~/components/common/StandardButton'
 import useActionStore from '~/store/actionStore'
 import useMessageStore from '~/store/messageStore'
 import { TagPill } from '~/components/common/TagPill'
 import { askTextDefault } from '~/server/service/constants'
+import {
+    Autocomplete,
+    Button,
+    FormControl,
+    InputLabel,
+    MenuItem,
+    Select,
+    Slider,
+    TextField,
+    Typography,
+} from '@mui/material'
+import useMediaQuery from '@mui/material/useMediaQuery'
+import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 type CreateAskInput = RouterInput['ask']['create']
 
 export const createAskInput = z.object({
-    title: z.string().max(64),
+    title: z.string().min(6).max(64),
     content: z.string().max(2000),
     amount: z.number().min(1),
-    tags: z.array(z.string().max(32)),
-    headerImageId: z.string(),
+    tags: z.array(z.string().max(32)).max(5),
+    headerImageId: z.string().optional(),
     untilClosed: zodDuration,
     acceptedAfterClosed: zodDuration,
     askKind: z.enum(['PUBLIC', 'BUMP_PUBLIC', 'PRIVATE']),
@@ -45,8 +57,9 @@ export const CreateAsk = ({}: CreateAskProps) => {
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
     const [uploadedImageId, setUploadedImageId] = useState<string | null>(null)
     const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-    const [tags, setTags] = useState<string[]>([])
-    const [possibleTags, setPossibleTags] = useState<string[]>([])
+    const [tags, setTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
+    const [possibleTags, setPossibleTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
+    const matches = useMediaQuery('(min-width:600px)')
 
     const createAskMutation = trpc.ask.create.useMutation()
     const utils = trpc.useContext()
@@ -56,6 +69,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
         handleSubmit,
         getValues,
         setValue,
+        watch,
         formState: { errors },
     } = useZodForm({
         schema: createAskInput,
@@ -90,35 +104,41 @@ export const CreateAsk = ({}: CreateAskProps) => {
     }
 
     const onSubmit = async (data: CreateAskInput) => {
-        await createAskMutation
-            .mutateAsync({
+        try {
+            await createAskMutation.mutateAsync({
                 title: data.title,
                 askKind: data.askKind,
                 amount: data.amount,
-                tags: tags,
+                tags: tags.map((t) => t.label),
                 headerImageId: uploadedImageId ?? '',
                 content: tempEditorState,
                 untilClosed: getValues('untilClosed'),
                 acceptedAfterClosed: { hours: 3 },
             })
-            .catch((error) => {
-                showToast('error', error.message)
-            })
-            .then(() => {
-                showToast('success', 'Ask created')
-            })
-        await utils.invalidate()
-        closeModal()
+            showToast('success', 'Ask created')
+            await utils.ask.invalidate()
+            closeModal()
+        } catch (error: any) {
+            showToast('error', error.message)
+            await utils.ask.invalidate()
+        }
     }
 
-    const handleSearchInput = async (e: ChangeEvent<HTMLInputElement>) => {
+    const handleSearchInput = async (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const searchTerm = e.target.value
         console.log(searchTerm)
         await utils.taxonomy.searchTags.fetch({ search: searchTerm }).then((data) => {
-            const tagResults = data.map((tag) => tag.name)
-            const contains = tagResults.includes(searchTerm)
+            const tagResults = data.map((tag) => {
+                return {
+                    label: tag.name,
+                    id: tag.id,
+                    isNew: false,
+                }
+            })
+            console.log(tagResults)
+            const contains = tagResults.some((name) => name.label === searchTerm)
             if (!contains) {
-                setPossibleTags([searchTerm, ...tagResults])
+                setPossibleTags([{ label: searchTerm, isNew: true, id: '0' }, ...tagResults])
             } else {
                 setPossibleTags(tagResults)
             }
@@ -173,133 +193,151 @@ export const CreateAsk = ({}: CreateAskProps) => {
         }[time]
     }
 
+    const marks = [
+        {
+            value: 0,
+            label: '30min',
+        },
+        {
+            value: 12.5,
+            label: '1h',
+        },
+        {
+            value: 25,
+            label: '2h',
+        },
+        {
+            value: 37.5,
+            label: '3h',
+        },
+        {
+            value: 50,
+            label: '6h',
+        },
+        {
+            value: 62.5,
+            label: '12h',
+        },
+        {
+            value: 75,
+            label: '1d',
+        },
+        {
+            value: 87.5,
+            label: '3d',
+        },
+        {
+            value: 100,
+            label: '7d',
+        },
+    ]
+
+    const handleTagClick = (option: { label: string; id: string; isNew: boolean }) => {
+        setTags([...tags, option])
+        setPossibleTags([])
+    }
+
     return (
-        <form className={'flex h-modal-height w-modal-width flex-col gap-8'} onSubmit={handleSubmit(onSubmit)}>
-            <div className={'flex flex-row gap-6'}>
-                <div className={'h-36 w-36 border-2 border-black'}>
-                    {uploadedImage ? (
-                        <img className={'w-36 object-cover'} src={uploadedImage} alt="uploaded image" />
-                    ) : (
-                        <span>&nbsp;</span>
-                    )}
-                </div>
-                <div className={'flex h-full w-full flex-col justify-between'}>
-                    <div className={'flex w-full flex-row gap-6'}>
-                        <div className={'form-control w-full grow'}>
-                            <label className={'label'} htmlFor="create-ask-title">
-                                Title
-                            </label>
-                            <input
-                                id={'create-ask-title'}
-                                {...register('title', { required: true })}
-                                type="text"
-                                className="
-                        input-bordered
-input input-sm w-full
-        "
-                            />
-                        </div>
-                        <div>
-                            <label className={'label'} htmlFor="create-ask-amount">
-                                Amount
-                            </label>
-                            <input
-                                id={'create-ask-amount'}
-                                {...register('amount', { required: true, valueAsNumber: true, min: 1 })}
-                                type="number"
-                                className="
-input-bordered input input-sm w-full
-        "
-                            />
-                        </div>
-
-                        <div>
-                            <label htmlFor="askKind" className={'label'}>
-                                Select an option
-                            </label>
-                            <select
-                                id="askKind"
-                                {...register('askKind', { required: true })}
-                                className={'select-bordered select select-sm'}
-                            >
-                                <option value="PUBLIC">Public</option>
-                                <option value="BUMP_PUBLIC">Bump Public</option>
-                                <option value="PRIVATE">Private</option>
-                            </select>
-                        </div>
-                    </div>
-                    <div className={'flex w-full flex-row justify-between gap-6'}>
-                        <input
-                            type="file"
-                            id="fileupload"
-                            className="file-input-bordered file-input file-input-sm w-full max-w-xs"
-                            onChange={(e) => handleFileChange(e?.target?.files?.[0])}
-                        />
-
-                        <div className={'grow'}>
-                            <input
-                                type="range"
-                                min="0"
-                                max="100"
-                                className="range"
-                                step="12.5"
-                                onChange={(e) => {
-                                    setValue('untilClosed', mapRunningTimeSliderValue(e.target.value as RunningTimes))
-                                }}
-                            />
-                            <div className="flex w-full justify-between px-2 text-xs">
-                                <span>30min</span>
-                                <span>1h</span>
-                                <span>2h</span>
-                                <span>3h</span>
-                                <span>6h</span>
-                                <span>12h</span>
-                                <span>1d</span>
-                                <span>3d</span>
-                                <span>7d</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <div className="flex flex-row items-center gap-2">
-                <input
-                    type="text"
-                    placeholder=""
-                    className="input-bordered input-primary input input-xs w-full lg:input-sm"
-                    onChange={(e) => handleSearchInput(e)}
-                />
-                <svg
-                    xmlns="http://www.w3.org/2000/svg"
-                    fill="none"
-                    viewBox="0 0 24 24"
-                    strokeWidth={1.5}
-                    stroke="currentColor"
-                    className="h-4 w-4"
-                >
-                    <path
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        d="M21 21l-5.197-5.197m0 0A7.5 7.5 0 105.196 5.196a7.5 7.5 0 0010.607 10.607z"
+        <form className={'flex w-modal-width flex-col gap-4 lg:h-modal-height'} onSubmit={handleSubmit(onSubmit)}>
+            <div className={'flex flex-col lg:flex-row'}>
+                {uploadedImage ? (
+                    <img
+                        className={'aspect-square w-12 lg:w-36 lg:object-cover'}
+                        src={uploadedImage}
+                        alt="uploaded image"
                     />
-                </svg>
+                ) : (
+                    <span>&nbsp;</span>
+                )}
+                <div className={'flex h-full w-full flex-col justify-between gap-2'}>
+                    <div className={'flex w-full flex-col gap-6 lg:flex-row'}>
+                        <TextField
+                            id="create-ask-title"
+                            className={'w-full lg:w-1/2'}
+                            size={`${matches ? 'medium' : 'small'}`}
+                            error={Boolean(errors.title)}
+                            label={'Title'}
+                            type="text"
+                            variant="outlined"
+                            {...register('title', {
+                                required: true,
+                            })}
+                            helperText={errors.title?.message}
+                        />
+                        <TextField
+                            id="create-ask-amount"
+                            size={`${matches ? 'medium' : 'small'}`}
+                            error={Boolean(errors.amount)}
+                            {...register('amount', {
+                                required: true,
+                                valueAsNumber: true,
+                            })}
+                            label="Amount"
+                            type="number"
+                            InputLabelProps={{
+                                shrink: true,
+                            }}
+                            helperText={errors.amount && errors.amount.message}
+                        />
+                        <FormControl className={'w-60'} size={`${matches ? 'medium' : 'small'}`}>
+                            <InputLabel id="ask-kind-label">Select an option</InputLabel>
+                            <Select
+                                labelId="demo-simple-select-label"
+                                label="Select an option"
+                                id="demo-simple-select"
+                                {...register('askKind', { required: true })}
+                                error={Boolean(errors.askKind)}
+                                defaultValue={'PUBLIC'}
+                            >
+                                <MenuItem value={'PUBLIC'}>Public</MenuItem>
+                                <MenuItem value={'BUMP_PUBLIC'}>Bump Public</MenuItem>
+                                <MenuItem value={'PRIVATE'}>Private</MenuItem>
+                            </Select>
+                        </FormControl>
+                        <Autocomplete
+                            size={`${matches ? 'medium' : 'small'}`}
+                            disablePortal
+                            id="combo-box-demo"
+                            options={possibleTags}
+                            sx={{ width: 300 }}
+                            renderInput={(params) => (
+                                <TextField {...params} label="Add a tag" onChange={(e) => handleSearchInput(e)} />
+                            )}
+                            renderOption={(props, option) => {
+                                return <Typography onClick={() => handleTagClick(option)}>{option.label}</Typography>
+                            }}
+                        />
+                    </div>
+                    <div className={'flex w-full flex-col justify-between gap-4 lg:flex-row'}>
+                        <Button variant="contained" component="label" size={`${matches ? 'medium' : 'small'}`}>
+                            Upload File
+                            <input
+                                type="file"
+                                accept="image/png, image/jpeg, image/svg+xml"
+                                id="fileupload"
+                                onChange={(e) => handleFileChange(e?.target?.files?.[0])}
+                            />
+                        </Button>
+                        <Slider
+                            size={`${matches ? 'medium' : 'small'}`}
+                            aria-label="Custom marks"
+                            className={`${matches ? 'w-3/5' : 'w-full'}`}
+                            defaultValue={50}
+                            step={12.5}
+                            valueLabelDisplay="off"
+                            marks={marks}
+                            onChange={(e: any) => {
+                                setValue('untilClosed', mapRunningTimeSliderValue(e.target.value as RunningTimes))
+                            }}
+                        />
+                    </div>
+                </div>
             </div>
-
-            <ul className="menu w-56 bg-base-100">
-                {possibleTags.map((tag, index) => {
-                    return (
-                        <li key={index} onClick={() => setTags([...tags, tag])}>
-                            <a>{tag}</a>
-                        </li>
-                    )
-                })}
-            </ul>
 
             {tags.length > 0 && (
                 <div className={'flex flex-row gap-2'}>
                     {tags.map((tag, index) => {
-                        return <TagPill key={index} tagValue={tag} />
+                        return <TagPill key={index} tagValue={tag.label} />
                     })}
                 </div>
             )}
@@ -333,7 +371,7 @@ input-bordered input input-sm w-full
                         <div className={'grow overflow-y-scroll'}>
                             <LexicalComposer initialConfig={initialConfig}>
                                 <PlainTextPlugin
-                                    contentEditable={<ContentEditable className={'h-full'} />}
+                                    contentEditable={<ContentEditable className={'editor-container h-full'} />}
                                     placeholder={getValues('content')}
                                     ErrorBoundary={LexicalErrorBoundary}
                                 />
@@ -342,27 +380,23 @@ input-bordered input input-sm w-full
                         </div>
                     ),
                     preview: (
-                        <div className={'grow grow overflow-y-scroll'}>
+                        <div className={'grow overflow-y-scroll'}>
                             <MDRender content={tempEditorState} />
                         </div>
                     ),
                 }[editorView]
             }
 
-            <div className={'flex flex-row justify-between'}>
-                <StandardButton onClick={() => onSubmit(getValues())} text={'Submit'}>
-                    <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        strokeWidth={1.5}
-                        stroke="currentColor"
-                        className="h-6 w-6"
-                    >
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M4.5 12.75l6 6 9-13.5" />
-                    </svg>
-                </StandardButton>
-            </div>
+            <Button
+                variant={'outlined'}
+                color={'primary'}
+                disabled={Boolean(errors.title || errors.amount || errors.askKind)}
+                type="submit"
+                onClick={() => onSubmit(getValues())}
+                endIcon={<PlayArrowIcon />}
+            >
+                Submit
+            </Button>
         </form>
     )
 }

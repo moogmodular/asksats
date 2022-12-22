@@ -49,14 +49,14 @@ Table Transaction {
   updatedAt DateTime [not null]
   confirmedAt DateTime
   maxAgeSeconds Int [not null]
-  description String [not null]
+  description String
   transactionKind TransactionKind [not null]
   transactionStatus TransactionStatus [not null]
-  hash String [unique, not null]
-  bolt11 String [not null]
-  lndId String [unique, not null]
+  hash String [unique]
+  bolt11 String
+  lndId String [unique]
   k1Hash String [unique]
-  mSatsTarget Int [not null]
+  mSatsTarget Int
   mSatsSettled Int
   user User
   userId String
@@ -144,7 +144,6 @@ Table OfferContext {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   content String
-  obscureMethod String [not null]
   filePairs OfferFilePair [not null]
   offer Offer [not null]
   offerId String [unique, not null]
@@ -155,6 +154,7 @@ Table OfferFilePair {
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
   fileName String [not null]
+  obscureMethod String [not null, default: 'BLUR']
   offerFile File [not null]
   offerFileId String [unique, not null]
   obscureFile File [not null]
@@ -185,6 +185,14 @@ Table Bump {
   bidderId String
   ask Ask
   askId String
+}
+
+Table StaticData {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  key String [unique, not null]
+  value Json [not null]
 }
 
 Table TagToUser {
@@ -246,9 +254,9 @@ Ref: Offer.authorId > User.id
 
 Ref: OfferContext.offerId - Offer.id [delete: Cascade]
 
-Ref: OfferFilePair.offerFileId - File.id
+Ref: OfferFilePair.offerFileId - File.id [delete: Cascade]
 
-Ref: OfferFilePair.obscureFileId - File.id
+Ref: OfferFilePair.obscureFileId - File.id [delete: Cascade]
 
 Ref: OfferFilePair.offerContextId > OfferContext.id [delete: Cascade]
 
