@@ -29,7 +29,6 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Button, createTheme, ThemeProvider } from '@mui/material'
 import { WelcomeScreen } from '~/components/common/WelcomeScreen'
-import useNodeConnectionStore from '~/store/nodeConnectionStore'
 
 const IndexPage: NextPageWithLayout = () => {
     const { setUser, storeToken, storeLogin } = useAuthStore()
@@ -39,7 +38,7 @@ const IndexPage: NextPageWithLayout = () => {
 
     const [parent] = useAutoAnimate<HTMLDivElement>(/* optional config */)
     const router = useRouter()
-    const isWide = useMedia({ minWidth: '1024px' })
+    const isWide = useMedia({ minWidth: '1024px' }) // TODO: use mui and uninstall
     const utils = trpc.useContext()
 
     const theme = createTheme({
