@@ -6,20 +6,17 @@ import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 export const Footer = ({}) => {
     const { connectionAddress, setConnectionAddress } = useNodeConnectionStore()
 
-    trpc.nodeUtils.nodeConnection.useQuery(
-        {},
-        {
-            refetchInterval: (data) => {
-                if (data) {
-                    setConnectionAddress(data)
-                } else {
-                    setConnectionAddress('')
-                }
+    trpc.nodeUtils.nodeConnection.useQuery(undefined, {
+        refetchInterval: (data) => {
+            if (data) {
+                setConnectionAddress(data)
+            } else {
+                setConnectionAddress('')
+            }
 
-                return 5000
-            },
+            return 5000
         },
-    )
+    })
 
     return (
         <div>

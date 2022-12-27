@@ -1,7 +1,7 @@
 import create from 'zustand'
 import { RouterInput } from '~/utils/trpc'
 import { z } from 'zod'
-import { Prisma, AskKind } from '@prisma/client'
+import { AskKind } from '@prisma/client'
 
 const filterForSchema = z.enum(['active', 'pending_acceptance', 'settled', 'expired', 'all'])
 const orderBySchema = z.enum(['deadline', 'acceptance', 'creation'])

@@ -6,7 +6,7 @@ interface ToasterDisplayProps {}
 export const ToasterDisplay = ({}: ToasterDisplayProps) => {
     const { currentMessage, currentMessageType } = useMessageStore()
 
-    const toastType = (type: MessageTypes, msg) => {
+    const toastType = (type: MessageTypes, msg: string) => {
         return {
             error: <Alert severity="error">{msg}</Alert>,
             success: <Alert severity="success">{msg}</Alert>,
