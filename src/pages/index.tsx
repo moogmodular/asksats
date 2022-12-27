@@ -64,7 +64,7 @@ const IndexPage: NextPageWithLayout = () => {
             },
         },
         palette: {},
-    })
+    }) // TODO: extract to theme.ts
 
     const routerPath = (path: string): string => {
         const subPath = path.split('/')[2]

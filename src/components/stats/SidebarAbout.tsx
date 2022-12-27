@@ -8,7 +8,7 @@ export const SidebarAbout = ({}: SidebarAboutProps) => {
     return (
         <div className={'prose flex flex-col'}>
             <h2>About:</h2>
-
+            {/*TODO: is there a way to make this smaller, looks weird on*/}
             {data && <MDRender content={data.message} />}
         </div>
     )

@@ -62,6 +62,7 @@
     .comment-container {
         @apply global-rounded global-glass p-4 shadow-lg;
     }
+    /*TODO: emphasis container does not show emphasis in combination with border*/
     .emphasis-container {
         @apply global-rounded border-4 border-gray-100 p-4 shadow-lg;
     }

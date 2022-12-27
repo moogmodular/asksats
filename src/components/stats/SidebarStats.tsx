@@ -18,7 +18,7 @@ export const SidebarStats = ({}: SidebarStatsProps) => {
     const { data: siteStatsData } = trpc.stats.siteStats.useQuery()
 
     return (
-        <div className={'flex h-full flex-col gap-2'}>
+        <div className={'flex flex-col gap-2'}>
             <div className={'emphasis-container'}>
                 <b>ending soon:</b>
                 <div className={'flex flex-col gap-1'}>
