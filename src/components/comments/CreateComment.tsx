@@ -112,7 +112,7 @@ export const CreateComment = ({ askId, commentId }: CreateCommentProps) => {
                             <LexicalComposer initialConfig={initialConfig}>
                                 <PlainTextPlugin
                                     contentEditable={<ContentEditable className={'h-96'} />}
-                                    placeholder={'Ask questions about this...'}
+                                    placeholder={() => <div>Ask questions about this...</div>}
                                     ErrorBoundary={LexicalErrorBoundary}
                                 />
                                 <OnChangePlugin onChange={updateEditorState} />

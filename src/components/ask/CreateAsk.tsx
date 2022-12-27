@@ -371,8 +371,8 @@ export const CreateAsk = ({}: CreateAskProps) => {
                         <div className={'grow overflow-y-scroll'}>
                             <LexicalComposer initialConfig={initialConfig}>
                                 <PlainTextPlugin
-                                    contentEditable={<ContentEditable className={'editor-container h-full'} />}
-                                    placeholder={getValues('content')}
+                                    contentEditable={<ContentEditable className={'editor-container h-full'} />} // TODO: ugly border, fix
+                                    placeholder={() => <div>{getValues('content')}</div>}
                                     ErrorBoundary={LexicalErrorBoundary}
                                 />
                                 <OnChangePlugin onChange={updateEditorState} />

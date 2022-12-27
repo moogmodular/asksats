@@ -247,7 +247,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                             <LexicalComposer initialConfig={initialConfig}>
                                 <PlainTextPlugin
                                     contentEditable={<ContentEditable className={'editor-container h-full'} />}
-                                    placeholder={getValues('content')}
+                                    placeholder={() => <div>{getValues('content')}</div>}
                                     ErrorBoundary={LexicalErrorBoundary}
                                 />
                                 <OnChangePlugin onChange={updateEditorState} />

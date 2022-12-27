@@ -159,7 +159,7 @@ export const CreateBlogItem = ({ parentId }: CreateBlogItemProps) => {
                                     <LexicalComposer initialConfig={initialConfig}>
                                         <PlainTextPlugin
                                             contentEditable={<ContentEditable className={'h-full'} />}
-                                            placeholder={getValues('content')}
+                                            placeholder={() => <div>{getValues('content')}</div>}
                                             ErrorBoundary={LexicalErrorBoundary}
                                         />
                                         <OnChangePlugin onChange={updateEditorState} />
