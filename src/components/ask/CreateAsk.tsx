@@ -158,7 +158,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 formData.append(name, ulData[name])
             }
 
-            await fetch(url.uploadUrl.url.replace('//', '//asksats.'), {
+            await fetch(url.uploadUrl.url.replace('//', '//artisats.'), {
                 method: 'POST',
                 body: formData,
             })

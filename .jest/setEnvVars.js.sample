@@ -1,6 +1,6 @@
 process.env.DB_USER='postgres'
 process.env.DB_PASSWORD='postgres'
-process.env.DB_NAME='asksats'
+process.env.DB_NAME='artisats'
 process.env.DOMAIN='localhost'
 process.env.DOMAIN='192.168.0.199'
 process.env.DATABASE_URL='postgresql://${DB_USER}:${DB_PASSWORD}@localhost:5432/${DB_NAME}'

@@ -127,7 +127,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                 formData.append(name, ulData[name])
             }
 
-            await fetch(url.offerFileUploadUrl.url.replace('//', '//asksats.'), {
+            await fetch(url.offerFileUploadUrl.url.replace('//', '//artisats.'), {
                 method: 'POST',
                 body: formData,
             })

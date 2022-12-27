@@ -232,7 +232,7 @@ export const assetRouter = t.router({
                 formData.append(name, ulData[name])
             }
 
-            await fetch(uploadUrl.url.replace('//', '//asksats.'), {
+            await fetch(uploadUrl.url.replace('//', '//artisats.'), {
                 method: 'POST',
                 body: formData as unknown as BodyInit,
             })
