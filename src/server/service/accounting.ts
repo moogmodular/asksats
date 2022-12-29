@@ -5,13 +5,11 @@ import {
     GLOBAL_MIN_BUMP_SATS,
     INVOICE_LIMIT,
     MSATS_UNIT_FACTOR,
+    PAYOUT_FACTOR,
     TRANSACTION_FREQUENCY_SECONDS_LIMIT,
     TRANSACTION_MAX_AGE,
 } from '~/server/service/constants'
 import { ACTIVE_SELECT, PENDING_ACCEPTANCE_SELECT, SETTLED_SELECT } from '~/server/service/selects'
-
-const THE_BANK = 0.1
-const PAYOUT_FACTOR = 1 - THE_BANK
 
 export const userBalance = async (prisma: PrismaClient, userId: string) => {
     const user = await prisma.user.findUnique({
