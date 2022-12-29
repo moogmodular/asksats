@@ -37,12 +37,7 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
     const { user } = useAuthStore()
 
     return (
-        <div
-            id="ask-preview-host"
-            className={
-                'card-container flex max-h-[500px] min-h-[500px] flex-col justify-between lg:max-h-[470px] lg:min-h-[470px]'
-            }
-        >
+        <div id="ask-preview-host" className={'card-container flex flex-col justify-between '}>
             {ask.askContext && (
                 <>
                     <div className={'relative cursor-pointer object-cover'}>
@@ -116,7 +111,7 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                 <AskTypeDisplay data-popover-target="popover-default" type={ask.askKind} />
                             </div>
                         </div>
-                        <div className={'grow'}>
+                        <div className={'h-16 grow'}>
                             <Link href={`/ask/single/${ask.askContext.slug}`}>
                                 <b className={'lg:text-md cursor-pointer'}>{ask.askContext.title}</b>
                             </Link>

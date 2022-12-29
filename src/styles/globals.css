@@ -67,10 +67,10 @@
         @apply global-rounded border-4 border-gray-100 p-4 shadow-lg;
     }
     .card-status-indicator-running {
-        @apply flex h-32 flex-row items-center justify-between border-t bg-gray-50 p-2;
+        @apply flex h-16 flex-row items-center justify-between border-t bg-gray-50 p-2;
     }
     .card-status-indicator {
-        @apply flex h-32 flex-col items-center justify-center rounded-b-global text-xs;
+        @apply flex h-16 flex-col items-center justify-center rounded-b-global text-xs;
     }
     .card-status-indicator-expired {
         @apply card-status-indicator bg-red-400 text-white;
