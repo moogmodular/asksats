@@ -111,7 +111,7 @@ const IndexPage: NextPageWithLayout = () => {
                         </footer>
                     )}
                 </div>
-                <main className={'grow overflow-hidden'} ref={parent}>
+                <main className={'grow overflow-hidden lg:w-8/12'} ref={parent}>
                     {
                         {
                             single: <Ask slug={router.query.slug as string} />,
