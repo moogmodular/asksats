@@ -114,7 +114,7 @@ export const recentSettledTransaction = async (
         .then((transactions) => {
             const lastTransaction = transactions[0]
             return lastTransaction
-                ? differenceInSeconds(lastTransaction.updatedAt, new Date()) < TRANSACTION_FREQUENCY_SECONDS_LIMIT
+                ? differenceInSeconds(new Date(), lastTransaction.createdAt) < TRANSACTION_FREQUENCY_SECONDS_LIMIT
                 : false
         })
 }
