@@ -1,6 +1,7 @@
 import { trpc } from '~/utils/trpc'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
+import { MSATS_UNIT_FACTOR } from '~/server/service/constants'
 
 export const TransactionList = ({}) => {
     const { data: transactionData } = trpc.accounting.transactions.useQuery()
@@ -20,7 +21,7 @@ export const TransactionList = ({}) => {
                               <div className={'w-80'}>
                                   <div>
                                       <b>amount:</b>
-                                      {transaction.mSatsSettled}
+                                      {transaction.mSatsSettled / MSATS_UNIT_FACTOR}
                                   </div>
                                   <div>
                                       <b>status:</b>
