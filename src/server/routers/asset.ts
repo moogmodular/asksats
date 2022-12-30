@@ -2,7 +2,7 @@ import { t } from '../trpc'
 import { prisma } from '~/server/prisma'
 import { isAuthed } from '~/server/middlewares/authed'
 import { uploadedImageById } from '~/components/ask/CreateAsk'
-import { DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3'
+import { DeleteObjectCommand, GetObjectCommand, PutObjectCommand } from '@aws-sdk/client-s3'
 import { createPresignedPost } from '@aws-sdk/s3-presigned-post'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { s3Client } from '~/server/service/s3-client'
@@ -10,7 +10,6 @@ import { BlurLevels, createFilePair, preSignedUrl } from '~/components/offer/Cre
 import sharp from 'sharp'
 import fs from 'fs'
 import path from 'path'
-import FormData from 'form-data'
 import { Buffer } from 'buffer'
 import { z } from 'zod'
 
@@ -202,19 +201,6 @@ export const assetRouter = t.router({
                 .obscureFile()
             const blurredImageKey = `${ctx.user.id}/${blurredDbImage?.id}`
 
-            const uploadUrl = await createPresignedPost(s3Client, {
-                Fields: {
-                    key: blurredImageKey,
-                },
-                Conditions: [
-                    ['content-length-range', 0, 6292],
-                    ['starts-with', '$Content-Type', 'image/'],
-                ],
-                Expires: 60,
-                Bucket: `${process.env.DO_API_NAME}`,
-                Key: blurredImageKey,
-            })
-
             await prisma.file.update({
                 where: { id: blurredDbImage?.id },
                 data: {
@@ -222,20 +208,15 @@ export const assetRouter = t.router({
                 },
             })
 
-            const ulData = { ...uploadUrl.fields, 'Content-Type': 'image/', file: obfuscatedImage } as Record<
-                string,
-                any
-            >
-
-            const formData = new FormData()
-            for (const name in ulData) {
-                formData.append(name, ulData[name])
+            if (obfuscatedImage) {
+                await s3Client.send(
+                    new PutObjectCommand({
+                        Bucket: `${process.env.DO_API_NAME}`,
+                        Key: blurredImageKey,
+                        Body: new Uint8Array(obfuscatedImage),
+                    }),
+                )
             }
-
-            await fetch(uploadUrl.url.replace('//', '//asksats.'), {
-                method: 'POST',
-                body: formData as unknown as BodyInit,
-            })
 
             return filePair
         }),

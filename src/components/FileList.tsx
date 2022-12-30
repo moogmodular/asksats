@@ -17,11 +17,11 @@ export const FileList = ({}: FileListProps) => {
             }
         >
             <b>my Files:</b>
-            <div className={'flex flex-row gap-4'}>
+            <div className={'grid grid-cols-4 gap-4'}>
                 {myFilesData &&
                     myFilesData.map((pair, index) => {
                         return (
-                            <div key={index} className={'flex flex-col border p-4'}>
+                            <div key={index} className={'flex w-72 flex-col border p-4'}>
                                 <i>created: {format(pair.createdAt ?? 0, standardDateFormat)}</i>
                                 {pair?.offerContext?.offer?.ask?.askContext && (
                                     <div>

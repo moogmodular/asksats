@@ -72,6 +72,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     const {
         register: registerItem,
         getValues: getPairValue,
+        setValue: setPairValue,
         watch: watchPair,
         formState: { errors: pairErrors },
     } = useForm()
@@ -142,6 +143,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                     setAssetsForThisAsk([...assetsForThisAsk, { id: result?.id ?? '' }])
                 })
 
+            setPairValue('file', null)
             return
         }
     }
@@ -197,6 +199,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                         Upload File
                         <input
                             type="file"
+                            {...registerItem('file')}
                             accept="image/png, image/jpeg, image/svg+xml"
                             disabled={assetsForThisAsk.length >= 3 || watchPair('obscureMethod') === undefined}
                             id="fileupload"
