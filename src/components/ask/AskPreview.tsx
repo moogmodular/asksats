@@ -76,7 +76,7 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                         <AccountCircleIcon fontSize={'small'} />
                                     </IconPropertyDisplay>
                                 )}
-                                <BumpDisplay bumps={ask.bumps} />
+                                <BumpDisplay bumps={ask.bumps} offerCount={ask.offerCount} />
                             </div>
                             <div className={'flex flex-row justify-between'}>
                                 <div className={'flex flex-col'}>

@@ -140,7 +140,7 @@ export const Ask = ({ slug }: AskProps) => {
                                 <div className={'flex grow flex-row gap-1'}>
                                     {askData.ask.bumpSummary && bumpSummary(askData.ask.bumpSummary)}
                                 </div>
-                                <BumpDisplay bumps={askData.ask.bumps} />
+                                <BumpDisplay bumps={askData.ask.bumps} offerCount={askData.ask.offerCount ?? 0} />
                                 {askData.ask.status === 'active' && (
                                     <div className={'flex-row-end flex min-w-fit items-center justify-between'}>
                                         {(askData.ask.askKind === 'BUMP_PUBLIC' ||
