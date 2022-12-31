@@ -5,8 +5,10 @@ import { z } from 'zod'
 import { TRPCError } from '@trpc/server'
 import secp256k1 from 'secp256k1'
 import jwt from 'jsonwebtoken'
-import { sub } from 'date-fns'
+import { format, sub } from 'date-fns'
 import { defaultUserData } from '~/server/service/user'
+import { sendDMToWebsiteAccount } from '~/server/service/nostr'
+import { standardDateFormat } from '~/utils/date'
 
 export const authRouter = t.router({
     loginUrl: t.procedure.query(async () => {
@@ -106,6 +108,11 @@ export const authRouter = t.router({
                                     profileImage: `data:image/png;base64,${image}`,
                                 },
                             })
+                            void sendDMToWebsiteAccount(
+                                `[${format(new Date(), standardDateFormat)}] New user: ${
+                                    innerUser.userName
+                                } with public key ${innerUser.publicKey} has joined ArtiSats.com.`,
+                            )
                         } else {
                             await transactionPrisma.user.update({
                                 where: { id: innerUser.id },

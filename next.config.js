@@ -26,6 +26,9 @@ module.exports = getConfig({
     publicRuntimeConfig: {
         NODE_ENV: env.NODE_ENV,
     },
+    typescript: {
+        ignoreBuildErrors: true,
+    },
     async rewrites() {
         return [
             {
