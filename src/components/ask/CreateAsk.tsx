@@ -23,11 +23,13 @@ import {
     MenuItem,
     Select,
     Slider,
+    Tabs,
     TextField,
     Typography,
 } from '@mui/material'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import Tab from '@mui/material/Tab'
 
 type CreateAskInput = RouterInput['ask']['create']
 
@@ -341,30 +343,15 @@ export const CreateAsk = ({}: CreateAskProps) => {
                     })}
                 </div>
             )}
-
-            <nav className="flex border-b border-gray-100 text-sm font-medium">
-                <div
-                    onClick={() => setEditorView('edit')}
-                    className={
-                        editorView === 'edit'
-                            ? '-mb-px border-b border-current p-4 text-cyan-500'
-                            : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                    }
-                >
-                    Raw
-                </div>
-
-                <div
-                    onClick={() => setEditorView('preview')}
-                    className={
-                        editorView === 'preview'
-                            ? '-mb-px border-b border-current p-4 text-cyan-500'
-                            : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                    }
-                >
-                    Preview
-                </div>
-            </nav>
+            <Tabs
+                value={editorView}
+                variant={'fullWidth'}
+                onChange={(event, value) => setEditorView(value)}
+                aria-label="basic tabs example"
+            >
+                <Tab value={'edit'} label="Edit" />
+                <Tab value={'preview'} label="Preview" />
+            </Tabs>
             {
                 {
                     edit: (

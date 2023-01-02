@@ -10,7 +10,8 @@ import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThe
 import { $rootTextContent } from '@lexical/text'
 import useMessageStore from '~/store/messageStore'
 import useQuestionsUXStore from '~/store/askQuestionsUXStore'
-import { Button } from '@mui/material'
+import { Button, Tabs } from '@mui/material'
+import Tab from '@mui/material/Tab'
 
 interface CreateCommentProps {
     askId?: string
@@ -82,29 +83,15 @@ export const CreateComment = ({ askId, commentId }: CreateCommentProps) => {
 
     return (
         <div className={'comment-container mt-4 mb-4 flex w-1/2 flex-col gap-1'}>
-            <nav className="flex border-b border-gray-100 text-sm font-medium">
-                <div
-                    onClick={() => setEditorView('edit')}
-                    className={
-                        editorView === 'edit'
-                            ? '-mb-px border-b border-current p-4 text-cyan-500'
-                            : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                    }
-                >
-                    Raw
-                </div>
-
-                <div
-                    onClick={() => setEditorView('preview')}
-                    className={
-                        editorView === 'preview'
-                            ? '-mb-px border-b border-current p-4 text-cyan-500'
-                            : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                    }
-                >
-                    Preview
-                </div>
-            </nav>
+            <Tabs
+                value={editorView}
+                variant={'fullWidth'}
+                onChange={(event, value) => setEditorView(value)}
+                aria-label="basic tabs example"
+            >
+                <Tab value={'edit'} label="Edit" />
+                <Tab value={'preview'} label="Preview" />
+            </Tabs>
             {
                 {
                     edit: (

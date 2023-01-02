@@ -12,7 +12,8 @@ import { RouterInput, trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import useMessageStore from '~/store/messageStore'
 import useBlogUXStore from '~/store/blogUXStore'
-import { Button } from '@mui/material'
+import { Button, Tabs } from '@mui/material'
+import Tab from '@mui/material/Tab'
 
 type CreateBlogItemInput = RouterInput['blog']['addBlogItem']
 
@@ -129,29 +130,15 @@ export const CreateBlogItem = ({ parentId }: CreateBlogItemProps) => {
             )}
             <div className={'flex flex-col gap-4'}>
                 <div className={'flex flex-col gap-4'}>
-                    <nav className="flex border-b border-gray-100 text-sm font-medium">
-                        <div
-                            onClick={() => setEditorView('edit')}
-                            className={
-                                editorView === 'edit'
-                                    ? '-mb-px border-b border-current p-4 text-cyan-500'
-                                    : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                            }
-                        >
-                            Raw
-                        </div>
-
-                        <div
-                            onClick={() => setEditorView('preview')}
-                            className={
-                                editorView === 'preview'
-                                    ? '-mb-px border-b border-current p-4 text-cyan-500'
-                                    : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                            }
-                        >
-                            Preview
-                        </div>
-                    </nav>
+                    <Tabs
+                        value={editorView}
+                        variant={'fullWidth'}
+                        onChange={(event, value) => setEditorView(value)}
+                        aria-label="basic tabs example"
+                    >
+                        <Tab value={'edit'} label="Edit" />
+                        <Tab value={'preview'} label="Preview" />
+                    </Tabs>
                     {
                         {
                             edit: (
