@@ -15,7 +15,7 @@ module.exports = {
                 'modal-width': '75vw',
             },
             height: {
-                'modal-height': '55vh',
+                'modal-height': '85vh',
             },
         },
     },

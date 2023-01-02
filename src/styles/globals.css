@@ -57,7 +57,7 @@
         @apply global-rounded opaque-glass shadow-lg transition;
     }
     .editor-container {
-        @apply border border-gray-600 shadow-lg transition;
+        @apply border border-gray-500 p-6 shadow-lg transition;
     }
     .comment-container {
         @apply global-rounded global-glass p-4 shadow-lg;
