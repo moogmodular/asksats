@@ -18,4 +18,8 @@ export const staticDataRouter = t.router({
             .then((data) => data?.value)
         return welcomeMessage as { message: string }
     }),
+    nostrRelays: t.procedure.query(async ({ ctx, input }) => {
+        const relays = await prisma.staticData.findUnique({ where: { key: 'nostrRelays' } }).then((data) => data?.value)
+        return relays as { relays: string }
+    }),
 })

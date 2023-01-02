@@ -5,6 +5,7 @@ import { randomBytes } from 'crypto'
 import * as secp256k1 from '@noble/secp256k1'
 import { encode as b64encode } from 'base64-arraybuffer'
 import { webcrypto as crypto } from 'crypto'
+import { prisma } from '~/server/prisma'
 
 function getNormalizedX(key: Uint8Array): Uint8Array {
     return key.slice(1, 33)
@@ -31,10 +32,12 @@ const getRelayStatus = (relay: Relay) => {
     }
 }
 const getConnectedRelays = async () => {
-    const envRelays = JSON.parse(`${process.env.NOSTR_RELAY_POOL}`) as string[]
+    const dbRelays = await prisma.staticData.findUnique({ where: { key: 'nostrRelays' } }).then((data) => data?.value)
+
+    const relayArray = dbRelays as { relays: string[] }
 
     const relays = await Promise.all(
-        envRelays.map(async (relay) => {
+        relayArray.relays.map(async (relay) => {
             const relayInstance = relayInit(relay)
             await relayInstance.connect()
             return relayInstance
