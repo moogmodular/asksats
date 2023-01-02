@@ -28,24 +28,24 @@ export const statsRouter = t.router({
             )
     }),
     topEarners: t.procedure.query(async ({ ctx }) => {
-        const test = await prisma.user.findMany({
-            where: { asks: { some: SETTLED_SELECT } },
-            include: { offers: true, bumps: true },
+        const topEarners = await prisma.user.findMany({
+            where: { offers: { some: { ask: SETTLED_SELECT } } },
+            include: { offers: { include: { ask: { include: { bumps: true } } } } },
         })
-        return test
-            .map((user) => {
-                return {
-                    userName: user.userName,
-                    publicKey: user.publicKey,
-                    createdAt: user.createdAt,
-                    totalEarned: user.bumps.reduce((acc, offer) => acc + offer.amount, 0),
-                }
-            })
-            .sort((a, b) => b.totalEarned - a.totalEarned)
+
+        return topEarners.map((user) => {
+            const relevantOffers = user.offers.filter((offer) => offer.favouritedById)
+            return {
+                ...user,
+                totalEarned: relevantOffers
+                    .map((offer) => offer?.ask?.bumps.reduce((acc, bump) => acc + bump.amount, 0))
+                    .reduce((acc, bump) => (acc ?? 0) + (bump ?? 0), 0),
+            }
+        })
     }),
     topSpenders: t.procedure.query(async ({ ctx }) => {
         const test = await prisma.user.findMany({
-            where: { offers: { some: { ask: SETTLED_SELECT } } },
+            where: { asks: { some: SETTLED_SELECT } },
             include: { offers: true, bumps: true },
         })
         return test
