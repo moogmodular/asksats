@@ -1,14 +1,11 @@
 import Countdown from 'react-countdown'
-import { useAutoAnimate } from '@formkit/auto-animate/react'
 
-interface CountdownProps {
+interface CountdownCompProps {
     endDate: Date
 }
-export const CountdownDisplay = ({ endDate }: CountdownProps) => {
-    const [parent] = useAutoAnimate<HTMLDivElement>()
-
+export const CountdownDisplay = ({ endDate }: CountdownCompProps) => {
     return (
-        <div className={'flex flex-col'} ref={parent} suppressHydrationWarning={true}>
+        <div className={'flex flex-col'} suppressHydrationWarning={true}>
             <Countdown date={endDate} className={'font-bold'} />
         </div>
     )

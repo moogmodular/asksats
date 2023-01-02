@@ -36,7 +36,7 @@ export const trpc = createTRPCNext<AppRouter, SSRContext>({
                 defaultOptions: {
                     queries: {
                         refetchOnMount: false,
-                        // refetchOnWindowFocus: false
+                        refetchOnWindowFocus: false,
                     },
                 },
             },
@@ -68,25 +68,25 @@ export const trpc = createTRPCNext<AppRouter, SSRContext>({
             ],
         }
     },
-    ssr: true,
-    responseMeta(opts) {
-        const ctx = opts.ctx as SSRContext
-
-        if (ctx.status) {
-            return {
-                status: ctx.status,
-            }
-        }
-
-        const error = opts.clientErrors[0]
-        if (error) {
-            return {
-                status: error.data?.httpStatus ?? 500,
-            }
-        }
-
-        return {}
-    },
+    ssr: false,
+    // responseMeta(opts) {
+    //     const ctx = opts.ctx as SSRContext
+    //
+    //     if (ctx.status) {
+    //         return {
+    //             status: ctx.status,
+    //         }
+    //     }
+    //
+    //     const error = opts.clientErrors[0]
+    //     if (error) {
+    //         return {
+    //             status: error.data?.httpStatus ?? 500,
+    //         }
+    //     }
+    //
+    //     return {}
+    // },
 })
 
 export type RouterInput = inferRouterInputs<AppRouter>
