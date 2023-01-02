@@ -203,7 +203,10 @@ export const Ask = ({ slug }: AskProps) => {
                                 <h3 className={'mb-6 text-xl'}>Offers</h3>
                                 <OfferList
                                     askId={askData.ask.id ?? ''}
-                                    canFavourite={user?.id === askData?.ask?.user?.id}
+                                    canFavourite={
+                                        user?.id === askData?.ask?.user?.id &&
+                                        (askData.ask.status === 'active' || askData.ask.status === 'pending_acceptance')
+                                    }
                                 />
                             </>
                         )}
