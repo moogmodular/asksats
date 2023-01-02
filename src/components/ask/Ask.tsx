@@ -98,6 +98,8 @@ export const Ask = ({ slug }: AskProps) => {
         setValue('amount', askData?.ask.minBump ?? 10)
     }, [askData])
 
+    // TODO: special tag setting for nsfw
+
     return (
         <>
             {askData && askData.ask && (
@@ -132,6 +134,7 @@ export const Ask = ({ slug }: AskProps) => {
                                 />
                                 <TagList tags={askData.ask.tags ?? []} />
                             </div>
+                            <h1 className={'my-4 py-2 text-3xl'}>{askData.title}</h1>
                             <div className={'mb-4 mt-4 flex w-full flex-row justify-between'}>
                                 <AskAuthorDisplay user={askData.ask.user} />
                                 <AskMetaDisplay ask={askData.ask} />
@@ -193,9 +196,7 @@ export const Ask = ({ slug }: AskProps) => {
                             </div>
                         </div>
                     </div>
-                    <div className={'content-block'}>
-                        <h1 className={' py-2 text-3xl'}>{askData.title}</h1>
-                        <Divider className={'my-8'} />
+                    <div className={'content-block gap-8'}>
                         <MDRender content={askData.content ?? ''} />
                         {user && (
                             <>
