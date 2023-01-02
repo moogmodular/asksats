@@ -15,8 +15,9 @@ import useMessageStore from '~/store/messageStore'
 import { offerTextDefault } from '~/server/service/constants'
 import { AssetPreview } from '~/components/offer/AssetPreview'
 import { useForm } from 'react-hook-form'
-import { Button, FormControl, InputLabel, MenuItem, Select } from '@mui/material'
+import { Button, FormControl, InputLabel, LinearProgress, MenuItem, Select, Tabs } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
+import Tab from '@mui/material/Tab'
 
 type CreateOfferInput = RouterInput['offer']['create']
 
@@ -46,6 +47,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
 
     const [assetsForThisAsk, setAssetsForThisAsk] = useState<{ id: string }[]>([])
+    const [isUploading, setIsUploading] = useState(false)
 
     const createOfferMutation = trpc.offer.create.useMutation()
     const createFilePairMutation = trpc.asset.doFilePair.useMutation()
@@ -116,6 +118,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
 
     const handleCreateFilePair = async (data: File | undefined) => {
         if (data) {
+            setIsUploading(true)
             const url = await utils.asset.preSignedUrlPair.fetch({ obscureMethod: getPairValue('obscureMethod') })
 
             const ulData = { ...url.offerFileUploadUrl.fields, 'Content-Type': data.type, file: data } as Record<
@@ -144,6 +147,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                 })
 
             setPairValue('file', null)
+            setIsUploading(false)
             return
         }
     }
@@ -162,87 +166,80 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     return (
         <form className={'flex h-modal-height w-modal-width flex-col gap-8'} onSubmit={handleSubmit(onSubmit)}>
             <b>Add up to 3 images to your offer</b>
-            {assetsForThisAsk.length < 4 && (
-                <div className={'flex w-1/5 flex-col gap-4'}>
-                    <div className={'flex flex-row justify-between'}>
-                        <FormControl className={'w-96'}>
-                            <InputLabel id="obscure-method-select-helper-label">Select an obscure method</InputLabel>
-                            <Select
-                                error={!!pairErrors.obscureMethod?.message}
-                                label={'Select an obscure method'}
-                                id="obscure-method-select-helper"
-                                {...registerItem('obscureMethod', { required: true })}
-                            >
-                                <MenuItem value={'BLUR'}>Blur</MenuItem>
-                                <MenuItem value={'CHECKER'}>Checker</MenuItem>
-                                <MenuItem value={'NONE'}>None</MenuItem>
-                            </Select>
-                        </FormControl>
-                        <FormControl className={'w-64'}>
-                            <InputLabel id="obscure-method-level-select-helper-label">Select a blur level</InputLabel>
-                            <Select
-                                label={'Select a blur level'}
-                                id="obscure-method-level-select-helper"
-                                {...registerItem('blurLevel', {
-                                    required: true,
-                                    disabled: watchPair('obscureMethod') !== 'BLUR',
-                                })}
-                            >
-                                <MenuItem value={'2'}>2</MenuItem>
-                                <MenuItem value={'5'}>5</MenuItem>
-                                <MenuItem value={'10'}>10</MenuItem>
-                                <MenuItem value={'20'}>20</MenuItem>
-                            </Select>
-                        </FormControl>
+            {isUploading && <LinearProgress />}
+            <div className={'flex flex-col gap-8 lg:flex-row'}>
+                {assetsForThisAsk.length < 4 && (
+                    <div className={'flex flex-col gap-4 lg:w-1/5'}>
+                        <div className={'flex flex-row justify-between'}>
+                            <FormControl className={'w-96'}>
+                                <InputLabel id="obscure-method-select-helper-label">
+                                    Select an obscure method
+                                </InputLabel>
+                                <Select
+                                    error={!!pairErrors.obscureMethod?.message}
+                                    label={'Select an obscure method'}
+                                    id="obscure-method-select-helper"
+                                    {...registerItem('obscureMethod', { required: true })}
+                                >
+                                    <MenuItem value={'BLUR'}>Blur</MenuItem>
+                                    <MenuItem value={'CHECKER'}>Checker</MenuItem>
+                                    <MenuItem value={'NONE'}>None</MenuItem>
+                                </Select>
+                            </FormControl>
+                            <FormControl className={'w-64'}>
+                                <InputLabel id="obscure-method-level-select-helper-label">
+                                    Select a blur level
+                                </InputLabel>
+                                <Select
+                                    label={'Select a blur level'}
+                                    id="obscure-method-level-select-helper"
+                                    {...registerItem('blurLevel', {
+                                        required: true,
+                                        disabled: watchPair('obscureMethod') !== 'BLUR',
+                                    })}
+                                >
+                                    <MenuItem value={'2'}>2</MenuItem>
+                                    <MenuItem value={'5'}>5</MenuItem>
+                                    <MenuItem value={'10'}>10</MenuItem>
+                                    <MenuItem value={'20'}>20</MenuItem>
+                                </Select>
+                            </FormControl>
+                        </div>
+                        <Button variant="contained" component="label">
+                            Upload File
+                            <input
+                                type="file"
+                                {...registerItem('file')}
+                                accept="image/png, image/jpeg, image/svg+xml"
+                                disabled={assetsForThisAsk.length >= 3 || watchPair('obscureMethod') === undefined}
+                                id="fileupload"
+                                onChange={(e) => handleCreateFilePair(e?.target?.files?.[0])}
+                            />
+                        </Button>
                     </div>
-                    <Button variant="contained" component="label">
-                        Upload File
-                        <input
-                            type="file"
-                            {...registerItem('file')}
-                            accept="image/png, image/jpeg, image/svg+xml"
-                            disabled={assetsForThisAsk.length >= 3 || watchPair('obscureMethod') === undefined}
-                            id="fileupload"
-                            onChange={(e) => handleCreateFilePair(e?.target?.files?.[0])}
-                        />
-                    </Button>
+                )}
+                <div className={'flex flex-row gap-2'}>
+                    {assetsForThisAsk.map((asset, index) => {
+                        return (
+                            <AssetPreview
+                                key={index}
+                                id={asset.id}
+                                deletable={true}
+                                deleteFilePair={(id) => handleDeleteFilePair(id)}
+                            />
+                        )
+                    })}
                 </div>
-            )}
-            <div className={'flex flex-row gap-2'}>
-                {assetsForThisAsk.map((asset, index) => {
-                    return (
-                        <AssetPreview
-                            key={index}
-                            id={asset.id}
-                            deletable={true}
-                            deleteFilePair={(id) => handleDeleteFilePair(id)}
-                        />
-                    )
-                })}
             </div>
-            <nav className="flex border-b border-gray-100 text-sm font-medium">
-                <div
-                    onClick={() => setEditorView('edit')}
-                    className={
-                        editorView === 'edit'
-                            ? '-mb-px border-b border-current p-4 text-cyan-500'
-                            : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                    }
-                >
-                    Raw
-                </div>
-
-                <div
-                    onClick={() => setEditorView('preview')}
-                    className={
-                        editorView === 'preview'
-                            ? '-mb-px border-b border-current p-4 text-cyan-500'
-                            : '-mb-px border-b border-transparent p-4 hover:text-cyan-500'
-                    }
-                >
-                    Preview
-                </div>
-            </nav>
+            <Tabs
+                value={editorView}
+                variant={'fullWidth'}
+                onChange={(event, value) => setEditorView(value)}
+                aria-label="basic tabs example"
+            >
+                <Tab value={'edit'} label="Edit" />
+                <Tab value={'preview'} label="Preview" />
+            </Tabs>
             {
                 {
                     edit: (
