@@ -72,7 +72,7 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                         <div className={'flex w-full flex-col'}>
                             <div className={'flex flex-row justify-between'}>
                                 {ask.user && (
-                                    <IconPropertyDisplay identifier={'userName'} value={'@' + ask.user.userName}>
+                                    <IconPropertyDisplay identifier={'userName'} value={ask.user.userName} link={true}>
                                         <AccountCircleIcon fontSize={'small'} />
                                     </IconPropertyDisplay>
                                 )}

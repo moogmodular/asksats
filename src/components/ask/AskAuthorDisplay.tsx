@@ -20,7 +20,7 @@ export const AskAuthorDisplay = ({ user }: AskAuthorDisplayProps) => (
                         <IconPropertyDisplay identifier={'publicKey'} value={user.publicKey?.slice(0, 24) + '...'}>
                             <KeyIcon fontSize={'small'} />
                         </IconPropertyDisplay>
-                        <IconPropertyDisplay identifier={'userName'} value={'@' + user.userName}>
+                        <IconPropertyDisplay identifier={'userName'} value={user.userName} link={true}>
                             <AccountCircleIcon fontSize={'small'} />
                         </IconPropertyDisplay>
                     </div>
