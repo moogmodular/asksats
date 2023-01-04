@@ -76,8 +76,8 @@ export const CreateAsk = ({}: CreateAskProps) => {
     } = useZodForm({
         schema: createAskInput,
         defaultValues: {
-            title: 'Title...',
-            content: 'Content...',
+            title: '',
+            content: '',
             askKind: 'PUBLIC',
             amount: 100,
             headerImageId: '',
@@ -259,6 +259,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
                             size={`${matches ? 'medium' : 'small'}`}
                             error={Boolean(errors.title)}
                             label={'Title'}
+                            placeholder={'Title...'}
                             type="text"
                             variant="outlined"
                             {...register('title', {
