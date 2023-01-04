@@ -72,7 +72,7 @@ export const CreateComment = ({ askId, commentId }: CreateCommentProps) => {
         setTempEditorState('')
         setCurrentOpenQuestionIdId('')
 
-        await utils.comment.commentTreeForAsk.invalidate()
+        await utils.comment.invalidate()
     }
 
     const updateEditorState = async (data: EditorState) => {

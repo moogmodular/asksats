@@ -35,7 +35,7 @@ export const Header = ({}: HeaderProps) => {
     }
 
     return (
-        <div className={'primary-container grow text-sm lg:h-full'}>
+        <div className={'grow text-sm lg:h-full'}>
             {user ? (
                 <div className={'flex w-full flex-row items-center justify-between'}>
                     <div className={'flex flex-row items-center gap-2'}>

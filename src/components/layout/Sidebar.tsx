@@ -36,7 +36,6 @@ export const Sidebar = ({}: SidebarProps) => {
 
     return (
         <div className={'no-scrollbar flex h-full flex-col justify-center gap-2 overflow-y-scroll'}>
-            <SubHeaderToolbarHeader />
             <div className={'grow'}>
                 <Tabs
                     value={currentTab}

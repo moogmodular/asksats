@@ -17,6 +17,7 @@ export const IconPropertyDisplay = ({ value, children, identifier, link }: IconP
                     component={LinkBehaviour}
                     href={`/ask/user/${value}`}
                     variant="body2"
+                    color={'secondary'}
                     className={
                         'lg:text-md link link-info flex cursor-pointer flex-row items-center gap-1 truncate text-sm'
                     }

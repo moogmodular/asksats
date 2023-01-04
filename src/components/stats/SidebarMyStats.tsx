@@ -6,10 +6,9 @@ interface SidebarMyStatsProps {}
 export const SidebarMyStats = ({}: SidebarMyStatsProps) => {
     const { data: myStatsData } = trpc.stats.myStats.useQuery()
     const { data: myBalanceData } = trpc.accounting.myBalance.useQuery()
-    const { data: transactionsData } = trpc.accounting.transactions.useQuery()
 
     return (
-        <div className={'flex flex-col gap-2'}>
+        <div className={'flex flex-col gap-2 pt-8'}>
             <div className={'emphasis-container break-all text-center'}>
                 {myStatsData && (
                     <div>
@@ -36,15 +35,6 @@ export const SidebarMyStats = ({}: SidebarMyStatsProps) => {
             </div>
             <div className={'emphasis-container'}>
                 <TransactionList />
-                {/*{transactionsData &&*/}
-                {/*    transactionsData.map((transaction, index) => {*/}
-                {/*        return (*/}
-                {/*            <div key={index} className={'flex flex-row items-center gap-1'}>*/}
-                {/*                <div>{transaction.transactionKind}</div>*/}
-                {/*                <div>{transaction.mSatsTarget}</div>*/}
-                {/*            </div>*/}
-                {/*        )*/}
-                {/*    })}*/}
             </div>
         </div>
     )

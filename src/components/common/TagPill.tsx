@@ -24,7 +24,7 @@ export const TagPill = ({ tagValue }: TagPillProps) => {
                         style={{ backgroundColor: getColor(tagValue) }}
                     ></div>
                 }
-                color={'secondary'}
+                color={'primary'}
                 label={'#' + tagValue}
             />
         </Link>

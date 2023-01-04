@@ -17,19 +17,19 @@ export const AskTypeDisplay = ({ type }: AskTypeDisplayProps) => {
                     PRIVATE: (
                         <div className="tooltip flex gap-1" data-tip="Private ask">
                             <b>private</b>
-                            <SecurityIcon />
+                            <SecurityIcon color={'secondary'} />
                         </div>
                     ),
                     PUBLIC: (
                         <div className="tooltip flex gap-1" data-tip="Public ask">
                             <b>public</b>
-                            <PublicIcon />
+                            <PublicIcon color={'primary'} />
                         </div>
                     ),
                     BUMP_PUBLIC: (
                         <div className="tooltip flex gap-1" data-tip="Bump public ask">
                             <b>bump public</b>
-                            <AddModeratorIcon />
+                            <AddModeratorIcon color={'success'} />
                         </div>
                     ),
                 }[type]

@@ -88,7 +88,7 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
     return (
         <>
             {!hideForSingle ? (
-                <div ref={parent} className={'flex cursor-pointer flex-col flex-wrap gap-2'}>
+                <div ref={parent} className={'flex cursor-pointer flex-col flex-wrap gap-2 p-4 shadow-2xl'}>
                     <div className="flex flex-col items-center gap-2 lg:flex-row">
                         <TextField
                             fullWidth

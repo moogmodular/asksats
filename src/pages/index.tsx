@@ -29,6 +29,7 @@ import { useAutoAnimate } from '@formkit/auto-animate/react'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Button, createTheme, ThemeProvider } from '@mui/material'
 import { WelcomeScreen } from '~/components/common/WelcomeScreen'
+import { SubHeaderToolbarHeader } from '~/components/layout/SubHeaderToolbar'
 
 const IndexPage: NextPageWithLayout = () => {
     const { setUser, storeToken, storeLogin } = useAuthStore()
@@ -45,7 +46,7 @@ const IndexPage: NextPageWithLayout = () => {
         components: {
             MuiButton: {
                 styleOverrides: {
-                    root: { borderRadius: 0 },
+                    // root: { borderRadius: 0 },
                 },
                 variants: [
                     {
@@ -59,11 +60,15 @@ const IndexPage: NextPageWithLayout = () => {
             },
             MuiOutlinedInput: {
                 styleOverrides: {
-                    root: { borderRadius: 0 },
+                    // root: { borderRadius: 0 },
                 },
             },
         },
-        palette: {},
+        palette: {
+            primary: {
+                main: '#FF9900',
+            },
+        },
     }) // TODO: extract to theme.ts
 
     const routerPath = (path: string): string => {
@@ -89,9 +94,13 @@ const IndexPage: NextPageWithLayout = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <div className={'index-background flex max-h-screen flex-col gap-1 p-4 lg:flex-row lg:gap-4'}>
-                <div className={'flex w-full flex-col gap-4 lg:w-4/12'}>
-                    <header className={'flex w-full flex-row gap-1 lg:gap-4'}>
+            <div className={'index-background flex max-h-screen flex-col lg:flex-row'}>
+                <div
+                    className={
+                        'flex w-full flex-col gap-4 bg-gradient-to-t from-orange-200 to-white shadow-2xl lg:w-4/12'
+                    }
+                >
+                    <header className={'flex w-full flex-row gap-1 bg-gray-50 p-4 shadow-xl lg:gap-4'}>
                         {!isWide && (
                             <Button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                                 <MenuIcon />
@@ -100,18 +109,19 @@ const IndexPage: NextPageWithLayout = () => {
                         {isWide && <Logo />}
                         <Header />
                     </header>
+                    <SubHeaderToolbarHeader />
                     {(isWide || mobileMenuOpen) && (
-                        <div className={'primary-container grow'}>
+                        <div className={'grow p-6'}>
                             <Sidebar />
                         </div>
                     )}
                     {isWide && (
-                        <footer className={'primary-container'}>
+                        <footer className={'border-t-black p-4'}>
                             <Footer />
                         </footer>
                     )}
                 </div>
-                <main className={'grow overflow-hidden lg:w-8/12'} ref={parent}>
+                <main className={'grow overflow-hidden bg-sidebar p-6 lg:w-8/12'} ref={parent}>
                     {
                         {
                             single: <Ask slug={router.query.slug as string} />,

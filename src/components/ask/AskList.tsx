@@ -66,7 +66,7 @@ export const AskList = ({}: AskListProps) => {
         <div
             ref={containerRef}
             className={
-                'no-scrollbar grid max-h-screen w-full grid-cols-1 gap-2 overflow-x-hidden overflow-y-scroll overscroll-auto pb-12 md:grid-cols-2 lg:gap-4 2xl:grid-cols-3'
+                'no-scrollbar grid max-h-screen w-full grid-cols-1 gap-6 overflow-x-hidden overflow-y-scroll overscroll-auto pb-12 md:grid-cols-2 lg:gap-6 2xl:grid-cols-3'
             }
         >
             {infiniteQuery?.data?.pages.map((item) => {

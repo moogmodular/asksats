@@ -4,7 +4,7 @@ module.exports = {
     theme: {
         extend: {
             borderRadius: {
-                global: '0.5rem',
+                global: '1rem',
                 small: '0.5rem',
             },
             fontFamily: {
@@ -16,6 +16,9 @@ module.exports = {
             },
             height: {
                 'modal-height': '85vh',
+            },
+            backgroundImage: {
+                sidebar: "url('/bg_image_2.jpg')",
             },
         },
     },

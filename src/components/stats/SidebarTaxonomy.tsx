@@ -43,7 +43,7 @@ export const SidebarTaxonomy = ({}: SidebarTaxonomyProps) => {
     }
 
     return (
-        <div className={'flex flex-col gap-2'}>
+        <div className={'flex flex-col gap-2 gap-6 pt-8'}>
             <div className={'emphasis-container'}>
                 <b>top tags:</b>
                 <div className={'flex flex-col gap-2'}>

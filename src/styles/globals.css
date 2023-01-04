@@ -18,56 +18,44 @@
     }
 }
 
-.custom-background {
-    background-color: #c0adad;
-    /*background-color: #e5e5f7;*/
-    /*opacity: 0.8;*/
-    /*background: repeating-linear-gradient(45deg, #e1e2f5, #efefef 5px, #e5e5f7 5px, #e5e5f7 25px);*/
-    /*@apply bg-white;*/
-}
-
 .global-rounded {
     @apply rounded-global;
 }
 
-.global-glass {
-    @apply border-4 border-gray-100 bg-white;
-    /*@apply border border-gray-700 bg-white bg-opacity-50 backdrop-blur-sm backdrop-filter;*/
+.shadow {
+    @apply drop-shadow-xl;
 }
 
-.opaque-glass {
-    @apply border-4 border-gray-100 bg-white;
-    /*@apply border border-gray-700 bg-white bg-opacity-60 backdrop-blur-lg backdrop-filter;*/
+.temp-border {
+    @apply border border-black;
 }
 
 @layer components {
     .index-background {
-        @apply custom-background min-h-screen;
+        @apply min-h-screen;
     }
     .primary-container {
-        @apply global-rounded global-glass p-4 shadow-2xl;
+        @apply rounded-global p-4 shadow;
     }
     .secondary-container {
-        @apply global-rounded global-glass p-4 shadow-lg transition hover:bg-opacity-60 hover:shadow-2xl;
     }
     .card-container {
-        @apply global-rounded global-glass shadow-lg transition hover:bg-opacity-60 hover:shadow-2xl;
+        @apply rounded-global bg-white shadow;
     }
     .modal-container {
-        @apply global-rounded opaque-glass shadow-lg transition;
+        @apply rounded-global bg-white;
     }
     .editor-container {
-        @apply border border-gray-500 p-6 shadow-lg transition;
+        @apply p-6;
     }
     .comment-container {
-        @apply global-rounded global-glass p-4 shadow-lg;
+        @apply rounded-global bg-white p-6;
     }
-    /*TODO: emphasis container does not show emphasis in combination with border*/
     .emphasis-container {
-        @apply global-rounded border-4 border-gray-100 p-4 shadow-lg;
+        /*TODO: emphasis container does not show emphasis in combination with border*/
     }
     .card-status-indicator-running {
-        @apply flex h-16 flex-row items-center justify-between border-t bg-gray-50 p-2;
+        @apply flex h-16 flex-row items-center justify-between rounded-b-global border-t bg-gray-50 p-2;
     }
     .card-status-indicator {
         @apply flex h-16 flex-col items-center justify-center rounded-b-global text-xs;
@@ -82,9 +70,9 @@
         @apply card-status-indicator bg-green-400 text-white;
     }
     .content-block {
-        @apply global-rounded global-glass p-4 shadow-lg;
+        @apply rounded-global bg-white p-6 shadow;
     }
     .ask-header-block {
-        @apply global-rounded global-glass shadow-lg;
+        @apply rounded-global bg-white shadow;
     }
 }

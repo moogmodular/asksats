@@ -37,7 +37,7 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
     const { user } = useAuthStore()
 
     return (
-        <div id="ask-preview-host" className={'card-container flex flex-col justify-between '}>
+        <div id="ask-preview-host" className={`card-container flex flex-col justify-between`}>
             {ask.askContext && (
                 <>
                     <div className={'relative cursor-pointer object-cover'}>
