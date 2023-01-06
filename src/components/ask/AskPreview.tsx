@@ -20,6 +20,7 @@ import ClearIcon from '@mui/icons-material/Clear'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import DoneAllIcon from '@mui/icons-material/DoneAll'
 import DoDisturbIcon from '@mui/icons-material/DoDisturb'
+import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
 
 type AskPreviewOutput = RouterOutput['ask']['list']['items'][0]
 
@@ -50,11 +51,21 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                         alt={`Header image for ask ${ask.askContext.title}`}
                                     />
                                 ) : (
-                                    <img
-                                        className={'h-64 w-full rounded-t-global object-cover'}
-                                        src={'/no_image_placeholder.jpg'}
-                                        alt={`Placeholder`}
-                                    />
+                                    <div className={'static'}>
+                                        <img
+                                            className={'h-64 w-full rounded-t-global object-cover'}
+                                            src={`https://picsum.photos/seed/${ask.id}/400/300`}
+                                            alt={`Placeholder`}
+                                        />
+                                        <div
+                                            className={
+                                                'absolute bottom-8 right-0 rounded-tl-global bg-blue-700 px-6 py-2 opacity-70'
+                                            }
+                                        >
+                                            <NoPhotographyIcon color={'warning'} />
+                                            <b className={'ml-2 text-white'}>no header image</b>
+                                        </div>
+                                    </div>
                                 )}
                             </Link>
                             <div className={'absolute left-2 top-2'}>

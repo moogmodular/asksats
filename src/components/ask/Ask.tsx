@@ -20,6 +20,7 @@ import { AskTypeDisplay } from '~/components/common/AskTypeDisplay'
 import { Button, Divider, IconButton, InputAdornment, TextField } from '@mui/material'
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
+import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
 
 type BumpSummary = RouterOutput['ask']['byContextSlug']['ask']['bumpSummary']
 
@@ -113,11 +114,17 @@ export const Ask = ({ slug }: AskProps) => {
                                     alt={`Header image for ask ${askData.headerImageUrl}`}
                                 />
                             ) : (
-                                <img
-                                    className={'h-64 w-full rounded-t-global object-cover'}
-                                    src={'/no_image_placeholder.jpg'}
-                                    alt={`Placeholder`}
-                                />
+                                <div className={'static'}>
+                                    <img
+                                        className={'h-64 w-full rounded-t-global object-cover'}
+                                        src={`https://picsum.photos/seed/${askData.askId}/800/600`}
+                                        alt={`Placeholder`}
+                                    />
+                                    <div className={'bottom-72 right-0 bg-blue-700 px-6 py-2 opacity-70'}>
+                                        <NoPhotographyIcon color={'warning'} />
+                                        <b className={'ml-2 text-white'}>no header image provided by user</b>
+                                    </div>
+                                </div>
                             )}
                         </div>
                         <CountdownProgress
