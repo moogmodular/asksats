@@ -38,8 +38,8 @@ export const Authenticate = ({}) => {
     )
 
     useEffect(() => {
-        const token = localStorage.getItem('token')
-        setLocalstorageToken(token)
+        // const token = localStorage.getItem('token')
+        // setLocalstorageToken(token)
         utils.auth.loginUrl.fetch().then((data) => {
             setLoginUrl(data)
         })
