@@ -26,7 +26,7 @@ export const IconPropertyDisplay = ({ value, children, identifier, link }: IconP
                     {value}
                 </Link>
             ) : (
-                <div className={'flex flex-row items-center gap-1 truncate text-xs lg:text-sm'}>
+                <div className={'flex flex-row items-center gap-1 text-xs lg:text-sm'}>
                     {children}
                     <div id={`header-property-${identifier}`}>{value}</div>
                 </div>

@@ -32,7 +32,7 @@ export const Header = ({}: HeaderProps) => {
         },
     })
 
-    const matches = useMediaQuery('(min-width:600px)')
+    const matches = useMediaQuery('(min-width:1024px)')
     const parent = useRef(null)
 
     useEffect(() => {
@@ -62,12 +62,26 @@ export const Header = ({}: HeaderProps) => {
                         )}
 
                         <div className={'flex max-w-xs flex-col content-center'}>
-                            <IconPropertyDisplay identifier={'publicKey'} value={user.publicKey?.slice(0, 12) + '...'}>
-                                <KeyIcon fontSize={'small'} />
-                            </IconPropertyDisplay>
-                            <IconPropertyDisplay identifier={'userName'} value={'@' + user.userName}>
-                                <AccountCircleIcon fontSize={'small'} />
-                            </IconPropertyDisplay>
+                            <Tooltip title={user.publicKey}>
+                                <IconPropertyDisplay
+                                    identifier={'publicKey'}
+                                    value={`${
+                                        matches
+                                            ? user.publicKey?.slice(0, 32) + '...'
+                                            : user.publicKey?.slice(0, 14) + '...'
+                                    }`}
+                                >
+                                    <KeyIcon fontSize={'small'} />
+                                </IconPropertyDisplay>
+                            </Tooltip>
+                            <Tooltip title={user.userName}>
+                                <IconPropertyDisplay
+                                    identifier={'userName'}
+                                    value={'@' + `${matches ? user.userName : user.userName?.slice(0, 14) + '...'}`}
+                                >
+                                    <AccountCircleIcon fontSize={'small'} />
+                                </IconPropertyDisplay>
+                            </Tooltip>
                         </div>
                     </div>
                     <div className={'flex flex-row'}>
