@@ -6,8 +6,7 @@ import { useZodForm } from '~/utils/useZodForm'
 import { z } from 'zod'
 import { MIN_INVOICE_FLOOR, SINGLE_TRANSACTION_CAP } from '~/server/service/constants'
 import AccountBalanceIcon from '@mui/icons-material/AccountBalance'
-import SouthIcon from '@mui/icons-material/South'
-import { Button, TextField } from '@mui/material'
+import { Button, LinearProgress, TextField } from '@mui/material'
 import CallMadeIcon from '@mui/icons-material/CallMade'
 import CallReceivedIcon from '@mui/icons-material/CallReceived'
 
@@ -29,7 +28,7 @@ export const Transact = ({}) => {
 
     const [transactMode, setTransactMode] = useState<'none' | 'deposit' | 'withdraw'>('none')
 
-    const { data: myBalance, isLoading: myBalanceIsLoading } = trpc.accounting.myBalance.useQuery()
+    const { data: myBalance } = trpc.accounting.myBalance.useQuery()
 
     return (
         <div>
@@ -37,15 +36,15 @@ export const Transact = ({}) => {
                 {
                     none: (
                         <div className={'flex flex-col items-center gap-4'}>
-                            {!myBalanceIsLoading && (
+                            {myBalance ? (
                                 <div>
                                     <div id={'transact-balance-display'}>
-                                        Available balance: {myBalance?.availableBalance}
+                                        Available balance: {myBalance.availableBalance}
                                     </div>
-                                    <div id={'transact-balance-display'}>
-                                        Locked balance: {myBalance?.lockedBalance}
-                                    </div>
+                                    <div id={'transact-balance-display'}>Locked balance: {myBalance.lockedBalance}</div>
                                 </div>
+                            ) : (
+                                <LinearProgress />
                             )}
                             <div className="mb-3 xl:w-96">
                                 <TextField
