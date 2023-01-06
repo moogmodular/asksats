@@ -19,14 +19,14 @@ export const IconPropertyDisplay = ({ value, children, identifier, link }: IconP
                     variant="body2"
                     color={'secondary'}
                     className={
-                        'lg:text-md link link-info flex cursor-pointer flex-row items-center gap-1 truncate text-sm'
+                        'link link-info flex cursor-pointer flex-row items-center gap-1 truncate text-xs lg:text-sm'
                     }
                 >
                     {children}
                     {value}
                 </Link>
             ) : (
-                <div className={'lg:text-md flex flex-row items-center gap-1 truncate text-sm'}>
+                <div className={'flex flex-row items-center gap-1 truncate text-xs lg:text-sm'}>
                     {children}
                     <div id={`header-property-${identifier}`}>{value}</div>
                 </div>
