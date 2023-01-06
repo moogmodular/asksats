@@ -1,10 +1,9 @@
-import { SubHeaderToolbarHeader } from '~/components/layout/SubHeaderToolbar'
 import { useState } from 'react'
 import { SidebarStats } from '~/components/stats/SidebarStats'
 import { SidebarTaxonomy } from '~/components/stats/SidebarTaxonomy'
 import { SidebarMyStats } from '~/components/stats/SidebarMyStats'
 import { SidebarAbout } from '~/components/stats/SidebarAbout'
-import { Box, Tabs } from '@mui/material'
+import { Tabs } from '@mui/material'
 import Tab from '@mui/material/Tab'
 
 interface SidebarProps {}
@@ -35,7 +34,7 @@ export const Sidebar = ({}: SidebarProps) => {
     const [currentTab, setCurrentTab] = useState<Tab>('stats')
 
     return (
-        <div className={'no-scrollbar flex h-full flex-col justify-center gap-2 overflow-y-scroll'}>
+        <div className={'no-scrollbar flex flex-col justify-center gap-2 overflow-y-scroll'}>
             <div className={'grow'}>
                 <Tabs
                     value={currentTab}
