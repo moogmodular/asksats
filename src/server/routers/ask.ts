@@ -44,7 +44,7 @@ export const askRouter = t.router({
                     include: {
                         askContext: { include: { headerImage: true } },
                         bumps: true,
-                        user: { select: { userName: true, publicKey: true } },
+                        user: { select: { userName: true, publicKey: true, profileImage: true } },
                         offer: true,
                         favouriteOffer: true,
                         tags: {

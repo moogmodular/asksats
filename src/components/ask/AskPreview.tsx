@@ -12,7 +12,7 @@ import useActionStore from '~/store/actionStore'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { TagList } from '~/components/common/TagList'
-import { Button } from '@mui/material'
+import { Avatar, Button } from '@mui/material'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CheckIcon from '@mui/icons-material/Check'
@@ -79,47 +79,57 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                             status={ask.status}
                         />
                     </div>
-                    <div className={'flex  flex-col justify-between gap-4 p-4'}>
-                        <div className={'flex w-full flex-col'}>
-                            <div className={'flex flex-row justify-between'}>
-                                {ask.user && (
-                                    <IconPropertyDisplay identifier={'userName'} value={ask.user.userName} link={true}>
-                                        <AccountCircleIcon fontSize={'small'} />
-                                    </IconPropertyDisplay>
-                                )}
-                                <BumpDisplay bumps={ask.bumps} offerCount={ask.offerCount} />
-                            </div>
-                            <div className={'flex flex-row justify-between'}>
-                                <div className={'flex flex-col'}>
-                                    <div className={'flex flex-row items-center gap-1'}>
-                                        {
-                                            {
-                                                active: <CountdownDisplay endDate={ask.deadlineAt ?? 0} />,
-                                                pending_acceptance: (
-                                                    <CountdownDisplay endDate={ask.acceptedDeadlineAt ?? 0} />
-                                                ),
-                                                settled: (
-                                                    <IconPropertyDisplay
-                                                        identifier={'id'}
-                                                        value={format(ask.acceptedDeadlineAt ?? 0, standardDateFormat)}
-                                                    >
-                                                        <DoneAllIcon fontSize={'small'} />
-                                                    </IconPropertyDisplay>
-                                                ),
-                                                expired: (
-                                                    <IconPropertyDisplay
-                                                        identifier={'id'}
-                                                        value={format(ask.deadlineAt ?? 0, standardDateFormat)}
-                                                    >
-                                                        <DoDisturbIcon fontSize={'small'} />
-                                                    </IconPropertyDisplay>
-                                                ),
-                                                no_status: 'NO_STATUS',
-                                            }[ask.status as AskStatus]
-                                        }
-                                    </div>
+                    <div className={'flex flex-col justify-between gap-4 p-4'}>
+                        <div className={'flex flex-row'}>
+                            {ask.user && <Avatar alt="User avatar" src={ask.user.profileImage ?? ''} />}
+                            <div className={'flex w-full flex-col'}>
+                                <div className={'flex flex-row justify-between'}>
+                                    {ask.user && (
+                                        <IconPropertyDisplay
+                                            identifier={'userName'}
+                                            value={ask.user.userName}
+                                            link={true}
+                                        >
+                                            <AccountCircleIcon fontSize={'small'} />
+                                        </IconPropertyDisplay>
+                                    )}
+                                    <BumpDisplay bumps={ask.bumps} offerCount={ask.offerCount} />
                                 </div>
-                                <AskTypeDisplay data-popover-target="popover-default" type={ask.askKind} />
+                                <div className={'flex flex-row justify-between'}>
+                                    <div className={'flex flex-col'}>
+                                        <div className={'flex flex-row items-center gap-1'}>
+                                            {
+                                                {
+                                                    active: <CountdownDisplay endDate={ask.deadlineAt ?? 0} />,
+                                                    pending_acceptance: (
+                                                        <CountdownDisplay endDate={ask.acceptedDeadlineAt ?? 0} />
+                                                    ),
+                                                    settled: (
+                                                        <IconPropertyDisplay
+                                                            identifier={'id'}
+                                                            value={format(
+                                                                ask.acceptedDeadlineAt ?? 0,
+                                                                standardDateFormat,
+                                                            )}
+                                                        >
+                                                            <DoneAllIcon fontSize={'small'} />
+                                                        </IconPropertyDisplay>
+                                                    ),
+                                                    expired: (
+                                                        <IconPropertyDisplay
+                                                            identifier={'id'}
+                                                            value={format(ask.deadlineAt ?? 0, standardDateFormat)}
+                                                        >
+                                                            <DoDisturbIcon fontSize={'small'} />
+                                                        </IconPropertyDisplay>
+                                                    ),
+                                                    no_status: 'NO_STATUS',
+                                                }[ask.status as AskStatus]
+                                            }
+                                        </div>
+                                    </div>
+                                    <AskTypeDisplay data-popover-target="popover-default" type={ask.askKind} />
+                                </div>
                             </div>
                         </div>
                         <div className={'h-16 grow'}>
@@ -137,17 +147,26 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                             <CreateBumpButton askId={ask.id} minBump={ask.minBump} />
                                         </div>
                                     )}
-                                    {ask?.user?.userName !== user?.userName && (
-                                        <Button
-                                            onClick={() => createOffer(ask.id)}
-                                            variant={'contained'}
-                                            component="label"
-                                            size={'small'}
-                                            startIcon={<LocalOfferIcon />}
-                                        >
-                                            Add Offer
-                                        </Button>
-                                    )}
+                                    {/*{ask?.user?.userName !== user?.userName && (*/}
+                                    {/*    <Button*/}
+                                    {/*        onClick={() => createOffer(ask.id)}*/}
+                                    {/*        variant={'contained'}*/}
+                                    {/*        component="label"*/}
+                                    {/*        size={'small'}*/}
+                                    {/*        startIcon={<LocalOfferIcon />}*/}
+                                    {/*    >*/}
+                                    {/*        Add Offer*/}
+                                    {/*    </Button>*/}
+                                    {/*)}*/}
+                                    <Button
+                                        onClick={() => createOffer(ask.id)}
+                                        variant={'contained'}
+                                        component="label"
+                                        size={'small'}
+                                        startIcon={<LocalOfferIcon />}
+                                    >
+                                        Add Offer
+                                    </Button>
                                 </div>
                             ),
                             pending_acceptance: (

@@ -48,7 +48,7 @@ const bumpSummary = (bumps: BumpSummary) => {
             >
                 {widthNumber > 10 && (
                     <>
-                        <div>{bump.amount}</div>
+                        <div className={'text-white'}>{bump.amount}</div>
                         <SatoshiIcon />
                     </>
                 )}
@@ -189,15 +189,22 @@ export const Ask = ({ slug }: AskProps) => {
                                                 />
                                             </div>
                                         )}
-                                        {askData.ask?.user?.userName !== user?.userName && (
-                                            <Button
-                                                variant="outlined"
-                                                onClick={() => createOffer(askData.ask.id ?? '')}
-                                                startIcon={<LocalOfferIcon />}
-                                            >
-                                                {`Add Offer (${askData.ask?.offerCount})`}
-                                            </Button>
-                                        )}
+                                        {/*{askData.ask?.user?.userName !== user?.userName && (*/}
+                                        {/*    <Button*/}
+                                        {/*        variant="outlined"*/}
+                                        {/*        onClick={() => createOffer(askData.ask.id ?? '')}*/}
+                                        {/*        startIcon={<LocalOfferIcon />}*/}
+                                        {/*    >*/}
+                                        {/*        {`Add Offer (${askData.ask?.offerCount})`}*/}
+                                        {/*    </Button>*/}
+                                        {/*)}*/}
+                                        <Button
+                                            variant="outlined"
+                                            onClick={() => createOffer(askData.ask.id ?? '')}
+                                            startIcon={<LocalOfferIcon />}
+                                        >
+                                            Add Offer
+                                        </Button>
                                     </div>
                                 )}
                             </div>
