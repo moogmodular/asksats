@@ -79,7 +79,10 @@ export const statsRouter = t.router({
             where: { id: ctx.user.id },
             include: {
                 asks: { where: SETTLED_SELECT },
-                offers: { where: { ask: SETTLED_SELECT }, include: { ask: { include: { bumps: true } } } },
+                offers: {
+                    where: { ask: SETTLED_SELECT },
+                    include: { ask: { include: { bumps: true } }, favouritedBy: true },
+                },
                 bumps: true,
             },
         })
@@ -95,10 +98,12 @@ export const statsRouter = t.router({
         return {
             userName: user?.userName,
             publicKey: user?.publicKey,
-            totalEarned: user?.offers.reduce(
-                (acc, offer) => acc + (offer?.ask?.bumps.reduce((acc, offer) => acc + offer.amount ?? 0, 0) ?? 0),
-                0,
-            ),
+            totalEarned: user?.offers
+                .filter((filter) => !filter.favouritedBy)
+                .reduce(
+                    (acc, offer) => acc + (offer?.ask?.bumps.reduce((acc, offer) => acc + offer.amount ?? 0, 0) ?? 0),
+                    0,
+                ),
             totalSpent: user?.bumps.reduce((acc, offer) => acc + offer.amount, 0),
             totalAsks: myAsks.length,
             settledAsks: user?.asks.length,
