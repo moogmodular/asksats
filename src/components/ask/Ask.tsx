@@ -135,7 +135,7 @@ export const Ask = ({ slug }: AskProps) => {
                                 <TagList tags={askData.ask.tags ?? []} />
                             </div>
                             <h1 className={'my-4 py-2 text-3xl'}>{askData.title}</h1>
-                            <div className={'mb-4 mt-4 flex w-full flex-row justify-between'}>
+                            <div className={'mb-4 mt-4 flex w-full flex-col justify-between lg:flex-row'}>
                                 <AskAuthorDisplay user={askData.ask.user} />
                                 <AskMetaDisplay ask={askData.ask} />
                             </div>
