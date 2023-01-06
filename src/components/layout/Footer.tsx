@@ -14,7 +14,7 @@ export const Footer = ({}) => {
                 setConnectionAddress('')
             }
 
-            return 5000
+            return 20000
         },
     })
 

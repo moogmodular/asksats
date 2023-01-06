@@ -15,13 +15,22 @@ import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined
 import { Avatar, IconButton, Tooltip } from '@mui/material'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import useNodeConnectionStore from '~/store/nodeConnectionStore'
+import { trpc } from '~/utils/trpc'
 
 interface HeaderProps {}
 
 export const Header = ({}: HeaderProps) => {
     const { setCurrentModal } = useActionStore()
     const { user, logout } = useAuthStore()
-    const { connectionAddress } = useNodeConnectionStore()
+    const { connectionAddress, setConnectionAddress } = useNodeConnectionStore()
+
+    trpc.nodeUtils.nodeConnection.useQuery(undefined, {
+        onSuccess: (data) => {
+            if (data) {
+                setConnectionAddress(data)
+            }
+        },
+    })
 
     const matches = useMediaQuery('(min-width:600px)')
     const parent = useRef(null)
