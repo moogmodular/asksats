@@ -36,6 +36,7 @@ export const userBalance = async (prisma: PrismaClient, userId: string) => {
                 {
                     ask: SETTLED_SELECT,
                 },
+                { favouritedById: { not: null } },
             ],
         },
         include: { ask: { include: { bumps: true } } },
