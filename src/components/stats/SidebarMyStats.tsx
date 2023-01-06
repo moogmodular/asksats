@@ -15,7 +15,7 @@ export const SidebarMyStats = ({}: SidebarMyStatsProps) => {
                         <p>
                             My username is <b>@{myStatsData.userName}</b> and my public key is <br />
                             <b>{myStatsData.publicKey}</b>.<br /> I have earned <b>{myStatsData.totalEarned}</b> and
-                            spent <b>{myStatsData.totalSpent}</b> on BumpBoard. I have placed{' '}
+                            spent <b>{myStatsData.totalSpent}</b> on ArtiSats. I have placed{' '}
                             <b>{myStatsData.totalAsks}</b> asks and made <b>{myStatsData.totalOffers}</b> offers. I have
                             settled <b>{myStatsData.settledAsks}</b> asks and have won{' '}
                             <b>{myStatsData.settledOffers}</b> settled offers.
