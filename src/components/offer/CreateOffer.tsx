@@ -164,20 +164,20 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     }
 
     return (
-        <form className={'flex h-modal-height w-modal-width flex-col gap-8'} onSubmit={handleSubmit(onSubmit)}>
+        <form className={'flex flex-col gap-8'} onSubmit={handleSubmit(onSubmit)}>
             <b>Add up to 3 images to your offer</b>
             {isUploading && <LinearProgress />}
             <div className={'flex flex-col gap-8 lg:flex-row'}>
                 {assetsForThisAsk.length < 4 && (
-                    <div className={'flex flex-col gap-4 lg:w-1/5'}>
-                        <div className={'flex flex-row justify-between'}>
+                    <div className={'flex flex-col gap-4 lg:w-2/5'}>
+                        <div className={'flex flex-row justify-between gap-4'}>
                             <FormControl className={'w-96'}>
                                 <InputLabel id="obscure-method-select-helper-label">
                                     Select an obscure method
                                 </InputLabel>
                                 <Select
                                     error={!!pairErrors.obscureMethod?.message}
-                                    label={'Select an obscure method'}
+                                    label={'Obscuration method'}
                                     id="obscure-method-select-helper"
                                     {...registerItem('obscureMethod', { required: true })}
                                 >
@@ -191,7 +191,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                                     Select a blur level
                                 </InputLabel>
                                 <Select
-                                    label={'Select a blur level'}
+                                    label={'Blur level'}
                                     id="obscure-method-level-select-helper"
                                     {...registerItem('blurLevel', {
                                         required: true,
@@ -218,7 +218,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                         </Button>
                     </div>
                 )}
-                <div className={'flex flex-row gap-2'}>
+                <div className={'flex flex-col gap-2'}>
                     {assetsForThisAsk.map((asset, index) => {
                         return (
                             <AssetPreview

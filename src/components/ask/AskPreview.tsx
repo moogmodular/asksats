@@ -122,7 +122,9 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                             active: (
                                 <div id="active-indicator" className={'card-status-indicator-running'}>
                                     {(ask.askKind === 'BUMP_PUBLIC' || ask.askKind === 'PUBLIC') && (
-                                        <CreateBumpButton askId={ask.id} minBump={ask.minBump} />
+                                        <div className={'w-1/2'}>
+                                            <CreateBumpButton askId={ask.id} minBump={ask.minBump} />
+                                        </div>
                                     )}
                                     {ask?.user?.userName !== user?.userName && (
                                         <Button
@@ -132,7 +134,7 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                             size={'small'}
                                             startIcon={<LocalOfferIcon />}
                                         >
-                                            {`Add Offer (${ask.offerCount})`}
+                                            Add Offer
                                         </Button>
                                     )}
                                 </div>

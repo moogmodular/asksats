@@ -1,6 +1,6 @@
 import { ReactNode } from 'react'
 import useActionStore from '~/store/actionStore'
-import { Box, Modal, Typography } from '@mui/material'
+import { Button, Dialog, DialogActions, DialogContent, DialogTitle, useMediaQuery } from '@mui/material'
 
 interface InteractionModalProps {
     title: string
@@ -9,26 +9,25 @@ interface InteractionModalProps {
 
 export const InteractionModal = ({ children, title }: InteractionModalProps) => {
     const { closeModal } = useActionStore()
+    const fullScreen = useMediaQuery('(min-width:600px)')
 
     return (
-        <>
-            <Modal
+        <div>
+            <Dialog
+                fullScreen={!fullScreen}
                 open={true}
                 onClose={closeModal}
-                disableScrollLock={true}
-                className={'flex flex-col items-center justify-center'}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
+                maxWidth={'lg'}
+                aria-labelledby="responsive-dialog-title"
             >
-                <Box className={'modal-container p-4'}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        {title}
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        {children}
-                    </Typography>
-                </Box>
-            </Modal>
-        </>
+                <DialogTitle id="responsive-dialog-title">{title}</DialogTitle>
+                <DialogContent>{children}</DialogContent>
+                <DialogActions>
+                    <Button autoFocus onClick={closeModal}>
+                        Close
+                    </Button>
+                </DialogActions>
+            </Dialog>
+        </div>
     )
 }

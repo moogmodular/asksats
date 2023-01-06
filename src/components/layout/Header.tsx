@@ -52,7 +52,7 @@ export const Header = ({}: HeaderProps) => {
                             <AccountCircleOutlinedIcon fontSize={'small'} />
                         )}
 
-                        <div className={'flex hidden max-w-xs flex-col content-center truncate 2xl:flex'}>
+                        <div className={'flex max-w-xs flex-col content-center'}>
                             <IconPropertyDisplay identifier={'publicKey'} value={user.publicKey?.slice(0, 12) + '...'}>
                                 <KeyIcon fontSize={'small'} />
                             </IconPropertyDisplay>

@@ -90,7 +90,7 @@ export const EditUser = ({}: EditUserProps) => {
     }
 
     return (
-        <div className={'flex h-4/6 flex-row gap-8'} onSubmit={handleSubmit(onSubmit)}>
+        <div className={'flex flex-row gap-8'} onSubmit={handleSubmit(onSubmit)}>
             <form className={'flex flex-col gap-8'} onSubmit={handleSubmit(onSubmit)}>
                 <div>
                     <label htmlFor="edit-user-profileImage">Profile image</label>

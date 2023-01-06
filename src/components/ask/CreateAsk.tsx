@@ -240,7 +240,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
     }
 
     return (
-        <form className={'flex w-modal-width flex-col gap-4 lg:h-modal-height'} onSubmit={handleSubmit(onSubmit)}>
+        <form className={'flex flex-col gap-4'} onSubmit={handleSubmit(onSubmit)}>
             <div className={'flex flex-col lg:flex-row'}>
                 {uploadedImage ? (
                     <img
