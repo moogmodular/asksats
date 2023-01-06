@@ -9,7 +9,7 @@ interface InteractionModalProps {
 
 export const InteractionModal = ({ children, title }: InteractionModalProps) => {
     const { closeModal } = useActionStore()
-    const fullScreen = useMediaQuery('(min-width:600px)')
+    const fullScreen = useMediaQuery('(min-width:1024px)')
 
     return (
         <div>
@@ -18,6 +18,7 @@ export const InteractionModal = ({ children, title }: InteractionModalProps) => 
                 open={true}
                 onClose={closeModal}
                 maxWidth={'lg'}
+                fullWidth={true}
                 aria-labelledby="responsive-dialog-title"
             >
                 <DialogTitle id="responsive-dialog-title">{title}</DialogTitle>
