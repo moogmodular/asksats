@@ -340,7 +340,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
                         <Slider
                             size={`${matches ? 'medium' : 'small'}`}
                             aria-label="Custom marks"
-                            className={`${matches ? 'w-3/5' : 'w-full'}`}
+                            className={`${matches ? 'w-3/5' : 'w-full'} mx-10`}
                             defaultValue={50}
                             step={12.5}
                             valueLabelDisplay="off"
