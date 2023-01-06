@@ -87,7 +87,6 @@
         "tls": "^0.0.1",
         "trpc-openapi": "^1.0.0",
         "unique-names-generator": "^4.7.1",
-        "use-media": "^1.4.0",
         "webln": "^0.3.2",
         "zod": "^3.20.2",
         "zustand": "^4.1.5"

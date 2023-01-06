@@ -63,7 +63,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
     const [uploadedImage, setUploadedImage] = useState<string | null>(null)
     const [tags, setTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const [possibleTags, setPossibleTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
-    const matches = useMediaQuery('(min-width:600px)')
+    const matches = useMediaQuery('(min-width:1024px)')
 
     const createAskMutation = trpc.ask.create.useMutation()
     const utils = trpc.useContext()
@@ -340,7 +340,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
                         <Slider
                             size={`${matches ? 'medium' : 'small'}`}
                             aria-label="Custom marks"
-                            className={`${matches ? 'w-3/5' : 'w-full'} mx-10`}
+                            className={`mx-10`}
                             defaultValue={50}
                             step={12.5}
                             valueLabelDisplay="off"

@@ -30,6 +30,7 @@ import MenuIcon from '@mui/icons-material/Menu'
 import { Button, createTheme, ThemeProvider } from '@mui/material'
 import { WelcomeScreen } from '~/components/common/WelcomeScreen'
 import { SubHeaderToolbarHeader } from '~/components/layout/SubHeaderToolbar'
+import useMediaQuery from '@mui/material/useMediaQuery'
 
 const IndexPage: NextPageWithLayout = () => {
     const { setUser, storeToken, storeLogin } = useAuthStore()
@@ -39,7 +40,7 @@ const IndexPage: NextPageWithLayout = () => {
 
     const [parent] = useAutoAnimate<HTMLDivElement>(/* optional config */)
     const router = useRouter()
-    const isWide = useMedia({ minWidth: '1024px' }) // TODO: use mui and uninstall
+    const matches = useMediaQuery('(min-width:1024px)')
     const utils = trpc.useContext()
 
     const theme = createTheme({
@@ -101,15 +102,15 @@ const IndexPage: NextPageWithLayout = () => {
                     }
                 >
                     <header className={'flex flex-row gap-1 bg-gray-50 p-2 shadow-xl lg:gap-4 lg:p-4'}>
-                        {!isWide && (
+                        {!matches && (
                             <Button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
                                 <MenuIcon />
                             </Button>
                         )}
-                        {isWide && <Logo />}
+                        {matches && <Logo />}
                         <Header />
                     </header>
-                    {(isWide || mobileMenuOpen) && (
+                    {(matches || mobileMenuOpen) && (
                         <div className={'grow'}>
                             <SubHeaderToolbarHeader />
                             <div className={'p-6'}>
@@ -117,7 +118,7 @@ const IndexPage: NextPageWithLayout = () => {
                             </div>
                         </div>
                     )}
-                    {isWide && (
+                    {matches && (
                         <footer className={'border-t-black p-4'}>
                             <Footer />
                         </footer>
