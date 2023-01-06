@@ -42,9 +42,9 @@ export const offerRouter = t.router({
                         : undefined
                 })
 
-            if (ask?.userId === ctx?.user?.id) {
-                throw new Error('You cannot create an offer for your own ask')
-            }
+            // if (ask?.userId === ctx?.user?.id) {
+            //     throw new Error('You cannot create an offer for your own ask')
+            // }
 
             if (ask?.status !== 'active') {
                 throw new Error('This ask si not active')
