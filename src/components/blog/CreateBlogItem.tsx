@@ -19,7 +19,7 @@ type CreateBlogItemInput = RouterInput['blog']['addBlogItem']
 
 export const createBlogItemInput = z.object({
     title: z.string().max(64),
-    content: z.string().max(5000),
+    content: z.string(),
 })
 
 export const createCommentInput = z.object({
