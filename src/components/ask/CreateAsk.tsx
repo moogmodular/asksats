@@ -5,7 +5,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThemeClasses } from 'lexical'
-import { ChangeEvent, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useState } from 'react'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
@@ -18,7 +18,9 @@ import { askTextDefault } from '~/server/service/constants'
 import {
     Autocomplete,
     Button,
+    Checkbox,
     FormControl,
+    FormControlLabel,
     InputLabel,
     MenuItem,
     Select,
@@ -239,8 +241,18 @@ export const CreateAsk = ({}: CreateAskProps) => {
         setPossibleTags([])
     }
 
+    const handleNsfwCheck = (checked: SyntheticEvent) => {
+        const tgt = checked.target as unknown as { checked: boolean }
+        const isChecked = tgt.checked
+        if (isChecked) {
+            setTags([...tags, { id: '', label: 'nsfw', isNew: false }])
+        } else {
+            setTags([...tags.filter((item) => item.label !== 'nsfw')])
+        }
+    }
+
     return (
-        <form className={'flex flex-col gap-4'} onSubmit={handleSubmit(onSubmit)}>
+        <form className={'flex flex-col gap-4 py-4'} onSubmit={handleSubmit(onSubmit)}>
             <div className={'flex flex-col lg:flex-row'}>
                 {uploadedImage ? (
                     <img
@@ -310,6 +322,10 @@ export const CreateAsk = ({}: CreateAskProps) => {
                                 return <Typography onClick={() => handleTagClick(option)}>{option.label}</Typography>
                             }}
                         />
+                        <FormControlLabel
+                            control={<Checkbox onChange={(value) => handleNsfwCheck(value)} />}
+                            label="potentially #nsfw"
+                        />
                     </div>
                     <div className={'flex w-full flex-col justify-between gap-4 lg:flex-row'}>
                         <Button variant="contained" component="label" size={`${matches ? 'medium' : 'small'}`}>
@@ -337,13 +353,18 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 </div>
             </div>
 
-            {tags.length > 0 && (
-                <div className={'flex flex-row gap-2'}>
-                    {tags.map((tag, index) => {
-                        return <TagPill key={index} tagValue={tag.label} />
-                    })}
-                </div>
-            )}
+            <div className={'flex flex-row gap-8'}>
+                <b>Tags:</b>
+                {tags.length > 0 ? (
+                    <div className={'flex flex-row gap-2'}>
+                        {tags.map((tag, index) => {
+                            return <TagPill key={index} tagValue={tag.label} />
+                        })}
+                    </div>
+                ) : (
+                    <span className={'h-8'}>&nbsp;</span>
+                )}
+            </div>
             <Tabs
                 value={editorView}
                 variant={'fullWidth'}

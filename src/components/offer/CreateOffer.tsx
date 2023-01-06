@@ -164,7 +164,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     }
 
     return (
-        <form className={'flex flex-col gap-8'} onSubmit={handleSubmit(onSubmit)}>
+        <form className={'flex flex-col gap-8 py-4'} onSubmit={handleSubmit(onSubmit)}>
             <b>Add up to 3 images to your offer</b>
             {isUploading && <LinearProgress />}
             <div className={'flex flex-col gap-8 lg:flex-row'}>
