@@ -45,6 +45,7 @@ export const blogRouter = t.router({
         const parentItems = await prisma.blogItem.findMany({
             where: { parentId: null },
             include: { children: true, user: { select: { userName: true } } },
+            orderBy: { createdAt: 'desc' },
         })
 
         const lookup = async (comment: Partial<BlogItemRecursive>): Promise<BlogItemRecursive> => {
