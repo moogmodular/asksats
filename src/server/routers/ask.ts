@@ -83,6 +83,7 @@ export const askRouter = t.router({
                             bumpCount: ask.bumps.length,
                             bumpSum: ask.bumps.reduce((acc, cur) => acc + cur.amount, 0),
                         },
+                        hasFavouritedOffer: Boolean(ask.favouriteOffer),
                         offerCount: ask.offer.length,
                         status: ask.status,
                         askContext: {

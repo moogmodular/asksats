@@ -3,15 +3,18 @@ import { SatoshiIcon } from '~/components/common/SatishiIcon'
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import { Tooltip } from '@mui/material'
+import StarIcon from '@mui/icons-material/Star'
+import StarBorderIcon from '@mui/icons-material/StarBorder'
 
 type BumpOutput = RouterOutput['ask']['list']['items'][0]['bumps']
 
 interface BumpDisplayProps {
     bumps: BumpOutput
     offerCount: number
+    hasFavouritedOffer: boolean
 }
 
-export const BumpDisplay = ({ bumps, offerCount }: BumpDisplayProps) => {
+export const BumpDisplay = ({ bumps, offerCount, hasFavouritedOffer }: BumpDisplayProps) => {
     return (
         <div className={'flex flex-row gap-1'}>
             <Tooltip title={`${offerCount} offers`}>
@@ -32,6 +35,19 @@ export const BumpDisplay = ({ bumps, offerCount }: BumpDisplayProps) => {
                     {bumps.bumpSum}
                 </div>
             </Tooltip>
+            {hasFavouritedOffer ? (
+                <Tooltip title={'already has a favourited offer'}>
+                    <div className={'flex flex-row items-center'}>
+                        <StarIcon color={'success'} />
+                    </div>
+                </Tooltip>
+            ) : (
+                <Tooltip title={'has no favourited offer yet'}>
+                    <div className={'flex flex-row items-center'}>
+                        <StarBorderIcon />
+                    </div>
+                </Tooltip>
+            )}
         </div>
     )
 }
