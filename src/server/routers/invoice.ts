@@ -16,6 +16,16 @@ export const invoiceRouter = t.router({
         .use(isAuthed)
         .input(createInvoiceInput)
         .query(async ({ ctx, input }) => {
+            const user = await prisma.user.findUnique({
+                where: {
+                    id: ctx.user.id,
+                },
+            })
+
+            if (!user) {
+                throw new TRPCError({ code: 'BAD_REQUEST', message: 'user not found' })
+            }
+
             if (!input.amount || input.amount <= 0) {
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'amount must be positive' })
             }
@@ -33,7 +43,7 @@ export const invoiceRouter = t.router({
             }
 
             const expiresAt = add(new Date(), { minutes: 60 })
-            const description = `${input.amount} sats for @${ctx.user.userName} on ${process.env.DOMAIN} at ${format(
+            const description = `${input.amount} sats for @${user.userName} on ${process.env.DOMAIN} at ${format(
                 new Date(),
                 'dd.MM.yyyy hh:mm:ss',
             )}`
