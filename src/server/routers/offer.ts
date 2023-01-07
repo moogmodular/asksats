@@ -187,6 +187,33 @@ export const offerRouter = t.router({
                 },
             })
         }),
+    unSetFavoutieForAsk: t.procedure
+        .use(isAuthed)
+        .input(z.object({ askId: z.string(), offerId: z.string() }))
+        .mutation(async ({ ctx, input }) => {
+            const ask = await prisma.ask.findUnique({ where: { id: input.askId }, include: { favouriteOffer: true } })
+
+            if (ask?.userId !== ctx?.user?.id) {
+                throw new TRPCError({
+                    code: 'FORBIDDEN',
+                    message: `You cannot set a favourite for an ask that is not yours`,
+                })
+            }
+
+            if (!ask?.favouriteOffer?.id) {
+                throw new TRPCError({
+                    code: 'NOT_FOUND',
+                    message: `There is no favourite offer for this ask`,
+                })
+            }
+
+            return await prisma.ask.update({
+                where: { id: input.askId },
+                data: {
+                    favouriteOffer: { disconnect: true },
+                },
+            })
+        }),
     myOffers: t.procedure.use(isAuthed).query(async ({ ctx, input }) => {
         return await prisma.offer.findMany({
             where: { author: { id: ctx.user.id } },

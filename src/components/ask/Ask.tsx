@@ -33,6 +33,7 @@ import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import InfoIcon from '@mui/icons-material/Info'
 
 type BumpSummary = RouterOutput['ask']['byContextSlug']['ask']['bumpSummary']
 
@@ -234,6 +235,14 @@ export const Ask = ({ slug }: AskProps) => {
                             <>
                                 <Divider className={'my-8'} />
                                 <h3 className={'mb-6 text-xl'}>Offers</h3>
+                                <div className={'flex flex-row gap-4'}>
+                                    <InfoIcon />
+                                    <i>
+                                        if you have any offers you can set any one of them as your favourite and change
+                                        your mind at any time, however when the ask runs out your favourite offer will
+                                        be the one that is accepted
+                                    </i>
+                                </div>
                                 <OfferList
                                     askId={askData.ask.id ?? ''}
                                     canFavourite={
