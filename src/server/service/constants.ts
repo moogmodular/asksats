@@ -21,3 +21,10 @@ export const bumpInfoText =
     '**Public:** these asks can be bumped by every user and if they settle successfully every other user on the site gets to see and to download the unobfuscated image. The image is given to the community.\n' +
     '\n' +
     '**Bump Public:** these asks are similar to public asks but only users that posted a bump (with at least 10% of the current sum) get to see the final image upon successful settlement. the choice of the favourite is stil in the hands of the original ask author.'
+
+export const privateInfoText =
+    'Private: this ask cannot be bumped by other users and if such an ask gets successfully settled only the author of the ask gets to see the unobfuscated image or media item.'
+export const publicInfoText =
+    '**Public:** these asks can be bumped by every user and if they settle successfully every other user on the site gets to see and to download the unobfuscated image. The image is given to the community.'
+export const bumpPublicInfoText =
+    '**Bump Public:** these asks are similar to public asks but only users that posted a bump (with at least 10% of the current sum) get to see the final image upon successful settlement. the choice of the favourite is stil in the hands of the original ask author.'
