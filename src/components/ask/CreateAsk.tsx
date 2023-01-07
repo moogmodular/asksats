@@ -14,7 +14,7 @@ import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import useActionStore from '~/store/actionStore'
 import useMessageStore from '~/store/messageStore'
 import { TagPill } from '~/components/common/TagPill'
-import { askTextDefault } from '~/server/service/constants'
+import { askTextDefault, bumpInfoText } from '~/server/service/constants'
 import {
     Autocomplete,
     Button,
@@ -27,9 +27,11 @@ import {
     Slider,
     Tabs,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Tab from '@mui/material/Tab'
 
@@ -264,7 +266,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
                     <span>&nbsp;</span>
                 )}
                 <div className={'flex h-full w-full flex-col justify-between gap-2'}>
-                    <div className={'flex w-full flex-col gap-6 lg:flex-row'}>
+                    <div className={'flex w-full flex-col items-center gap-6 lg:flex-row'}>
                         <TextField
                             id="create-ask-title"
                             className={'w-full lg:w-1/2'}
@@ -309,6 +311,9 @@ export const CreateAsk = ({}: CreateAskProps) => {
                                 <MenuItem value={'PRIVATE'}>Private</MenuItem>
                             </Select>
                         </FormControl>
+                        <Tooltip title={bumpInfoText}>
+                            <InfoIcon />
+                        </Tooltip>
                         <Autocomplete
                             size={`${matches ? 'medium' : 'small'}`}
                             disablePortal

@@ -15,3 +15,9 @@ export const askTextDefault =
     'Describe your Ask here... click on the *preview* tab to see how it will be displayed. You can use **markdown** ([cheat sheet](https://www.markdownguide.org/cheat-sheet/)) and if you need more than one image to describe it you can use external images like: ![imgae from wikipedia](https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png)'
 export const offerTextDefault =
     'Describe your Offer here... click on the *preview* tab to see how it will be displayed. You can use **markdown** ([cheat sheet](https://www.markdownguide.org/cheat-sheet/)) and use external images like: ![imgae from wikipedia](https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png) but only the uploaded images will be **OBFUSCATED**.'
+export const bumpInfoText =
+    '**Private:** this ask cannot be bumped by other users and if such an ask gets successfully settled only the author of the ask gets to see the unobfuscated image or media item.\n' +
+    '\n' +
+    '**Public:** these asks can be bumped by every user and if they settle successfully every other user on the site gets to see and to download the unobfuscated image. The image is given to the community.\n' +
+    '\n' +
+    '**Bump Public:** these asks are similar to public asks but only users that posted a bump (with at least 10% of the current sum) get to see the final image upon successful settlement. the choice of the favourite is stil in the hands of the original ask author.'

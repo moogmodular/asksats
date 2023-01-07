@@ -26,6 +26,7 @@ import {
     IconButton,
     InputAdornment,
     TextField,
+    Tooltip,
     Typography,
 } from '@mui/material'
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
@@ -55,7 +56,7 @@ const bumpSummary = (bumps: BumpSummary) => {
                     width: widthString,
                     background: colorFromNumber(bump.amount),
                 }}
-                className={`min-w-1 flex flex-row items-center justify-center rounded-global text-gray-400 shadow`}
+                className={`min-w-1 flex flex-row items-center justify-center rounded-none text-gray-400 shadow`}
             >
                 {widthNumber > 10 && (
                     <>
@@ -112,8 +113,6 @@ export const Ask = ({ slug }: AskProps) => {
         setValue('amount', askData?.ask.minBump ?? 10)
     }, [askData])
 
-    // TODO: special tag setting for nsfw
-
     return (
         <>
             {askData && askData.ask && (
@@ -160,46 +159,50 @@ export const Ask = ({ slug }: AskProps) => {
                                 <AskMetaDisplay ask={askData.ask} />
                             </div>
                             <div className={'flex flex-row gap-4 '}>
-                                <div className={'flex grow flex-row gap-1'}>
-                                    {askData.ask.bumpSummary && bumpSummary(askData.ask.bumpSummary)}
-                                </div>
+                                <Tooltip title="All bumps for this ask">
+                                    <div className={'flex grow flex-row gap-1'}>
+                                        {askData.ask.bumpSummary && bumpSummary(askData.ask.bumpSummary)}
+                                    </div>
+                                </Tooltip>
                                 <BumpDisplay bumps={askData.ask.bumps} offerCount={askData.ask.offerCount ?? 0} />
                                 {askData.ask.status === 'active' && (
                                     <div className={'flex-row-end flex min-w-fit items-center justify-between'}>
                                         {(askData.ask.askKind === 'BUMP_PUBLIC' ||
                                             askData.ask?.askKind === 'PUBLIC') && (
                                             <div className={'flex flex-row'}>
-                                                <TextField
-                                                    id="create-ask-amount"
-                                                    size={'small'}
-                                                    error={Boolean(errors.amount)}
-                                                    label="Bump with"
-                                                    type="number"
-                                                    helperText={errors.amount && errors.amount.message}
-                                                    {...register('amount', {
-                                                        valueAsNumber: true,
-                                                        min: askData.ask.minBump,
-                                                        required: true,
-                                                    })}
-                                                    InputProps={{
-                                                        endAdornment: (
-                                                            <InputAdornment position="end">
-                                                                <SatoshiIcon />
-                                                                <IconButton
-                                                                    component="label"
-                                                                    disabled={!!errors.amount}
-                                                                    onClick={() =>
-                                                                        handleCreateBump(askData.ask.id ?? '')
-                                                                    }
-                                                                    edge="end"
-                                                                    color="primary"
-                                                                >
-                                                                    <RocketLaunchOutlinedIcon />
-                                                                </IconButton>
-                                                            </InputAdornment>
-                                                        ),
-                                                    }}
-                                                />
+                                                <Tooltip title={'bump this ask with some sats'}>
+                                                    <TextField
+                                                        id="create-ask-amount"
+                                                        size={'small'}
+                                                        error={Boolean(errors.amount)}
+                                                        label="Bump with"
+                                                        type="number"
+                                                        helperText={errors.amount && errors.amount.message}
+                                                        {...register('amount', {
+                                                            valueAsNumber: true,
+                                                            min: askData.ask.minBump,
+                                                            required: true,
+                                                        })}
+                                                        InputProps={{
+                                                            endAdornment: (
+                                                                <InputAdornment position="end">
+                                                                    <SatoshiIcon />
+                                                                    <IconButton
+                                                                        component="label"
+                                                                        disabled={!!errors.amount}
+                                                                        onClick={() =>
+                                                                            handleCreateBump(askData.ask.id ?? '')
+                                                                        }
+                                                                        edge="end"
+                                                                        color="primary"
+                                                                    >
+                                                                        <RocketLaunchOutlinedIcon />
+                                                                    </IconButton>
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                    />
+                                                </Tooltip>
                                             </div>
                                         )}
                                         {/*{askData.ask?.user?.userName !== user?.userName && (*/}
@@ -211,13 +214,15 @@ export const Ask = ({ slug }: AskProps) => {
                                         {/*        {`Add Offer (${askData.ask?.offerCount})`}*/}
                                         {/*    </Button>*/}
                                         {/*)}*/}
-                                        <Button
-                                            variant="outlined"
-                                            onClick={() => createOffer(askData.ask.id ?? '')}
-                                            startIcon={<LocalOfferIcon />}
-                                        >
-                                            Add Offer
-                                        </Button>
+                                        <Tooltip title={`add an offer for this ask`}>
+                                            <Button
+                                                variant="outlined"
+                                                onClick={() => createOffer(askData.ask.id ?? '')}
+                                                startIcon={<LocalOfferIcon />}
+                                            >
+                                                Add Offer
+                                            </Button>
+                                        </Tooltip>
                                     </div>
                                 )}
                             </div>

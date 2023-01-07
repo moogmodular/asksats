@@ -5,14 +5,14 @@ import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
 import { CreateBumpButton } from '~/components/common/CreateBump'
 import { AskTypeDisplay } from '~/components/common/AskTypeDisplay'
 import useAuthStore from '~/store/useAuthStore'
-import { RouterOutput, trpc } from '~/utils/trpc'
+import { RouterOutput } from '~/utils/trpc'
 import { CountdownDisplay } from '~/components/common/CountdownDisplay'
 import { AskStatus, CountdownProgress } from '~/components/common/CountdownProgress'
 import useActionStore from '~/store/actionStore'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { TagList } from '~/components/common/TagList'
-import { Avatar, Button } from '@mui/material'
+import { Avatar, Button, Tooltip } from '@mui/material'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CheckIcon from '@mui/icons-material/Check'
@@ -143,9 +143,11 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                             active: (
                                 <div id="active-indicator" className={'card-status-indicator-running'}>
                                     {(ask.askKind === 'BUMP_PUBLIC' || ask.askKind === 'PUBLIC') && (
-                                        <div className={'w-1/2'}>
-                                            <CreateBumpButton askId={ask.id} minBump={ask.minBump} />
-                                        </div>
+                                        <Tooltip title={'bump this ask with some sats'}>
+                                            <div className={'w-1/2'}>
+                                                <CreateBumpButton askId={ask.id} minBump={ask.minBump} />
+                                            </div>
+                                        </Tooltip>
                                     )}
                                     {/*{ask?.user?.userName !== user?.userName && (*/}
                                     {/*    <Button*/}
@@ -158,15 +160,17 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                     {/*        Add Offer*/}
                                     {/*    </Button>*/}
                                     {/*)}*/}
-                                    <Button
-                                        onClick={() => createOffer(ask.id)}
-                                        variant={'contained'}
-                                        component="label"
-                                        size={'small'}
-                                        startIcon={<LocalOfferIcon />}
-                                    >
-                                        Add Offer
-                                    </Button>
+                                    <Tooltip title={`add an offer for this ask`}>
+                                        <Button
+                                            onClick={() => createOffer(ask.id)}
+                                            variant={'contained'}
+                                            component="label"
+                                            size={'small'}
+                                            startIcon={<LocalOfferIcon />}
+                                        >
+                                            Add Offer
+                                        </Button>
+                                    </Tooltip>
                                 </div>
                             ),
                             pending_acceptance: (

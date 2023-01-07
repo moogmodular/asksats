@@ -3,10 +3,10 @@ import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { RouterOutput } from '~/utils/trpc'
 import { CountdownDisplay } from '~/components/common/CountdownDisplay'
-import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import LastPageIcon from '@mui/icons-material/LastPage'
 import SportsScoreIcon from '@mui/icons-material/SportsScore'
+import { Tooltip } from '@mui/material'
 
 type AskMetaOutput = RouterOutput['ask']['byContextSlug']['ask']
 
@@ -38,20 +38,39 @@ export const AskMetaDisplay = ({ ask }: AskMetaDisplayProps) => {
                                 }
                             </div>
                         </div>
-                        <IconPropertyDisplay
-                            identifier={'id'}
-                            value={format(ask.acceptedDeadlineAt ?? 0, standardDateFormat)}
-                        >
-                            <SportsScoreIcon fontSize={'small'} />
-                        </IconPropertyDisplay>
+
+                        <Tooltip title={'final settlement'}>
+                            <div>
+                                <IconPropertyDisplay
+                                    identifier={'id'}
+                                    value={format(ask.acceptedDeadlineAt ?? 0, standardDateFormat)}
+                                >
+                                    <SportsScoreIcon fontSize={'small'} />
+                                </IconPropertyDisplay>
+                            </div>
+                        </Tooltip>
                     </div>
                     <div className={'flex flex-col'}>
-                        <IconPropertyDisplay identifier={'id'} value={format(ask.createdAt ?? 0, standardDateFormat)}>
-                            <PlayArrowIcon />
-                        </IconPropertyDisplay>
-                        <IconPropertyDisplay identifier={'id'} value={format(ask.deadlineAt ?? 0, standardDateFormat)}>
-                            <LastPageIcon fontSize={'small'} />
-                        </IconPropertyDisplay>
+                        <Tooltip title={'ask creation'}>
+                            <div>
+                                <IconPropertyDisplay
+                                    identifier={'id'}
+                                    value={format(ask.createdAt ?? 0, standardDateFormat)}
+                                >
+                                    <PlayArrowIcon />
+                                </IconPropertyDisplay>
+                            </div>
+                        </Tooltip>
+                        <Tooltip title={'ask expiry'}>
+                            <div>
+                                <IconPropertyDisplay
+                                    identifier={'id'}
+                                    value={format(ask.deadlineAt ?? 0, standardDateFormat)}
+                                >
+                                    <LastPageIcon fontSize={'small'} />
+                                </IconPropertyDisplay>
+                            </div>
+                        </Tooltip>
                     </div>
                 </div>
             )}
