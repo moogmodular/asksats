@@ -346,7 +346,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
                             size={`${matches ? 'medium' : 'small'}`}
                             aria-label="Custom marks"
                             className={`mx-10`}
-                            defaultValue={50}
+                            defaultValue={75}
                             step={12.5}
                             valueLabelDisplay="off"
                             marks={marks}
