@@ -18,7 +18,7 @@ import Tab from '@mui/material/Tab'
 type CreateBlogItemInput = RouterInput['blog']['addBlogItem']
 
 export const createBlogItemInput = z.object({
-    title: z.string().max(64),
+    title: z.string().max(80),
     content: z.string(),
 })
 

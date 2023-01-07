@@ -36,7 +36,7 @@ import Tab from '@mui/material/Tab'
 type CreateAskInput = RouterInput['ask']['create']
 
 export const createAskInput = z.object({
-    title: z.string().min(6).max(64),
+    title: z.string().min(6).max(80),
     content: z.string().max(2000),
     amount: z.number().min(1),
     tags: z.array(z.string().max(32)).max(5),
