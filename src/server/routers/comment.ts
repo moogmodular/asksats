@@ -19,7 +19,7 @@ export const commentRouter = t.router({
         .query(async ({ ctx, input }) => {
             const parentAsk = await prisma.ask.findFirst({
                 where: { id: input.askId },
-                include: { comments: { include: { children: true, user: true } } },
+                include: { comments: { include: { children: true, user: true }, orderBy: { createdAt: 'desc' } } },
             })
 
             const children = parentAsk?.comments.map((comment) => {

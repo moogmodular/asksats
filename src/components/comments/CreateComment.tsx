@@ -16,9 +16,10 @@ import Tab from '@mui/material/Tab'
 interface CreateCommentProps {
     askId?: string
     commentId?: string
+    invalidate: () => void
 }
 
-export const CreateComment = ({ askId, commentId }: CreateCommentProps) => {
+export const CreateComment = ({ askId, commentId, invalidate }: CreateCommentProps) => {
     const { showToast } = useMessageStore()
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
     const [tempEditorState, setTempEditorState] = useState<string>('Ask questions about this ask...')
@@ -61,11 +62,13 @@ export const CreateComment = ({ askId, commentId }: CreateCommentProps) => {
                     commentId,
                     content: tempEditorState,
                 })
-                .catch((error) => {
-                    showToast('error', error.message)
-                })
                 .then(() => {
+                    console.log('comment created')
                     showToast('success', 'Comment created')
+                })
+                .catch((error) => {
+                    console.error(error)
+                    showToast('error', error.message)
                 })
         }
 
@@ -73,6 +76,7 @@ export const CreateComment = ({ askId, commentId }: CreateCommentProps) => {
         setCurrentOpenQuestionIdId('')
 
         await utils.comment.invalidate()
+        invalidate()
     }
 
     const updateEditorState = async (data: EditorState) => {

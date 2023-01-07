@@ -15,12 +15,23 @@ import { useZodForm } from '~/utils/useZodForm'
 import { createBumpForAsk } from '~/components/ask/AskPreview'
 import { SatoshiIcon } from '~/components/common/SatishiIcon'
 import { TagList } from '~/components/common/TagList'
-import { useEffect } from 'react'
+import { useEffect, useState } from 'react'
 import { AskTypeDisplay } from '~/components/common/AskTypeDisplay'
-import { Button, Divider, IconButton, InputAdornment, TextField } from '@mui/material'
+import {
+    Accordion,
+    AccordionDetails,
+    AccordionSummary,
+    Button,
+    Divider,
+    IconButton,
+    InputAdornment,
+    TextField,
+    Typography,
+} from '@mui/material'
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 type BumpSummary = RouterOutput['ask']['byContextSlug']['ask']['bumpSummary']
 
@@ -65,6 +76,8 @@ export const Ask = ({ slug }: AskProps) => {
     const { createOffer, openImage } = useActionStore()
     const { user } = useAuthStore()
     const { showToast } = useMessageStore()
+
+    const [createQuestionVisible, setCreateQuestionVisible] = useState(false)
 
     const mutateCreateBump = trpc.bump.createForAsk.useMutation()
     const { data: askData } = trpc.ask.byContextSlug.useQuery({ slug: slug })
@@ -226,7 +239,27 @@ export const Ask = ({ slug }: AskProps) => {
                             </>
                         )}
                     </div>
-                    {user && <CreateComment askId={askData.ask.id} />}
+
+                    {user && (
+                        <Accordion expanded={createQuestionVisible} onClick={() => setCreateQuestionVisible(true)}>
+                            <AccordionSummary
+                                expandIcon={<ExpandMoreIcon />}
+                                aria-controls="panel1a-content"
+                                id="panel1a-header"
+                            >
+                                <Typography>Ask a question</Typography>
+                            </AccordionSummary>
+                            <AccordionDetails>
+                                <CreateComment
+                                    askId={askData.ask.id}
+                                    invalidate={async () => {
+                                        setCreateQuestionVisible(false)
+                                        await utils.comment.commentTreeForAsk.invalidate()
+                                    }}
+                                />
+                            </AccordionDetails>
+                        </Accordion>
+                    )}
                     <CommentList askId={askData?.ask?.id ?? ''} />
                 </div>
             )}
