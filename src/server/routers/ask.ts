@@ -13,7 +13,16 @@ import { askListProps } from '~/store/listStore'
 import { minBumpForAsk, userBalance } from '~/server/service/accounting'
 import { TRPCError } from '@trpc/server'
 import { DEFAULT_EXCLUDED_TAG } from '~/server/service/constants'
-import { byAskKind, byTags, byUser, getAskStatus, getFilter, getOrder, getSearch } from '~/server/service/ask'
+import {
+    byAskKind,
+    byHasFavouriteOffer,
+    byTags,
+    byUser,
+    getAskStatus,
+    getFilter,
+    getOrder,
+    getSearch,
+} from '~/server/service/ask'
 
 export const askRouter = t.router({
     myList: t.procedure.use(isAuthed).query(async ({ ctx, input }) => {
@@ -27,7 +36,7 @@ export const askRouter = t.router({
                 ? await prisma.user.findUnique({ where: { id: ctx?.user?.id } }).excludedTags()
                 : undefined
 
-            console.log('excludedTags', { ...getSearch(input.searchTerm) })
+            console.log('input', input)
 
             const listWithStatus = await prisma.ask
                 .findMany({
@@ -37,6 +46,7 @@ export const askRouter = t.router({
                         ...byUser(input.userName),
                         ...(byAskKind(input.askKind) as Prisma.EnumAskKindFilter),
                         ...byTags(excludedTags ?? DEFAULT_EXCLUDED_TAG, ctx?.user?.role ?? 'USER', input.tagName),
+                        ...byHasFavouriteOffer(input.withoutFavouritesOnly ?? false),
                     },
                     orderBy: getOrder(input.orderBy, input.orderByDirection),
                     take: input.pageSize + 1,

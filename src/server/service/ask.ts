@@ -116,3 +116,11 @@ export const byTags = (tags: Array<Partial<Tag>>, role: 'USER' | 'GUEST' | 'ADMI
               },
           }
 }
+
+export const byHasFavouriteOffer = (filter: boolean) => {
+    return filter
+        ? {
+              favouriteOffer: null,
+          }
+        : {}
+}

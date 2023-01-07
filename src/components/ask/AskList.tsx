@@ -9,7 +9,7 @@ import { Button } from '@mui/material'
 interface AskListProps {}
 
 export const AskList = ({}: AskListProps) => {
-    const { filterFor, orderBy, orderByDirection, searchTerm } = useListStore()
+    const { filterFor, orderBy, orderByDirection, searchTerm, withoutFavouritesOnly } = useListStore()
 
     const router = useRouter()
     const [userName, setUserName] = useState<string | undefined>(undefined)
@@ -26,6 +26,7 @@ export const AskList = ({}: AskListProps) => {
             filterFor,
             orderBy,
             orderByDirection,
+            withoutFavouritesOnly,
             searchTerm,
             tagName: tag,
             userName,
@@ -60,7 +61,7 @@ export const AskList = ({}: AskListProps) => {
         }
 
         infiniteQuery.refetch()
-    }, [router, filterFor, orderBy, orderByDirection, searchTerm, tag, userName])
+    }, [router, filterFor, orderBy, orderByDirection, searchTerm, tag, userName, withoutFavouritesOnly])
 
     return (
         <div

@@ -33,10 +33,16 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
     const [anchorElFilterFor, setAnchorElFilterFor] = useState<null | HTMLElement>(null)
     const [anchorElOrderBy, setAnchorElOrderBy] = useState<null | HTMLElement>(null)
     const [anchorElDirection, setAnchorElDirection] = useState<null | HTMLElement>(null)
+    const [anchorElQuickFilter, setAnchorElQuickFilter] = useState<null | HTMLElement>(null)
 
     const openFilterFor = Boolean(anchorElFilterFor)
     const openOrderBy = Boolean(anchorElOrderBy)
     const openDirection = Boolean(anchorElDirection)
+    const openQuickFilter = Boolean(anchorElQuickFilter)
+
+    const handleClickQuickFilter = (event: any) => {
+        setAnchorElQuickFilter(event.currentTarget)
+    }
     const handleClickFilterFor = (event: any) => {
         setAnchorElFilterFor(event.currentTarget)
     }
@@ -45,6 +51,9 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
     }
     const handleClickDirection = (event: any) => {
         setAnchorElDirection(event.currentTarget)
+    }
+    const handleCloseQuickFilter = () => {
+        setAnchorElQuickFilter(null)
     }
     const handleCloseFilterFor = () => {
         setAnchorElFilterFor(null)
@@ -136,17 +145,31 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
                         </div>
                     </div>
                     <div className={'flex flex-col gap-2 lg:flex-row'}>
-                        <ButtonGroup size="small" aria-label="small button group">
-                            <Button key="one" onClick={() => setTemplate('newest')}>
-                                new
-                            </Button>
-                            <Button key="two" onClick={() => setTemplate('public_settled')}>
-                                public settled
-                            </Button>
-                            <Button key="three" onClick={() => setTemplate('ending_soon')}>
-                                ending
-                            </Button>
-                        </ButtonGroup>
+                        <Button
+                            id="demo-customized-button"
+                            size="small"
+                            variant="outlined"
+                            disableElevation
+                            onClick={(e) => handleClickQuickFilter(e)}
+                            endIcon={<KeyboardArrowDownIcon />}
+                        >
+                            quick filter
+                        </Button>
+                        <Menu
+                            id="basic-menu"
+                            anchorEl={anchorElQuickFilter}
+                            open={openQuickFilter}
+                            onClose={handleCloseQuickFilter}
+                            MenuListProps={{
+                                'aria-labelledby': 'basic-button',
+                            }}
+                        >
+                            <MenuItem onClick={() => setTemplate('default_template')}>Default</MenuItem>
+                            <MenuItem onClick={() => setTemplate('newest')}>New</MenuItem>
+                            <MenuItem onClick={() => setTemplate('not_favourited')}>Not favourited yet</MenuItem>
+                            <MenuItem onClick={() => setTemplate('public_settled')}>Public settled</MenuItem>
+                            <MenuItem onClick={() => setTemplate('ending_soon')}>Ending</MenuItem>
+                        </Menu>
 
                         <Button
                             id="demo-customized-button"
