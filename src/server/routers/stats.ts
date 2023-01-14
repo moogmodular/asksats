@@ -33,15 +33,17 @@ export const statsRouter = t.router({
             include: { offers: { include: { ask: { include: { bumps: true } } } } },
         })
 
-        return topEarners.map((user) => {
-            const relevantOffers = user.offers.filter((offer) => offer.favouritedById)
-            return {
-                ...user,
-                totalEarned: relevantOffers
-                    .map((offer) => offer?.ask?.bumps.reduce((acc, bump) => acc + bump.amount, 0))
-                    .reduce((acc, bump) => (acc ?? 0) + (bump ?? 0), 0),
-            }
-        })
+        return topEarners
+            .map((user) => {
+                const relevantOffers = user.offers.filter((offer) => offer.favouritedById)
+                return {
+                    ...user,
+                    totalEarned: relevantOffers
+                        .map((offer) => offer?.ask?.bumps.reduce((acc, bump) => acc + bump.amount, 0))
+                        .reduce((acc, bump) => (acc ?? 0) + (bump ?? 0), 0),
+                }
+            })
+            .slice(0, 5)
     }),
     topSpenders: t.procedure.query(async ({ ctx }) => {
         const test = await prisma.user.findMany({
@@ -58,6 +60,7 @@ export const statsRouter = t.router({
                 }
             })
             .sort((a, b) => b.totalEarned - a.totalEarned)
+            .slice(0, 5)
     }),
     biggestGrossingAsks: t.procedure.query(async ({ ctx }) => {
         const test = await prisma.ask.findMany({
@@ -73,6 +76,7 @@ export const statsRouter = t.router({
                 }
             })
             .sort((a, b) => b.grossed - a.grossed)
+            .slice(0, 5)
     }),
     myStats: t.procedure.use(isAuthed).query(async ({ ctx }) => {
         const user = await prisma.user.findUnique({
