@@ -43,6 +43,7 @@ export const statsRouter = t.router({
                         .reduce((acc, bump) => (acc ?? 0) + (bump ?? 0), 0),
                 }
             })
+            .sort((a, b) => (a.totalEarned ?? 0) - (b.totalEarned ?? 0))
             .slice(0, 5)
     }),
     topSpenders: t.procedure.query(async ({ ctx }) => {
