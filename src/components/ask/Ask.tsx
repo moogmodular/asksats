@@ -272,12 +272,16 @@ export const Ask = ({ slug }: AskProps) => {
                                         be the one that is accepted
                                     </i>
                                 </div>
-                                <OfferList
-                                    askId={askData.ask.id ?? ''}
-                                    canFavourite={
-                                        user?.id === askData?.ask?.user?.id && askData.ask.askStatus === 'OPEN'
-                                    }
-                                />
+                                {askData.ask.askKind !== 'PRIVATE' || askData.ask.user === user.id ? (
+                                    <OfferList
+                                        askId={askData.ask.id ?? ''}
+                                        canFavourite={
+                                            user?.id === askData?.ask?.user?.id && askData.ask.askStatus === 'OPEN'
+                                        }
+                                    />
+                                ) : (
+                                    <b>This ask is private. Users cannot see the offers for this.</b>
+                                )}
                             </>
                         )}
                     </div>

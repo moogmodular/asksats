@@ -93,11 +93,17 @@ export const offerRouter = t.router({
                     const conditionIsSettledAndPrivateAndICreatedAsk =
                         isAskSettled && isPrivate && isMyAsk && isTheFavouriteOffer
 
-                    const finalBumpRevealCondition =
+                    const finalOfferFileRevealCondition =
                         conditionIsMyOffer ||
                         conditionIsSettledBumpPublicAndIHaveBumped ||
                         conditionIsSettledAndPublic ||
                         conditionIsSettledAndPrivateAndICreatedAsk
+
+                    const conditionIsNotPrivate = !isPrivate
+                    const conditionIAmTheAskAuthor = ask?.userId === ctx.user.id
+
+                    const finalObscureFileRevealCondition =
+                        conditionIsNotPrivate || conditionIsMyOffer || conditionIAmTheAskAuthor
 
                     return {
                         ...offer,
@@ -109,7 +115,7 @@ export const offerRouter = t.router({
                                       offer?.offerContext?.filePairs.map(async (pair) => {
                                           return {
                                               id: pair.id,
-                                              offerFileUrl: finalBumpRevealCondition
+                                              offerFileUrl: finalOfferFileRevealCondition
                                                   ? pair.offerFile.s3Key
                                                       ? await getSignedUrl(
                                                             s3Client,
@@ -120,14 +126,16 @@ export const offerRouter = t.router({
                                                         )
                                                       : ''
                                                   : '',
-                                              obscureFileUrl: pair.obscureFile.s3Key
-                                                  ? await getSignedUrl(
-                                                        s3Client,
-                                                        new GetObjectCommand({
-                                                            Bucket: `${process.env.DO_API_NAME}`,
-                                                            Key: pair.obscureFile.s3Key,
-                                                        }),
-                                                    )
+                                              obscureFileUrl: finalObscureFileRevealCondition
+                                                  ? pair.obscureFile.s3Key
+                                                      ? await getSignedUrl(
+                                                            s3Client,
+                                                            new GetObjectCommand({
+                                                                Bucket: `${process.env.DO_API_NAME}`,
+                                                                Key: pair.obscureFile.s3Key,
+                                                            }),
+                                                        )
+                                                      : ''
                                                   : '',
                                           }
                                       }),
