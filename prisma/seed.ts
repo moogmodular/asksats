@@ -93,6 +93,7 @@ function getIdOfOtherUser(index: number, newUsers: Awaited<any>[]) {
 }
 
 async function main() {
+    return // no need to run this script for prod
     await Promise.all([
         await prisma.ask.deleteMany(),
         await prisma.tag.deleteMany(),
