@@ -4,7 +4,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThemeClasses } from 'lexical'
-import { ChangeEvent, SyntheticEvent, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useRef, useState } from 'react'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
@@ -32,7 +32,6 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Tab from '@mui/material/Tab'
-import CheckIcon from '@mui/icons-material/Check'
 
 type CreateAskInput = RouterInput['ask']['create']
 
@@ -49,8 +48,6 @@ export const uploadedImageById = z.object({
     imageId: z.string(),
 })
 
-type RunningTimes = '0' | '12.5' | '25' | '37.5' | '50' | '62.5' | '75' | '87.5' | '100'
-
 interface CreateAskProps {}
 
 export const CreateAsk = ({}: CreateAskProps) => {
@@ -63,6 +60,8 @@ export const CreateAsk = ({}: CreateAskProps) => {
     const [tags, setTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const [possibleTags, setPossibleTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const matches = useMediaQuery('(min-width:1024px)')
+
+    const inputRef = useRef<HTMLInputElement>(null)
 
     const createAskMutation = trpc.ask.create.useMutation()
     const utils = trpc.useContext()
@@ -182,6 +181,9 @@ export const CreateAsk = ({}: CreateAskProps) => {
     const handleTagClick = (option: { label: string; id: string; isNew: boolean }) => {
         setTags([...tags, option])
         setPossibleTags([])
+        if (inputRef.current) {
+            inputRef.current.value = ''
+        }
     }
 
     const handleNsfwCheck = (checked: SyntheticEvent) => {
@@ -192,6 +194,10 @@ export const CreateAsk = ({}: CreateAskProps) => {
         } else {
             setTags([...tags.filter((item) => item.label !== 'nsfw')])
         }
+    }
+
+    const handleRemoveTag = (tag: string) => {
+        setTags([...tags.filter((item) => item.label !== tag)])
     }
 
     return (
@@ -268,7 +274,12 @@ export const CreateAsk = ({}: CreateAskProps) => {
                             options={possibleTags}
                             sx={{ width: 300 }}
                             renderInput={(params) => (
-                                <TextField {...params} label="Add a tag" onChange={(e) => handleSearchInput(e)} />
+                                <TextField
+                                    {...params}
+                                    label="Add a tag"
+                                    onChange={(e) => handleSearchInput(e)}
+                                    ref={inputRef}
+                                />
                             )}
                             renderOption={(props, option) => {
                                 return <Typography onClick={() => handleTagClick(option)}>{option.label}</Typography>
@@ -298,7 +309,9 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 {tags.length > 0 ? (
                     <div className={'flex flex-row gap-2'}>
                         {tags.map((tag, index) => {
-                            return <TagPill key={index} tagValue={tag.label} />
+                            return (
+                                <TagPill key={index} tagValue={tag.label} noLink={true} removeTag={handleRemoveTag} />
+                            )
                         })}
                     </div>
                 ) : (
@@ -343,8 +356,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 component="div"
                 disabled={Boolean(errors.title || errors.amount || errors.askKind)}
                 onClick={() => {
-                    console.log('submitting', getValues())
-                    console.log('submitting', errors)
                     handleSubmit(onSubmit)()
                 }}
                 endIcon={<PlayArrowIcon />}

@@ -1,9 +1,11 @@
 import Link from 'next/link'
-import CircleIcon from '@mui/icons-material/Circle'
-import { Chip } from '@mui/material'
+import { Badge, Chip } from '@mui/material'
+import ClearIcon from '@mui/icons-material/Clear'
 
 interface TagPillProps {
     tagValue: string
+    noLink?: boolean
+    removeTag?: (value: string) => void
 }
 
 const getColor = (str: string) => {
@@ -13,11 +15,29 @@ const getColor = (str: string) => {
     return `hsl(${hash % 360}, 80%, 50%)`
 }
 
-export const TagPill = ({ tagValue }: TagPillProps) => {
-    return (
-        <Link href={`/ask/tag/${tagValue}`}>
+export const TagPill = ({ tagValue, noLink, removeTag }: TagPillProps) => {
+    const handleRemove = () => {
+        removeTag && removeTag(tagValue)
+    }
+
+    return noLink ? (
+        <Badge color="secondary" badgeContent={<ClearIcon onClick={handleRemove} />}>
             <Chip
-                className={'cursor-pointer text-white'}
+                className={'text-white'}
+                icon={
+                    <div
+                        className={`aspect-square w-6 rounded-full`}
+                        style={{ backgroundColor: getColor(tagValue) }}
+                    ></div>
+                }
+                color={'primary'}
+                label={'#' + tagValue}
+            />
+        </Badge>
+    ) : (
+        <Link href={`/ask/tag/${tagValue}`} className={'cursor-pointer'}>
+            <Chip
+                className={'text-white'}
                 icon={
                     <div
                         className={`aspect-square w-6 rounded-full`}
