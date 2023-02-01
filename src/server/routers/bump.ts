@@ -4,13 +4,15 @@ import { isAuthed } from '~/server/middlewares/authed'
 import { createBumpForAsk } from '~/components/ask/AskPreview'
 import { minBumpForAsk, userBalance } from '~/server/service/accounting'
 import { TRPCError } from '@trpc/server'
+import { doBumpBalanceTransaction } from '~/server/service/finalise'
+import { MSATS_UNIT_FACTOR } from '~/server/service/constants'
 
 export const bumpRouter = t.router({
     createForAsk: t.procedure
         .use(isAuthed)
         .input(createBumpForAsk)
         .mutation(async ({ ctx, input }) => {
-            const { availableBalance } = await userBalance(prisma, ctx?.user?.id)
+            const { availableBalance } = await userBalance(ctx?.user?.id)
             if (availableBalance < input.amount) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
@@ -25,7 +27,7 @@ export const bumpRouter = t.router({
                 })
             }
 
-            const bumpSum = ask?.bumps.reduce((acc, bump) => acc + bump.amount, 0)
+            const bumpSum = ask?.bumps.reduce((acc, bump) => acc + bump.amount / MSATS_UNIT_FACTOR, 0)
             const minBump = minBumpForAsk(bumpSum ?? 100, ask?.askKind ?? 'PUBLIC')
 
             if (input.amount < minBump) {
@@ -35,17 +37,7 @@ export const bumpRouter = t.router({
                 })
             }
 
-            return prisma.ask.update({
-                where: { id: input.askId },
-                data: {
-                    bumps: {
-                        create: {
-                            bidder: { connect: { id: ctx.user.id } },
-                            amount: input.amount,
-                        },
-                    },
-                },
-            })
+            return await doBumpBalanceTransaction(input.askId, ctx.user.id, input.amount)
         }),
     myBumps: t.procedure.use(isAuthed).query(async ({ ctx, input }) => {
         return await prisma.bump.findMany({

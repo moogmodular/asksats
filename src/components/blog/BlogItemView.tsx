@@ -2,7 +2,7 @@ import { EditorThemeClasses } from 'lexical'
 import { MDRender } from '~/components/common/MDRender'
 import { RouterOutput } from '~/utils/trpc'
 import { CreateBlogItem } from '~/components/blog/CreateBlogItem'
-import useBlogUXStore from '~/store/blogUXStore'
+import { useBlogUXStore } from '~/store/blogUXStore'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { Button } from '@mui/material'
@@ -46,7 +46,7 @@ export const BlogItemView = ({ blogItem }: BlogItemViewProps) => {
             {currentOpenModalId === blogItem.id ? (
                 <CreateBlogItem parentId={blogItem.id} />
             ) : (
-                <Button variant={'contained'} component="label" onClick={() => setCurrentOpenModalId(blogItem.id)}>
+                <Button variant={'contained'} component="div" onClick={() => setCurrentOpenModalId(blogItem.id)}>
                     Add comment
                 </Button>
             )}

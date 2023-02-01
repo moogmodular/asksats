@@ -1,46 +1,61 @@
-import { RouterOutput } from '~/utils/trpc'
+import { RouterOutput, trpc } from '~/utils/trpc'
 import { MDRender } from '~/components/common/MDRender'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { FileView } from '~/components/FileView'
-import { Accordion, AccordionDetails, AccordionSummary, Switch, Tooltip } from '@mui/material'
+import { Accordion, AccordionDetails, AccordionSummary, Button, IconButton, Tooltip } from '@mui/material'
 import StarIcon from '@mui/icons-material/Star'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DesignServicesIcon from '@mui/icons-material/DesignServices'
 import StarBorderIcon from '@mui/icons-material/StarBorder'
-import { ChangeEvent } from 'react'
+import CheckIcon from '@mui/icons-material/Check'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
 
 type OfferOutput = RouterOutput['offer']['listForAsk'][0]
 
 interface OfferPreviewProps {
     offer: OfferOutput
-    setFavOffer: (offerId: string) => void
-    unSetFavOffer: (offerId: string) => void
     canFavourite?: boolean
+    index: number
 }
 
-export const OfferPreview = ({ offer, setFavOffer, unSetFavOffer, canFavourite }: OfferPreviewProps) => {
-    const handleChanged = (event: ChangeEvent<HTMLInputElement>) => {
-        if (event.target.checked) {
-            setFavOffer(offer.id)
-        } else {
-            unSetFavOffer(offer.id)
-        }
+export const OfferPreview = ({ offer, canFavourite, index }: OfferPreviewProps) => {
+    const settleAskMutation = trpc.ask.settleAsk.useMutation()
+    const utils = trpc.useContext()
+
+    const handleSettleAsk = async () => {
+        await settleAskMutation.mutateAsync({ askId: offer.askId ?? '', offerId: offer.id })
+        utils.invalidate()
     }
+
     return (
-        <div className={'flex flex-row items-center'}>
-            {canFavourite ? (
-                <Tooltip title={'Set this offer as your favourite'}>
-                    <Switch onChange={(event) => handleChanged(event)} checked={Boolean(offer.favouritedById)} />
-                </Tooltip>
-            ) : (
-                <div>{offer.favouritedById ? <StarIcon color={'success'} /> : <StarBorderIcon />}</div>
-            )}
+        <div id={`offer-display-host-${index}`} className={'flex flex-row items-center'}>
             <Accordion key={offer.id}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
-                    <div className={'flex flex-row text-sm'}>
+                    <div className={'flex flex-row items-center gap-4 text-sm'}>
+                        {canFavourite && (
+                            <Tooltip title={'Settle this ask'}>
+                                <Button
+                                    id={`settle-ask-button`}
+                                    aria-label="delete"
+                                    component={'div'}
+                                    color={'primary'}
+                                    variant={'contained'}
+                                    onClick={() => handleSettleAsk()}
+                                    startIcon={<CheckIcon />}
+                                >
+                                    settle
+                                </Button>
+                            </Tooltip>
+                        )}
                         <DesignServicesIcon />
-                        {format(offer.createdAt ?? 0, standardDateFormat)}
+                        <div>{format(offer.createdAt ?? 0, standardDateFormat)}</div>
+                        <div>
+                            <IconPropertyDisplay identifier={'userName'} value={offer?.author?.userName} link={true}>
+                                <AccountCircleIcon fontSize={'small'} />
+                            </IconPropertyDisplay>
+                        </div>
                     </div>
                 </AccordionSummary>
                 <AccordionDetails>
@@ -48,6 +63,7 @@ export const OfferPreview = ({ offer, setFavOffer, unSetFavOffer, canFavourite }
                         {offer.offerContext.filePairs.map((pair, index) => {
                             return (
                                 <FileView
+                                    index={index}
                                     key={index}
                                     filePairId={pair.id}
                                     offerFileUrl={pair.offerFileUrl}

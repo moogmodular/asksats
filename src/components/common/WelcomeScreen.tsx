@@ -1,13 +1,14 @@
-import useAuthStore from '~/store/useAuthStore'
 import { MDRender } from '~/components/common/MDRender'
 import { trpc } from '~/utils/trpc'
-import useActionStore from '~/store/actionStore'
+import { useActionStore } from '~/store/actionStore'
 import { Button } from '@mui/material'
+import { useStore } from 'zustand'
+import { authedUserStore } from '~/store/authedUserStore'
 
 interface WelcomeScreenProps {}
 
 export const WelcomeScreen = ({}: WelcomeScreenProps) => {
-    const { user } = useAuthStore()
+    const { user } = useStore(authedUserStore)
     const { closeModal } = useActionStore()
     const { data: welcome } = trpc.staticData.welcomeMessage.useQuery()
 
@@ -21,7 +22,9 @@ export const WelcomeScreen = ({}: WelcomeScreenProps) => {
             <MDRender content={welcome?.message ?? ''} />
             <Button
                 variant={'outlined'}
+                id={'welcomeContinue'}
                 className={'mt-8'}
+                component="div"
                 onClick={() => {
                     closeModal()
                 }}

@@ -3,14 +3,12 @@ import { RouterOutput, trpc } from '~/utils/trpc'
 import { OfferList } from '~/components/offer/OfferList'
 import { AskAuthorDisplay } from '~/components/ask/AskAuthorDisplay'
 import { AskMetaDisplay } from '~/components/ask/AskMetaDisplay'
-import { CountdownProgress } from '~/components/common/CountdownProgress'
 import { BumpDisplay } from '~/components/common/BumpDisplay'
-import useActionStore from '~/store/actionStore'
-import useAuthStore from '~/store/useAuthStore'
+import { useActionStore } from '~/store/actionStore'
 import { createHash } from 'crypto'
 import { CreateComment } from '~/components/comments/CreateComment'
 import { CommentList } from '~/components/comments/CommentList'
-import useMessageStore from '~/store/messageStore'
+import { useMessageStore } from '~/store/messageStore'
 import { useZodForm } from '~/utils/useZodForm'
 import { createBumpForAsk } from '~/components/ask/AskPreview'
 import { SatoshiIcon } from '~/components/common/SatishiIcon'
@@ -34,8 +32,12 @@ import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import InfoIcon from '@mui/icons-material/Info'
+import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb'
+import { useStore } from 'zustand'
+import { authedUserStore } from '~/store/authedUserStore'
 
 type BumpSummary = RouterOutput['ask']['byContextSlug']['ask']['bumpSummary']
+export type AskStatus = 'OPEN' | 'SETTLED' | 'CANCELED'
 
 const colorFromNumber = (number: number) => {
     return '#' + createHash('sha256').update(number.toString()).digest('hex').slice(0, 6)
@@ -76,12 +78,13 @@ interface AskProps {
 
 export const Ask = ({ slug }: AskProps) => {
     const { createOffer, openImage } = useActionStore()
-    const { user } = useAuthStore()
+    const { user } = useStore(authedUserStore)
     const { showToast } = useMessageStore()
 
     const [createQuestionVisible, setCreateQuestionVisible] = useState(false)
 
     const mutateCreateBump = trpc.bump.createForAsk.useMutation()
+    const mutateCancelAsk = trpc.ask.cancel.useMutation()
     const { data: askData } = trpc.ask.byContextSlug.useQuery({ slug: slug })
     const utils = trpc.useContext()
 
@@ -98,6 +101,10 @@ export const Ask = ({ slug }: AskProps) => {
         },
     })
 
+    useEffect(() => {
+        setValue('amount', askData?.ask.minBump ?? 10)
+    }, [askData])
+
     const handleCreateBump = async (askId: string) => {
         await mutateCreateBump
             .mutateAsync({
@@ -110,14 +117,28 @@ export const Ask = ({ slug }: AskProps) => {
         utils.ask.invalidate()
     }
 
-    useEffect(() => {
-        setValue('amount', askData?.ask.minBump ?? 10)
-    }, [askData])
+    const handleCancelAsk = async () => {
+        await mutateCancelAsk
+            .mutateAsync({
+                askId: askData?.ask.id ?? '',
+            })
+            .then(() => {
+                showToast('success', 'Ask canceled')
+            })
+            .catch((error) => {
+                showToast('error', error.message)
+            })
+        utils.ask.invalidate()
+    }
 
     return (
         <>
             {askData && askData.ask && (
-                <div className={'no-scrollbar flex max-h-screen w-full flex-col gap-4 overflow-y-scroll pb-12'}>
+                <div
+                    className={
+                        'no-scrollbar flex max-h-screen w-full flex-col gap-4 overflow-y-scroll pb-12 text-btcgrey'
+                    }
+                >
                     <div className={'ask-header-block'}>
                         <div onClick={() => (askData.headerImageUrl ? openImage(askData.headerImageUrl) : {})}>
                             {askData.headerImageUrl ? (
@@ -130,36 +151,46 @@ export const Ask = ({ slug }: AskProps) => {
                                 <div className={'static'}>
                                     <img
                                         className={'h-64 w-full rounded-t-global object-cover'}
-                                        src={`https://picsum.photos/seed/${askData.askId}/800/600`}
+                                        src={`https://source.unsplash.com/random/400×300`}
                                         alt={`Placeholder`}
                                     />
-                                    <div className={'bottom-72 right-0 bg-blue-700 px-6 py-2 opacity-70'}>
+                                    <div className={'bottom-72 right-0 bg-info px-6 py-2 opacity-70'}>
                                         <NoPhotographyIcon color={'warning'} />
                                         <b className={'ml-2 text-white'}>no header image provided by user</b>
                                     </div>
                                 </div>
                             )}
                         </div>
-                        <CountdownProgress
-                            creationDate={askData.ask.createdAt ?? new Date()}
-                            endDate={askData.ask.deadlineAt ?? new Date()}
-                            acceptedDate={askData.ask.acceptedDeadlineAt ?? new Date()}
-                            status={askData.ask.status}
-                        />
                         <div className={'p-4'}>
-                            <div className={'flex gap-4'}>
-                                <AskTypeDisplay
-                                    data-popover-target="popover-default"
-                                    type={askData.ask.askKind ?? 'PRIVATE'}
-                                />
-                                <TagList tags={askData.ask.tags ?? []} />
+                            <div className={'flex flex-row justify-between '}>
+                                <div className={'flex flex-row items-center gap-4'}>
+                                    <AskTypeDisplay
+                                        data-popover-target="popover-default"
+                                        type={askData.ask.askKind ?? 'PRIVATE'}
+                                    />
+                                    <TagList tags={askData.ask.tags ?? []} />
+                                </div>
+                                {askData?.ask?.user?.id === user?.id && askData.ask.askStatus === 'OPEN' && (
+                                    <Tooltip title={`cancel this ask`}>
+                                        <Button
+                                            id="cancel-ask-button"
+                                            variant="contained"
+                                            color="warning"
+                                            component="div"
+                                            onClick={() => handleCancelAsk()}
+                                            startIcon={<DoNotDisturbIcon />}
+                                        >
+                                            cancel
+                                        </Button>
+                                    </Tooltip>
+                                )}
                             </div>
                             <h1 className={'my-4 py-2 text-3xl'}>{askData.title}</h1>
                             <div className={'mb-4 mt-4 flex w-full flex-col justify-between lg:flex-row'}>
                                 <AskAuthorDisplay user={askData.ask.user} />
                                 <AskMetaDisplay ask={askData.ask} />
                             </div>
-                            <div className={'flex flex-row gap-4 '}>
+                            <div className={'flex flex-col gap-4 lg:flex-row '}>
                                 <Tooltip title="All bumps for this ask">
                                     <div className={'flex grow flex-row gap-1'}>
                                         {askData.ask.bumpSummary && bumpSummary(askData.ask.bumpSummary)}
@@ -168,16 +199,16 @@ export const Ask = ({ slug }: AskProps) => {
                                 <BumpDisplay
                                     bumps={askData.ask.bumps}
                                     offerCount={askData.ask.offerCount ?? 0}
-                                    hasFavouritedOffer={Boolean(askData.ask.favouriteOffer)}
+                                    hasFavouritedOffer={Boolean(askData.ask.settledForOffer)}
                                 />
-                                {askData.ask.status === 'active' && (
-                                    <div className={'flex-row-end flex min-w-fit items-center justify-between'}>
+                                {askData.ask.askStatus === 'OPEN' && (
+                                    <div className={'flex-row-end flex min-w-fit items-center justify-between gap-2'}>
                                         {(askData.ask.askKind === 'BUMP_PUBLIC' ||
                                             askData.ask?.askKind === 'PUBLIC') && (
                                             <div className={'flex flex-row'}>
                                                 <Tooltip title={'bump this ask with some sats'}>
                                                     <TextField
-                                                        id="create-ask-amount"
+                                                        id="bump-amount-text-field"
                                                         size={'small'}
                                                         error={Boolean(errors.amount)}
                                                         label="Bump with"
@@ -193,8 +224,8 @@ export const Ask = ({ slug }: AskProps) => {
                                                                 <InputAdornment position="end">
                                                                     <SatoshiIcon />
                                                                     <IconButton
-                                                                        component="label"
                                                                         disabled={!!errors.amount}
+                                                                        id="bump-amount-button"
                                                                         onClick={() =>
                                                                             handleCreateBump(askData.ask.id ?? '')
                                                                         }
@@ -210,18 +241,12 @@ export const Ask = ({ slug }: AskProps) => {
                                                 </Tooltip>
                                             </div>
                                         )}
-                                        {/*{askData.ask?.user?.userName !== user?.userName && (*/}
-                                        {/*    <Button*/}
-                                        {/*        variant="outlined"*/}
-                                        {/*        onClick={() => createOffer(askData.ask.id ?? '')}*/}
-                                        {/*        startIcon={<LocalOfferIcon />}*/}
-                                        {/*    >*/}
-                                        {/*        {`Add Offer (${askData.ask?.offerCount})`}*/}
-                                        {/*    </Button>*/}
-                                        {/*)}*/}
                                         <Tooltip title={`add an offer for this ask`}>
                                             <Button
-                                                variant="outlined"
+                                                id={'add-offer-button'}
+                                                variant="contained"
+                                                color="primary"
+                                                component="div"
                                                 onClick={() => createOffer(askData.ask.id ?? '')}
                                                 startIcon={<LocalOfferIcon />}
                                             >
@@ -250,8 +275,7 @@ export const Ask = ({ slug }: AskProps) => {
                                 <OfferList
                                     askId={askData.ask.id ?? ''}
                                     canFavourite={
-                                        user?.id === askData?.ask?.user?.id &&
-                                        (askData.ask.status === 'active' || askData.ask.status === 'pending_acceptance')
+                                        user?.id === askData?.ask?.user?.id && askData.ask.askStatus === 'OPEN'
                                     }
                                 />
                             </>

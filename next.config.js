@@ -26,6 +26,7 @@ module.exports = getConfig({
     publicRuntimeConfig: {
         NODE_ENV: env.NODE_ENV,
     },
+    transpilePackages: ['FilerobotImageEditor'],
     typescript: {
         ignoreBuildErrors: true,
     },

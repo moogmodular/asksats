@@ -1,8 +1,8 @@
-import useListStore, { FilterForInput, OrderByDirectionInput, OrderByInput } from '~/store/listStore'
+import { FilterForInput, OrderByDirectionInput, OrderByInput, useListStore } from '~/store/listStore'
 import { useEffect, useState } from 'react'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import { useRouter } from 'next/router'
-import { Button, ButtonGroup, IconButton, InputAdornment, Menu, MenuItem, TextField, Tooltip } from '@mui/material'
+import { Button, IconButton, InputAdornment, Menu, MenuItem, TextField, Tooltip } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import SearchIcon from '@mui/icons-material/Search'
 import Link from 'next/link'
@@ -10,10 +10,10 @@ import QueueOutlinedIcon from '@mui/icons-material/QueueOutlined'
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 import HandshakeOutlinedIcon from '@mui/icons-material/HandshakeOutlined'
 import PermMediaOutlinedIcon from '@mui/icons-material/PermMediaOutlined'
-import useAuthStore from '~/store/useAuthStore'
 import SouthIcon from '@mui/icons-material/South'
 import NorthIcon from '@mui/icons-material/North'
-import useMediaQuery from '@mui/material/useMediaQuery'
+import { useStore } from 'zustand'
+import { authedUserStore } from '~/store/authedUserStore'
 
 interface SubHeaderToolbarHeaderProps {}
 
@@ -28,7 +28,7 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
         orderByDirection,
         setTemplate,
     } = useListStore()
-    const { user } = useAuthStore()
+    const { user } = useStore(authedUserStore)
 
     const [anchorElFilterFor, setAnchorElFilterFor] = useState<null | HTMLElement>(null)
     const [anchorElOrderBy, setAnchorElOrderBy] = useState<null | HTMLElement>(null)
@@ -103,6 +103,7 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
                             fullWidth
                             id="input-with-icon-adornment"
                             variant="outlined"
+                            size={'small'}
                             placeholder="Search for asks"
                             onChange={(e) => setSearchTerm(e.target.value)}
                             InputProps={{
@@ -117,28 +118,28 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
                             <Tooltip title="My asks">
                                 <IconButton>
                                     <Link className={'flex items-center'} href={`/ask/user/${user?.userName}`}>
-                                        <QueueOutlinedIcon fontSize={'medium'} />
+                                        <QueueOutlinedIcon fontSize={'medium'} color={'btcgrey'} />
                                     </Link>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="My bumps">
                                 <IconButton>
                                     <Link className={'flex items-center'} href={`/ask/bumps`}>
-                                        <RocketLaunchOutlinedIcon fontSize={'medium'} />
+                                        <RocketLaunchOutlinedIcon fontSize={'medium'} color={'btcgrey'} />
                                     </Link>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="My offers">
                                 <IconButton>
                                     <Link className={'flex items-center'} href={`/ask/offers`}>
-                                        <HandshakeOutlinedIcon fontSize={'medium'} />
+                                        <HandshakeOutlinedIcon fontSize={'medium'} color={'btcgrey'} />
                                     </Link>
                                 </IconButton>
                             </Tooltip>
                             <Tooltip title="My files">
                                 <IconButton id={'files-button'}>
                                     <Link href={`/ask/files`}>
-                                        <PermMediaOutlinedIcon fontSize={'medium'} />
+                                        <PermMediaOutlinedIcon fontSize={'medium'} color={'btcgrey'} />
                                     </Link>
                                 </IconButton>
                             </Tooltip>
@@ -146,6 +147,8 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
                     </div>
                     <div className={'flex flex-col gap-2 lg:flex-row'}>
                         <Button
+                            component="div"
+                            color="secondary"
                             id="demo-customized-button"
                             size="small"
                             variant="outlined"
@@ -166,20 +169,21 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
                         >
                             <MenuItem onClick={() => setTemplate('default_template')}>Default</MenuItem>
                             <MenuItem onClick={() => setTemplate('newest')}>New</MenuItem>
-                            <MenuItem onClick={() => setTemplate('not_favourited')}>Not favourited yet</MenuItem>
                             <MenuItem onClick={() => setTemplate('public_settled')}>Public settled</MenuItem>
                             <MenuItem onClick={() => setTemplate('ending_soon')}>Ending</MenuItem>
                         </Menu>
 
                         <Button
+                            component="div"
                             id="demo-customized-button"
                             size="small"
+                            color="secondary"
                             variant="outlined"
                             disableElevation
                             onClick={(e) => handleClickFilterFor(e)}
                             endIcon={<KeyboardArrowDownIcon />}
                         >
-                            {filterFor}
+                            Ask Status
                         </Button>
                         <Menu
                             id="basic-menu"
@@ -190,18 +194,17 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
                                 'aria-labelledby': 'basic-button',
                             }}
                         >
-                            <MenuItem onClick={() => handleFilterFor('all')}>All</MenuItem>
-                            <MenuItem onClick={() => handleFilterFor('active')}>Active</MenuItem>
-                            <MenuItem onClick={() => handleFilterFor('pending_acceptance')}>
-                                Acceptance pending
-                            </MenuItem>
-                            <MenuItem onClick={() => handleFilterFor('settled')}>Settled</MenuItem>
-                            <MenuItem onClick={() => handleFilterFor('expired')}>Expired</MenuItem>
+                            <MenuItem onClick={() => handleFilterFor(undefined)}>All</MenuItem>
+                            <MenuItem onClick={() => handleFilterFor('OPEN')}>Open</MenuItem>
+                            <MenuItem onClick={() => handleFilterFor('SETTLED')}>Settled</MenuItem>
+                            <MenuItem onClick={() => handleFilterFor('CANCELED')}>Canceled</MenuItem>
                         </Menu>
                         <Button
+                            component="div"
                             id="demo-customized-button"
                             size="small"
                             variant="outlined"
+                            color="secondary"
                             disableElevation
                             onClick={handleClickOrderBy}
                             endIcon={<KeyboardArrowDownIcon />}
@@ -223,9 +226,11 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
                         </Menu>
 
                         <Button
+                            component="div"
                             id="demo-customized-button"
                             size="small"
                             variant="outlined"
+                            color="secondary"
                             disableElevation
                             onClick={handleClickDirection}
                             endIcon={<KeyboardArrowDownIcon />}

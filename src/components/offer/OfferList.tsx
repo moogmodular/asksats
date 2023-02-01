@@ -1,6 +1,6 @@
 import { trpc } from '~/utils/trpc'
 import { OfferPreview } from '~/components/offer/OfferPreview'
-import useMessageStore from '~/store/messageStore'
+import { useMessageStore } from '~/store/messageStore'
 
 interface OfferListProps {
     askId: string
@@ -10,35 +10,15 @@ interface OfferListProps {
 export const OfferList = ({ askId, canFavourite }: OfferListProps) => {
     const { showToast } = useMessageStore()
     const { data: offerListData } = trpc.offer.listForAsk.useQuery({ askId: askId })
-    const { mutateAsync: setFavMutation } = trpc.offer.setFavoutieForAsk.useMutation()
-    const { mutateAsync: unSetFavMutation } = trpc.offer.unSetFavoutieForAsk.useMutation()
     const utils = trpc.useContext()
 
-    const setFavourite = async (offerId: string) => {
-        await setFavMutation({ offerId: offerId, askId: askId }).catch((error) => {
-            showToast('error', error.message)
-        })
-        utils.offer.listForAsk.invalidate()
-    }
-
-    const unSetFavourite = async (offerId: string) => {
-        await unSetFavMutation({ offerId: offerId, askId: askId }).catch((error) => {
-            showToast('error', error.message)
-        })
-        utils.offer.listForAsk.invalidate()
-    }
+    console.log(offerListData)
 
     return (
         <div className={'flex flex-col gap-4'}>
             {offerListData &&
                 offerListData.map((offer, index) => (
-                    <OfferPreview
-                        key={offer.id}
-                        offer={offer}
-                        setFavOffer={setFavourite}
-                        unSetFavOffer={unSetFavourite}
-                        canFavourite={canFavourite}
-                    />
+                    <OfferPreview index={index} key={offer.id} offer={offer} canFavourite={canFavourite} />
                 ))}
         </div>
     )

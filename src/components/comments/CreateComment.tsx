@@ -8,8 +8,8 @@ import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { useState } from 'react'
 import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThemeClasses } from 'lexical'
 import { $rootTextContent } from '@lexical/text'
-import useMessageStore from '~/store/messageStore'
-import useQuestionsUXStore from '~/store/askQuestionsUXStore'
+import { useMessageStore } from '~/store/messageStore'
+import { useQuestionsUXStore } from '~/store/askQuestionsUXStore'
 import { Button, Tabs } from '@mui/material'
 import Tab from '@mui/material/Tab'
 
@@ -119,10 +119,10 @@ export const CreateComment = ({ askId, commentId, invalidate }: CreateCommentPro
             }
 
             <div className={'flex justify-between'}>
-                <Button variant={'outlined'} onClick={() => handleCreateComment()} color={'success'} type={'submit'}>
+                <Button variant={'contained'} onClick={() => handleCreateComment()} color={'success'} component="div">
                     Post question
                 </Button>
-                <Button component="label" variant={'contained'} onClick={() => setCurrentOpenQuestionIdId('')}>
+                <Button component="div" variant={'contained'} onClick={() => setCurrentOpenQuestionIdId('')}>
                     Close
                 </Button>
             </div>

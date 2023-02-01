@@ -1,4 +1,4 @@
-import create from 'zustand'
+import { create } from 'zustand'
 
 type Modals = 'none' | 'authenticate' | 'transact' | 'editUser' | 'createAsk' | 'addOffer' | 'viewImage' | 'welcome'
 
@@ -12,7 +12,7 @@ interface Action {
     openImage: (imageUrl: string) => void
 }
 
-const useActionStore = create<Action>((set) => ({
+export const useActionStore = create<Action>((set) => ({
     currentModal: 'none',
     setCurrentModal: (modal: Modals) => {
         set({ currentModal: modal })
@@ -29,5 +29,3 @@ const useActionStore = create<Action>((set) => ({
         set({ imageUrl: imageUrl, currentModal: 'viewImage' })
     },
 }))
-
-export default useActionStore

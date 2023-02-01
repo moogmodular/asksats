@@ -1,6 +1,6 @@
 import { trpc } from '~/utils/trpc'
 import { AskPreview } from '~/components/ask/AskPreview'
-import useListStore from '~/store/listStore'
+import { useListStore } from '~/store/listStore'
 import { useRouter } from 'next/router'
 import { useCallback, useEffect, useState } from 'react'
 import { useBottomScrollListener } from 'react-bottom-scroll-listener'
@@ -9,7 +9,7 @@ import { Button } from '@mui/material'
 interface AskListProps {}
 
 export const AskList = ({}: AskListProps) => {
-    const { filterFor, orderBy, orderByDirection, searchTerm, withoutFavouritesOnly } = useListStore()
+    const { filterFor, orderBy, orderByDirection, searchTerm } = useListStore()
 
     const router = useRouter()
     const [userName, setUserName] = useState<string | undefined>(undefined)
@@ -26,7 +26,6 @@ export const AskList = ({}: AskListProps) => {
             filterFor,
             orderBy,
             orderByDirection,
-            withoutFavouritesOnly,
             searchTerm,
             tagName: tag,
             userName,
@@ -61,7 +60,7 @@ export const AskList = ({}: AskListProps) => {
         }
 
         infiniteQuery.refetch()
-    }, [router, filterFor, orderBy, orderByDirection, searchTerm, tag, userName, withoutFavouritesOnly])
+    }, [router, filterFor, orderBy, orderByDirection, searchTerm, tag, userName])
 
     return (
         <div
@@ -71,11 +70,11 @@ export const AskList = ({}: AskListProps) => {
             }
         >
             {infiniteQuery?.data?.pages.map((item) => {
-                return item.items.map((ask) => {
-                    return <AskPreview key={ask.id} ask={ask} />
+                return item.items.map((ask, index) => {
+                    return <AskPreview key={ask.id} ask={ask} index={index} />
                 })
             })}
-            <Button variant="contained" component="label" onClick={() => handleLoadMore()}>
+            <Button variant="contained" component="div" onClick={() => handleLoadMore()}>
                 load more...
             </Button>
         </div>

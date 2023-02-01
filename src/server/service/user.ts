@@ -9,7 +9,7 @@ export const defaultUserData = async () => {
     }
     const randomName: string = uniqueNamesGenerator(customConfig)
 
-    const response = await fetch('https://picsum.photos/250')
+    const response = await fetch('https://source.unsplash.com/random/250×250')
     const image = await fetch(response.url)
         .then((r) => r.arrayBuffer())
         .then((b) => Buffer.from(b).toString('base64'))

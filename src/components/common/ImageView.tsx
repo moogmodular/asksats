@@ -1,4 +1,4 @@
-import useActionStore from '~/store/actionStore'
+import { useActionStore } from '~/store/actionStore'
 
 interface ImageViewProps {}
 

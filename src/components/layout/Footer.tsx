@@ -1,5 +1,5 @@
 import { trpc } from '~/utils/trpc'
-import useNodeConnectionStore from '~/store/nodeConnectionStore'
+import { useNodeConnectionStore } from '~/store/nodeConnectionStore'
 import { Skeleton, Typography } from '@mui/material'
 import HighlightOffIcon from '@mui/icons-material/HighlightOff'
 
@@ -21,7 +21,7 @@ export const Footer = ({}) => {
     return (
         <div>
             {connectionAddress ? (
-                <div className={' break-all p-2 text-center text-sm'}>{connectionAddress}</div>
+                <div className={'break-all p-2 text-center text-sm text-white'}>{connectionAddress}</div>
             ) : (
                 <Typography variant="body1">
                     <HighlightOffIcon /> No connection to node

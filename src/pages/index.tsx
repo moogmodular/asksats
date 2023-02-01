@@ -2,7 +2,6 @@ import { trpc } from '../utils/trpc'
 import { NextPageWithLayout } from './_app'
 import React, { useEffect } from 'react'
 import { Header } from '~/components/layout/Header'
-import useAuthStore from '~/store/useAuthStore'
 import { Authenticate } from '~/components/modal/Authenticate'
 import { Transact } from '~/components/modal/Transact'
 import { Footer } from '~/components/layout/Footer'
@@ -13,27 +12,29 @@ import { CreateAsk } from '~/components/ask/CreateAsk'
 import { CreateOffer } from '~/components/offer/CreateOffer'
 import { useRouter } from 'next/router'
 import { Ask } from '~/components/ask/Ask'
-import useActionStore from '~/store/actionStore'
+import { useActionStore } from '~/store/actionStore'
 import { BumpList } from '~/components/ask/BumpList'
 import { OfferList } from '~/components/ask/OfferList'
 import { Logo } from '~/components/layout/Logo'
 import { ImageView } from '~/components/common/ImageView'
-import useMessageStore from '~/store/messageStore'
+import { useMessageStore } from '~/store/messageStore'
 import { Sidebar } from '~/components/layout/Sidebar'
 import { ToasterDisplay } from '~/components/common/Toaster'
-import { useMedia } from 'use-media'
-import useUXStore from '~/store/uxStore'
+import { useUXStore } from '~/store/uxStore'
 import { BlogList } from '~/components/blog/BlogList'
 import { FileList } from '~/components/FileList'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import MenuIcon from '@mui/icons-material/Menu'
-import { Button, createTheme, ThemeProvider } from '@mui/material'
+import { Button, ThemeProvider } from '@mui/material'
 import { WelcomeScreen } from '~/components/common/WelcomeScreen'
 import { SubHeaderToolbarHeader } from '~/components/layout/SubHeaderToolbar'
 import useMediaQuery from '@mui/material/useMediaQuery'
+import theme from '~/theme'
+import { authedUserStore } from '~/store/authedUserStore'
+import { useStore } from 'zustand'
 
 const IndexPage: NextPageWithLayout = () => {
-    const { setUser, storeToken, storeLogin } = useAuthStore()
+    const { setUser, storeToken, storeLogin } = useStore(authedUserStore)
     const { mobileMenuOpen, setMobileMenuOpen } = useUXStore()
     const { currentModal, setCurrentModal } = useActionStore()
     const { visible } = useMessageStore()
@@ -42,35 +43,6 @@ const IndexPage: NextPageWithLayout = () => {
     const router = useRouter()
     const matches = useMediaQuery('(min-width:1024px)')
     const utils = trpc.useContext()
-
-    const theme = createTheme({
-        components: {
-            MuiButton: {
-                styleOverrides: {
-                    // root: { borderRadius: 0 },
-                },
-                variants: [
-                    {
-                        props: { variant: 'preview' },
-                        style: {
-                            borderTop: '1px solid #ccc',
-                            borderLeft: '1px solid #ccc',
-                        },
-                    },
-                ],
-            },
-            MuiOutlinedInput: {
-                styleOverrides: {
-                    // root: { borderRadius: 0 },
-                },
-            },
-        },
-        palette: {
-            primary: {
-                main: '#FF9900',
-            },
-        },
-    }) // TODO: extract to theme.ts
 
     const routerPath = (path: string): string => {
         const subPath = path.split('/')[2]
@@ -96,14 +68,14 @@ const IndexPage: NextPageWithLayout = () => {
     return (
         <ThemeProvider theme={theme}>
             <div className={'index-background flex max-h-screen flex-col lg:flex-row'}>
-                <div
-                    className={
-                        'flex w-full flex-col gap-4 bg-gradient-to-t from-orange-200 to-white shadow-2xl lg:w-4/12'
-                    }
-                >
-                    <header className={'flex flex-row gap-1 bg-gray-50 p-2 shadow-xl lg:gap-4 lg:p-4'}>
+                <div className={'flex w-full flex-col gap-4 shadow-2xl lg:w-4/12'}>
+                    <header className={'flex flex-row gap-1 bg-primary p-2 shadow-xl lg:gap-4 lg:p-4'}>
                         {!matches && (
-                            <Button onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+                            <Button
+                                onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
+                                variant={'contained'}
+                                component="div"
+                            >
                                 <MenuIcon />
                             </Button>
                         )}
@@ -119,12 +91,12 @@ const IndexPage: NextPageWithLayout = () => {
                         </div>
                     )}
                     {matches && (
-                        <footer className={'border-t-black p-4'}>
+                        <footer className={'border-t-black bg-primary p-4'}>
                             <Footer />
                         </footer>
                     )}
                 </div>
-                <main className={'grow overflow-hidden bg-sidebar lg:w-8/12 lg:p-6'} ref={parent}>
+                <main className={'bg-sidebar grow overflow-hidden bg-gray-100 lg:w-8/12 lg:p-6'} ref={parent}>
                     {
                         {
                             single: <Ask slug={router.query.slug as string} />,
@@ -151,7 +123,7 @@ const IndexPage: NextPageWithLayout = () => {
                             </InteractionModal>
                         ),
                         editUser: (
-                            <InteractionModal title={'Edit User'}>
+                            <InteractionModal title={'Edit User'} size={'md'}>
                                 <EditUser />
                             </InteractionModal>
                         ),
@@ -161,7 +133,7 @@ const IndexPage: NextPageWithLayout = () => {
                             </InteractionModal>
                         ),
                         addOffer: (
-                            <InteractionModal title={'Add Offer'}>
+                            <InteractionModal title={'Add Offer'} size={'xl'}>
                                 <CreateOffer />
                             </InteractionModal>
                         ),

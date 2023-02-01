@@ -12,6 +12,8 @@ Table User {
   profileImage String
   bio String
   role UserRole [not null, default: 'USER']
+  balance Int [not null, default: 0]
+  lockedBalance Int [not null, default: 0]
   transaction Transaction [not null]
   asks Ask [not null]
   offers Offer [not null]
@@ -66,15 +68,14 @@ Table Ask {
   id String [pk]
   createdAt DateTime [default: `now()`, not null]
   updatedAt DateTime [not null]
-  userId String
-  deadlineAt DateTime [not null]
-  acceptedDeadlineAt DateTime [not null]
   askKind AskKind [not null]
+  askStatus AskStatus [not null]
   user User
+  userId String
   askContext AskContext
   offer Offer [not null]
   comments AskComment [not null]
-  favouriteOffer Offer
+  settledForOffer Offer
   bumps Bump [not null]
   tags TagsOnAsks [not null]
 }
@@ -216,6 +217,12 @@ Enum TransactionStatus {
   FAILED
   CANCELED
   EXPIRED
+}
+
+Enum AskStatus {
+  OPEN
+  SETTLED
+  CANCELED
 }
 
 Enum AskKind {

@@ -1,4 +1,4 @@
-import useMessageStore, { MessageTypes } from '~/store/messageStore'
+import { useMessageStore, MessageTypes } from '~/store/messageStore'
 import { Alert, Snackbar } from '@mui/material'
 
 interface ToasterDisplayProps {}

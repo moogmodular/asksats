@@ -17,10 +17,19 @@ const config: PlaywrightTestConfig = {
     reporter: process.env.CI ? 'github' : 'list',
     use: {
         ...devices['Desktop Chrome'],
+        viewport: { width: 1920, height: 1080 },
         baseURL: baseUrl,
         headless: opts.headless,
         video: 'on',
     },
+    fullyParallel: false,
+    // testMatch: ['auth.test.ts'],
+    // testMatch: ['user.test.ts'],
+    // testMatch: ['offer.test.ts'],
+    // testMatch: ['ask.test.ts'],
+    // testMatch: ['ask-public.test.ts'],
+    // testMatch: ['ask-bump-public.test.ts'],
+    // testMatch: ['ask-private.test.ts'],
 }
 
 export default config

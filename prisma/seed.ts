@@ -9,6 +9,8 @@ const bip39 = require('bip39')
 import { wallets } from './seed/wallets'
 const BitcoinWIF = require('bitcoin-wif')
 
+const MSATS_UNIT_FACTOR = 1000
+
 const prisma = new PrismaClient()
 
 const slugify = (title: string) => {
@@ -104,8 +106,6 @@ async function main() {
         await prisma.transaction.deleteMany(),
     ])
 
-    const userNumber = [1, 2, 3, 4]
-
     const btcWIF = new BitcoinWIF('testnet')
 
     await Promise.all(
@@ -125,6 +125,8 @@ async function main() {
                     profileImage: image,
                     userName: randomName,
                     publicKey: key,
+                    balance: 5000000,
+                    lockedBalance: 0,
                     excludedTags: { connectOrCreate: { where: { name: 'nsfw' }, create: { name: 'nsfw' } } },
                     bio: faker.lorem.paragraph(3),
                 },
@@ -199,20 +201,13 @@ async function main() {
     )
 
     newUsers.map(async (user, index) => {
-        const titleExpired = 'This is an Expired Ask Title'
-        const amountExpired = 15000
-        const theNowExpired = new Date()
-        const createdInThePastExpired = sub(theNowExpired, {
-            days: 9,
-            hours: randomIntFromTo(1, 10),
-            minutes: randomIntFromTo(1, 60),
-        })
-        const expiredInThePastExpired = add(createdInThePastExpired, { days: 1 })
-        const acceptedInThePastExpired = add(expiredInThePastExpired, { hours: 3 })
+        const titleExpired = 'This is an Cancelled Ask Title'
+        const amountExpired = 15000 * MSATS_UNIT_FACTOR
 
-        const expiredAsk = await prisma.ask.create({
+        const cancelledAsk = await prisma.ask.create({
             data: {
                 user: { connect: { id: user.id } },
+                askStatus: 'CANCELED',
                 tags: {
                     createMany: {
                         data: [
@@ -235,9 +230,6 @@ async function main() {
                         slug: slugify(titleExpired),
                     },
                 },
-                createdAt: createdInThePastExpired,
-                deadlineAt: expiredInThePastExpired,
-                acceptedDeadlineAt: acceptedInThePastExpired,
                 askKind: getRandomAskKind(),
                 bumps: {
                     create: {
@@ -248,20 +240,13 @@ async function main() {
             },
         })
 
-        const titleActive = 'This is an Active Title Ask' + index
-        const amountActive = 25000
-        const theNowActive = new Date()
-        const createdInThePastActive = sub(theNowActive, {
-            days: 2,
-            hours: randomIntFromTo(1, 10),
-            minutes: randomIntFromTo(1, 60),
-        })
-        const expiredInThePastActive = add(createdInThePastActive, { days: 6 })
-        const acceptedInThePastActive = add(expiredInThePastActive, { hours: 3 })
+        const titleActive = 'This is an Open Title Ask' + index
+        const amountActive = 25000 * MSATS_UNIT_FACTOR
 
-        const activeAsk = await prisma.ask.create({
+        const openAsk = await prisma.ask.create({
             data: {
                 user: { connect: { id: user.id } },
+                askStatus: 'OPEN',
                 tags: {
                     createMany: {
                         data: [
@@ -284,9 +269,6 @@ async function main() {
                         slug: slugify(titleActive),
                     },
                 },
-                createdAt: createdInThePastActive,
-                deadlineAt: expiredInThePastActive,
-                acceptedDeadlineAt: acceptedInThePastActive,
                 askKind: getRandomAskKind(),
                 bumps: {
                     create: {
@@ -297,98 +279,8 @@ async function main() {
             },
         })
 
-        const titlePending = 'This is a Pending Acceptance Ask'
-        const amountPending = 6000
-        const theNowPending = new Date()
-        const createdInThePastPending = sub(theNowPending, {
-            days: 2,
-            minutes: randomIntFromTo(1, 60),
-        })
-        const expiredInThePastPending = add(createdInThePastPending, { days: 2 })
-        const acceptedInThePastPending = add(expiredInThePastPending, { hours: 3 })
-
-        const pendingAsk = await prisma.ask.create({
-            data: {
-                user: { connect: { id: user.id } },
-                tags: {
-                    createMany: {
-                        data: [
-                            { tagId: freshTags[2]!.id },
-                            { tagId: freshTags[4]!.id },
-                            { tagId: freshTags[6]!.id },
-                            { tagId: freshTags[1]!.id },
-                        ],
-                    },
-                },
-                askContext: {
-                    create: {
-                        title: titlePending,
-                        content: markdown[0]!.content!,
-                        headerImage: {
-                            create: {
-                                s3Key: 'test/testimage.png',
-                            },
-                        },
-                        slug: slugify(titlePending),
-                    },
-                },
-                createdAt: createdInThePastPending,
-                deadlineAt: expiredInThePastPending,
-                acceptedDeadlineAt: acceptedInThePastPending,
-                askKind: getRandomAskKind(),
-                bumps: {
-                    create: {
-                        bidder: { connect: { id: user.id } },
-                        amount: amountPending,
-                    },
-                },
-                offer: {
-                    create: {
-                        author: {
-                            connect: {
-                                id: getIdOfOtherUser(index, newUsers),
-                            },
-                        },
-                        offerContext: {
-                            create: {
-                                content: markdown[0]!.content!,
-                                filePairs: {
-                                    create: {
-                                        fileName: 'testfile.txt',
-                                        user: {
-                                            connect: {
-                                                id: getIdOfOtherUser(index, newUsers),
-                                            },
-                                        },
-                                        obscureFile: {
-                                            create: {
-                                                s3Key: 'test/testimage.png',
-                                            },
-                                        },
-                                        offerFile: {
-                                            create: {
-                                                s3Key: 'test/testimage.png',
-                                            },
-                                        },
-                                        obscureMethod: 'BLUR',
-                                    },
-                                },
-                            },
-                        },
-                    },
-                },
-            },
-        })
-
         const titleSettled = 'This is a Settled Ask'
-        const amountSettled = 3000
-        const theNowSettled = new Date()
-        const createdInThePastSettled = sub(theNowSettled, {
-            days: 2,
-            minutes: randomIntFromTo(1, 60),
-        })
-        const expiredInThePastSettled = add(createdInThePastSettled, { days: 1, hours: 21 })
-        const acceptedInThePastSettled = add(theNowPending, { hours: 3 })
+        const amountSettled = 3000 * MSATS_UNIT_FACTOR
 
         const newOffer1 = await prisma.offer.create({
             data: {
@@ -411,7 +303,7 @@ async function main() {
                                 fileName: 'testfile.txt',
                                 obscureFile: {
                                     create: {
-                                        s3Key: 'test/testimage.png',
+                                        s3Key: 'test/test_hidden.png',
                                     },
                                 },
                                 offerFile: {
@@ -448,7 +340,7 @@ async function main() {
                                 fileName: 'testfile.txt',
                                 obscureFile: {
                                     create: {
-                                        s3Key: 'test/testimage.png',
+                                        s3Key: 'test/test_hidden.png',
                                     },
                                 },
                                 offerFile: {
@@ -484,7 +376,7 @@ async function main() {
                                 fileName: 'testfile.txt',
                                 obscureFile: {
                                     create: {
-                                        s3Key: 'test/testimage.png',
+                                        s3Key: 'test/test_hidden.png',
                                     },
                                 },
                                 offerFile: {
@@ -503,6 +395,7 @@ async function main() {
         const settledAsk = await prisma.ask.create({
             data: {
                 user: { connect: { id: user.id } },
+                askStatus: 'SETTLED',
                 tags: {
                     createMany: {
                         data: [
@@ -525,9 +418,6 @@ async function main() {
                         slug: slugify(titleSettled),
                     },
                 },
-                createdAt: createdInThePastSettled,
-                deadlineAt: expiredInThePastSettled,
-                acceptedDeadlineAt: acceptedInThePastSettled,
                 askKind: getRandomAskKind(),
                 bumps: {
                     create: {
@@ -538,8 +428,82 @@ async function main() {
                 offer: {
                     connect: [{ id: newOffer1.id }, { id: newOffer2.id }, { id: newOffer3.id }],
                 },
-                favouriteOffer: {
+                settledForOffer: {
                     connect: { id: newOffer1.id },
+                },
+            },
+        })
+
+        const titlePending = 'This is a Open Acceptance Ask'
+        const amountPending = 6000 * MSATS_UNIT_FACTOR
+
+        const open2Ask = await prisma.ask.create({
+            data: {
+                user: { connect: { id: user.id } },
+                askStatus: 'OPEN',
+                tags: {
+                    createMany: {
+                        data: [
+                            { tagId: freshTags[2]!.id },
+                            { tagId: freshTags[4]!.id },
+                            { tagId: freshTags[6]!.id },
+                            { tagId: freshTags[1]!.id },
+                        ],
+                    },
+                },
+                askContext: {
+                    create: {
+                        title: titlePending,
+                        content: markdown[0]!.content!,
+                        headerImage: {
+                            create: {
+                                s3Key: 'test/testimage.png',
+                            },
+                        },
+                        slug: slugify(titlePending),
+                    },
+                },
+                askKind: getRandomAskKind(),
+                bumps: {
+                    create: {
+                        bidder: { connect: { id: user.id } },
+                        amount: amountPending,
+                    },
+                },
+                offer: {
+                    create: {
+                        author: {
+                            connect: {
+                                id: getIdOfOtherUser(index, newUsers),
+                            },
+                        },
+                        offerContext: {
+                            create: {
+                                content: markdown[0]!.content!,
+                                filePairs: {
+                                    create: {
+                                        fileName: 'testfile.txt',
+                                        user: {
+                                            connect: {
+                                                id: getIdOfOtherUser(index, newUsers),
+                                            },
+                                        },
+                                        obscureFile: {
+                                            create: {
+                                                s3Key: 'test/test_hidden.png',
+                                            },
+                                        },
+                                        offerFile: {
+                                            create: {
+                                                s3Key: 'test/testimage.png',
+                                            },
+                                        },
+                                        obscureMethod: 'BLUR',
+                                    },
+                                },
+                            },
+                        },
+                    },
                 },
             },
         })

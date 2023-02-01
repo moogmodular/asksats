@@ -2,7 +2,7 @@ import { useZodForm } from '~/utils/useZodForm'
 import { createBumpForAsk } from '~/components/ask/AskPreview'
 import { trpc } from '~/utils/trpc'
 import { SatoshiIcon } from '~/components/common/SatishiIcon'
-import useMessageStore from '~/store/messageStore'
+import { useMessageStore } from '~/store/messageStore'
 import { IconButton, InputAdornment, TextField } from '@mui/material'
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 
@@ -45,7 +45,7 @@ export const CreateBumpButton = ({ askId, minBump }: CreateBumpButtonProps) => {
 
     return (
         <TextField
-            id="create-ask-amount"
+            id={'bump-amount-text-field'}
             size={'small'}
             error={Boolean(errors.amount)}
             label="Bump with"
@@ -57,7 +57,7 @@ export const CreateBumpButton = ({ askId, minBump }: CreateBumpButtonProps) => {
                     <InputAdornment position="end">
                         <SatoshiIcon />
                         <IconButton
-                            component="label"
+                            id="bump-amount-button"
                             disabled={!!errors.amount}
                             onClick={handleCreateBump}
                             edge="end"

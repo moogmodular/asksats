@@ -1,11 +1,11 @@
-import create from 'zustand'
+import { create } from 'zustand'
 
 interface NodeConnection {
     connectionAddress: string
     setConnectionAddress: (address: string) => void
 }
 
-const useNodeConnectionStore = create<NodeConnection>((set, getState) => ({
+export const useNodeConnectionStore = create<NodeConnection>((set, getState) => ({
     connectionAddress: '',
     setConnectionAddress: (address: string) => {
         if (getState().connectionAddress !== address) {
@@ -13,5 +13,3 @@ const useNodeConnectionStore = create<NodeConnection>((set, getState) => ({
         }
     },
 }))
-
-export default useNodeConnectionStore

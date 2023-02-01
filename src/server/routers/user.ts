@@ -15,7 +15,7 @@ export const userRouter = t.router({
                     id: tokenUser?.id,
                 },
             })
-            return { ...user, balance: await userBalance(prisma, user?.id ?? '') }
+            return { ...user, balance: await userBalance(user?.id ?? '') }
         } catch (error) {
             throw new TRPCError({
                 code: 'UNAUTHORIZED',

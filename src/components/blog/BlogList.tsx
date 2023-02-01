@@ -1,12 +1,13 @@
 import { trpc } from '~/utils/trpc'
 import { BlogItemView } from '~/components/blog/BlogItemView'
-import useAuthStore from '~/store/useAuthStore'
 import { CreateBlogItem } from '~/components/blog/CreateBlogItem'
+import { useStore } from 'zustand'
+import { authedUserStore } from '~/store/authedUserStore'
 
 interface BlogListProps {}
 
 export const BlogList = ({}: BlogListProps) => {
-    const { user } = useAuthStore()
+    const { user } = useStore(authedUserStore)
     const { data: blogListData } = trpc.blog.listBlogItems.useQuery()
 
     return (

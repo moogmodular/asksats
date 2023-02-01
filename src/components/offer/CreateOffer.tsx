@@ -8,18 +8,15 @@ import { useState } from 'react'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
-import { RouterInput, trpc } from '~/utils/trpc'
+import { trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
-import useActionStore from '~/store/actionStore'
-import useMessageStore from '~/store/messageStore'
+import { useActionStore } from '~/store/actionStore'
+import { useMessageStore } from '~/store/messageStore'
 import { offerTextDefault } from '~/server/service/constants'
-import { AssetPreview } from '~/components/offer/AssetPreview'
-import { useForm } from 'react-hook-form'
-import { Button, FormControl, InputLabel, LinearProgress, MenuItem, Select, Tabs } from '@mui/material'
+import { Button, LinearProgress, Tabs } from '@mui/material'
 import CheckIcon from '@mui/icons-material/Check'
 import Tab from '@mui/material/Tab'
-
-type CreateOfferInput = RouterInput['offer']['create']
+import { AssetPreview } from '~/components/offer/AssetPreview'
 
 export type BlurLevels = '2' | '5' | '10' | '20'
 
@@ -45,13 +42,12 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     const { showToast } = useMessageStore()
     const [tempEditorState, setTempEditorState] = useState<string>(offerTextDefault)
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
+    const [rawImagePairs, setRawImagePairs] = useState<{ originalImage: string; obfuscatedImage: string }[]>([])
 
-    const [assetsForThisAsk, setAssetsForThisAsk] = useState<{ id: string }[]>([])
     const [isUploading, setIsUploading] = useState(false)
 
     const createOfferMutation = trpc.offer.create.useMutation()
-    const createFilePairMutation = trpc.asset.doFilePair.useMutation()
-    const deleteImagePairMutation = trpc.asset.deleteImagePair.useMutation()
+    const getPreSignedPairUrlMutation = trpc.asset.preSignedPair.useMutation()
     const utils = trpc.useContext()
 
     const {
@@ -70,14 +66,6 @@ export const CreateOffer = ({}: CreateOfferProps) => {
             filePairs: [],
         },
     })
-
-    const {
-        register: registerItem,
-        getValues: getPairValue,
-        setValue: setPairValue,
-        watch: watchPair,
-        formState: { errors: pairErrors },
-    } = useForm()
 
     const onError = (error: Error) => {
         console.error(error)
@@ -98,12 +86,63 @@ export const CreateOffer = ({}: CreateOfferProps) => {
         onError,
     }
 
-    const onSubmit = async (data: CreateOfferInput) => {
+    const updateEditorState = async (data: EditorState) => {
+        data.read(() => {
+            setTempEditorState($rootTextContent())
+        })
+    }
+
+    const handleSetPair = (id: number, originalImage: string, obfuscatedImage: string) => {
+        setRawImagePairs([...rawImagePairs, { originalImage, obfuscatedImage }])
+    }
+
+    const resolveImage = async (imageBase64: string, uploadFields: Record<string, string>, uploadUrl: string) => {
+        const imgOriginal = Buffer.from(imageBase64.replace(/^data:image\/\w+;base64,/, ''), 'base64')
+        const typeOriginal = imageBase64.split(';')[0]?.split('/')[1]
+        const originalFile = new File([imgOriginal], `orig`, { type: `image/${typeOriginal}` })
+
+        const ulDataOriginal = {
+            ...uploadFields,
+            'Content-Type': `image/${typeOriginal}`,
+            file: originalFile,
+        } as Record<string, any>
+
+        const formDataOriginal = new FormData()
+        for (const name in ulDataOriginal) {
+            formDataOriginal.append(name, ulDataOriginal[name])
+        }
+
+        return await fetch(uploadUrl.replace('//', '//asksats.'), {
+            method: 'POST',
+            body: formDataOriginal,
+        })
+    }
+
+    const onSubmit = async () => {
+        const filePairIds = await Promise.all(
+            rawImagePairs.map(async (pair) => {
+                const uploadData = await getPreSignedPairUrlMutation.mutateAsync()
+
+                const originalRes = await resolveImage(
+                    pair.originalImage,
+                    uploadData.originalImageUploadUrl.fields,
+                    uploadData.originalImageUploadUrl.url,
+                )
+                const obfuscatedRes = await resolveImage(
+                    pair.obfuscatedImage,
+                    uploadData.obscuredImageUploadUrl.fields,
+                    uploadData.obscuredImageUploadUrl.url,
+                )
+
+                return uploadData.filePairId
+            }),
+        )
+
         try {
             await createOfferMutation.mutateAsync({
                 askId,
                 content: tempEditorState,
-                filePairs: assetsForThisAsk,
+                filePairs: filePairIds.map((id) => ({ id })),
             })
             showToast('success', 'Offer created')
             utils.ask.invalidate()
@@ -114,123 +153,26 @@ export const CreateOffer = ({}: CreateOfferProps) => {
             utils.ask.invalidate()
             utils.offer.listForAsk.invalidate()
         }
-    }
-
-    const handleCreateFilePair = async (data: File | undefined) => {
-        if (data) {
-            setIsUploading(true)
-            const url = await utils.asset.preSignedUrlPair.fetch({ obscureMethod: getPairValue('obscureMethod') })
-
-            const ulData = { ...url.offerFileUploadUrl.fields, 'Content-Type': data.type, file: data } as Record<
-                string,
-                any
-            >
-
-            const formData = new FormData()
-            for (const name in ulData) {
-                formData.append(name, ulData[name])
-            }
-
-            await fetch(url.offerFileUploadUrl.url.replace('//', '//asksats.'), {
-                method: 'POST',
-                body: formData,
-            })
-
-            await createFilePairMutation
-                .mutateAsync({
-                    offerFileId: url.offerFileId,
-                    blurLevel: getPairValue().blurLevel,
-                })
-                .then((result) => {
-                    console.log(result)
-                    setAssetsForThisAsk([...assetsForThisAsk, { id: result?.id ?? '' }])
-                })
-
-            setPairValue('file', null)
-            setIsUploading(false)
-            return
-        }
-    }
-
-    const updateEditorState = async (data: EditorState) => {
-        data.read(() => {
-            setTempEditorState($rootTextContent())
-        })
-    }
-
-    const handleDeleteFilePair = async (id: string) => {
-        await deleteImagePairMutation.mutateAsync({ imagePairId: id })
-        setAssetsForThisAsk(assetsForThisAsk.filter((pair) => pair.id !== id))
+        utils.invalidate()
     }
 
     return (
-        <form className={'flex flex-col gap-8 py-4'} onSubmit={handleSubmit(onSubmit)}>
+        <form className={'flex flex-col gap-8 py-4'}>
             <b>Add up to 3 images to your offer</b>
-            {isUploading && <LinearProgress />}
-            <div className={'flex flex-col gap-8 lg:flex-row'}>
-                {assetsForThisAsk.length < 4 && (
-                    <div className={'flex flex-col gap-4 lg:w-2/5'}>
-                        <div className={'flex flex-row justify-between gap-4'}>
-                            <FormControl className={'w-96'}>
-                                <InputLabel id="obscure-method-select-helper-label">
-                                    Select an obscure method
-                                </InputLabel>
-                                <Select
-                                    error={!!pairErrors.obscureMethod?.message}
-                                    label={'Obscuration method'}
-                                    id="obscure-method-select-helper"
-                                    {...registerItem('obscureMethod', { required: true })}
-                                >
-                                    <MenuItem value={'BLUR'}>Blur</MenuItem>
-                                    <MenuItem value={'CHECKER'}>Checker</MenuItem>
-                                    <MenuItem value={'NONE'}>None</MenuItem>
-                                </Select>
-                            </FormControl>
-                            <FormControl className={'w-64'}>
-                                <InputLabel id="obscure-method-level-select-helper-label">
-                                    Select a blur level
-                                </InputLabel>
-                                <Select
-                                    label={'Blur level'}
-                                    id="obscure-method-level-select-helper"
-                                    {...registerItem('blurLevel', {
-                                        required: true,
-                                        disabled: watchPair('obscureMethod') !== 'BLUR',
-                                    })}
-                                >
-                                    <MenuItem value={'2'}>2</MenuItem>
-                                    <MenuItem value={'5'}>5</MenuItem>
-                                    <MenuItem value={'10'}>10</MenuItem>
-                                    <MenuItem value={'20'}>20</MenuItem>
-                                </Select>
-                            </FormControl>
-                        </div>
-                        <Button variant="contained" component="label">
-                            Upload File
-                            <input
-                                type="file"
-                                {...registerItem('file')}
-                                accept="image/png, image/jpeg, image/svg+xml"
-                                disabled={assetsForThisAsk.length >= 3 || watchPair('obscureMethod') === undefined}
-                                id="fileupload"
-                                onChange={(e) => handleCreateFilePair(e?.target?.files?.[0])}
-                            />
-                        </Button>
-                    </div>
-                )}
-                <div className={'flex flex-col gap-2'}>
-                    {assetsForThisAsk.map((asset, index) => {
-                        return (
-                            <AssetPreview
-                                key={index}
-                                id={asset.id}
-                                deletable={true}
-                                deleteFilePair={(id) => handleDeleteFilePair(id)}
-                            />
-                        )
-                    })}
-                </div>
+            <div className={'flex flex-col justify-between gap-4 lg:flex-row'}>
+                {Array.from({ length: 3 }).map((_, index) => {
+                    return (
+                        <AssetPreview
+                            key={index}
+                            index={index}
+                            setImagePair={(originalImage, obfuscatedImage) =>
+                                handleSetPair(index, originalImage, obfuscatedImage)
+                            }
+                        />
+                    )
+                })}
             </div>
+            {isUploading && <LinearProgress />}
             <Tabs
                 value={editorView}
                 variant={'fullWidth'}
@@ -261,8 +203,14 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                     ),
                 }[editorView]
             }
-            <Button id={'edit-profile-submit'} variant="outlined" type={'submit'}>
-                <CheckIcon fontSize={'medium'} />
+            <Button
+                component="div"
+                id={'create-offer-submit'}
+                variant="contained"
+                disabled={rawImagePairs.length === 0}
+                onClick={handleSubmit(onSubmit)}
+                endIcon={<CheckIcon />}
+            >
                 Submit
             </Button>
         </form>

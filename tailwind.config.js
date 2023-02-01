@@ -3,8 +3,17 @@ module.exports = {
     content: ['./src/**/*.{js,ts,jsx,tsx}', './public/**/*.html'],
     theme: {
         extend: {
+            colors: {
+                primary: '#ff9900',
+                secondary: '#B37212',
+                warning: '#ec3426',
+                success: '#19FF65',
+                error: '#ff1900',
+                info: '#8C19FF',
+                btcgrey: '#4D4D4D',
+            },
             borderRadius: {
-                global: '1rem',
+                global: '0',
                 small: '0.5rem',
             },
             fontFamily: {
@@ -16,9 +25,6 @@ module.exports = {
             },
             height: {
                 'modal-height': '85vh',
-            },
-            backgroundImage: {
-                sidebar: "url('/bg_image_2.jpg')",
             },
         },
     },

@@ -1,35 +1,34 @@
 import { t } from '../trpc'
 import { prisma } from '~/server/prisma'
-import { ACTIVE_SELECT, SETTLED_SELECT } from '~/server/service/selects'
 import { isAuthed } from '~/server/middlewares/authed'
-import { getAskStatus } from '~/server/service/ask'
+import { MSATS_UNIT_FACTOR } from '~/server/service/constants'
 
 export const statsRouter = t.router({
-    endingSoon: t.procedure.query(async ({ ctx }) => {
-        return await prisma.ask
-            .findMany({
-                where: ACTIVE_SELECT,
-                orderBy: { deadlineAt: 'asc' },
-                include: { askContext: true, offer: true, favouriteOffer: true },
-                take: 5,
+    oldestTopBountyNotSettled: t.procedure.query(async ({ ctx }) => {
+        const openAsks = await prisma.ask.findMany({
+            where: { askStatus: 'OPEN' },
+            orderBy: { createdAt: 'desc' },
+            include: {
+                askContext: true,
+                bumps: true,
+                offer: true,
+            },
+        })
+        return openAsks
+            .map((ask) => {
+                return {
+                    ...ask,
+                    bumpSum: ask.bumps.reduce((acc, bump) => acc + bump.amount / MSATS_UNIT_FACTOR, 0),
+                    offerCount: ask.offer.length,
+                    bumpCount: ask.bumps.length,
+                }
             })
-            .then((list) =>
-                list.map((ask) => {
-                    return {
-                        ...ask,
-                        status: getAskStatus(
-                            ask.deadlineAt,
-                            ask.acceptedDeadlineAt,
-                            Boolean(ask.offer.length),
-                            Boolean(ask.favouriteOffer),
-                        ),
-                    }
-                }),
-            )
+            .sort((a, b) => b.bumpSum - a.bumpSum)
+            .slice(0, 5)
     }),
     topEarners: t.procedure.query(async ({ ctx }) => {
         const topEarners = await prisma.user.findMany({
-            where: { offers: { some: { ask: SETTLED_SELECT } } },
+            where: { offers: { some: { ask: { askStatus: 'SETTLED' } } } },
             include: { offers: { include: { ask: { include: { bumps: true } } } } },
         })
 
@@ -39,16 +38,18 @@ export const statsRouter = t.router({
                 return {
                     ...user,
                     totalEarned: relevantOffers
-                        .map((offer) => offer?.ask?.bumps.reduce((acc, bump) => acc + bump.amount, 0))
+                        .map((offer) =>
+                            offer?.ask?.bumps.reduce((acc, bump) => acc + bump.amount / MSATS_UNIT_FACTOR, 0),
+                        )
                         .reduce((acc, bump) => (acc ?? 0) + (bump ?? 0), 0),
                 }
             })
             .sort((a, b) => (a.totalEarned ?? 0) - (b.totalEarned ?? 0))
-            .slice(0, 5)
+            .slice(0, 3)
     }),
     topSpenders: t.procedure.query(async ({ ctx }) => {
         const test = await prisma.user.findMany({
-            where: { asks: { some: SETTLED_SELECT } },
+            where: { asks: { some: { askStatus: 'SETTLED' } } },
             include: { offers: true, bumps: true },
         })
         return test
@@ -57,35 +58,37 @@ export const statsRouter = t.router({
                     userName: user.userName,
                     publicKey: user.publicKey,
                     createdAt: user.createdAt,
-                    totalEarned: user.bumps.reduce((acc, offer) => acc + offer.amount, 0),
+                    totalEarned: user.bumps.reduce((acc, offer) => acc + offer.amount / MSATS_UNIT_FACTOR, 0),
                 }
             })
             .sort((a, b) => b.totalEarned - a.totalEarned)
-            .slice(0, 5)
+            .slice(0, 3)
     }),
     biggestGrossingAsks: t.procedure.query(async ({ ctx }) => {
         const test = await prisma.ask.findMany({
-            where: SETTLED_SELECT,
-            include: { bumps: true, askContext: true },
+            where: { askStatus: 'SETTLED' },
+            include: { bumps: true, askContext: true, offer: true },
         })
         return test
             .map((ask) => {
                 return {
                     ...ask,
                     name: ask?.askContext?.title,
-                    grossed: ask.bumps.reduce((acc, offer) => acc + offer.amount, 0),
+                    grossed: ask.bumps.reduce((acc, offer) => acc + offer.amount / MSATS_UNIT_FACTOR, 0),
+                    offerCount: ask.offer.length,
+                    bumpCount: ask.bumps.length,
                 }
             })
             .sort((a, b) => b.grossed - a.grossed)
-            .slice(0, 5)
+            .slice(0, 3)
     }),
     myStats: t.procedure.use(isAuthed).query(async ({ ctx }) => {
         const user = await prisma.user.findUnique({
             where: { id: ctx.user.id },
             include: {
-                asks: { where: SETTLED_SELECT },
+                asks: { where: { askStatus: 'SETTLED' } },
                 offers: {
-                    where: { ask: SETTLED_SELECT },
+                    where: { ask: { askStatus: 'SETTLED' } },
                     include: { ask: { include: { bumps: true } }, favouritedBy: true },
                 },
                 bumps: true,
@@ -106,10 +109,12 @@ export const statsRouter = t.router({
             totalEarned: user?.offers
                 .filter((filter) => !filter.favouritedBy)
                 .reduce(
-                    (acc, offer) => acc + (offer?.ask?.bumps.reduce((acc, offer) => acc + offer.amount ?? 0, 0) ?? 0),
+                    (acc, offer) =>
+                        acc +
+                        (offer?.ask?.bumps.reduce((acc, offer) => acc + offer.amount / MSATS_UNIT_FACTOR ?? 0, 0) ?? 0),
                     0,
                 ),
-            totalSpent: user?.bumps.reduce((acc, offer) => acc + offer.amount, 0),
+            totalSpent: user?.bumps.reduce((acc, offer) => acc + offer.amount / MSATS_UNIT_FACTOR, 0),
             totalAsks: myAsks.length,
             settledAsks: user?.asks.length,
             totalOffers: myOffers.length,
@@ -127,7 +132,7 @@ export const statsRouter = t.router({
             askCount,
             offerCount,
             bumpCount: bumps.length,
-            totalEarned: bumps.reduce((acc, offer) => acc + offer.amount, 0),
+            totalEarned: bumps.reduce((acc, offer) => acc + offer.amount / MSATS_UNIT_FACTOR, 0),
         }
     }),
 })

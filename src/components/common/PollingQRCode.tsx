@@ -52,7 +52,7 @@ export const PollingQRCode = ({ bolt11 }: PollingQRCodeProps) => {
             {showCopied && <div>ln-url copied to clipboard!</div>}
             {webLNAvailable && (
                 <a href={`lightning:${bolt11}`}>
-                    <Button variant={'contained'} type="button">
+                    <Button variant={'contained'} component="div" color={'info'}>
                         WebLN
                     </Button>
                 </a>

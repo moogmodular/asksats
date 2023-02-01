@@ -1,6 +1,5 @@
 import { z } from 'zod'
 import { useZodForm } from '~/utils/useZodForm'
-import { zodDuration } from '~/utils/zod-extra'
 import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
@@ -11,8 +10,8 @@ import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
 import { RouterInput, trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
-import useActionStore from '~/store/actionStore'
-import useMessageStore from '~/store/messageStore'
+import { useActionStore } from '~/store/actionStore'
+import { useMessageStore } from '~/store/messageStore'
 import { TagPill } from '~/components/common/TagPill'
 import { askTextDefault, bumpInfoText } from '~/server/service/constants'
 import {
@@ -24,7 +23,6 @@ import {
     InputLabel,
     MenuItem,
     Select,
-    Slider,
     Tabs,
     TextField,
     Tooltip,
@@ -34,6 +32,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Tab from '@mui/material/Tab'
+import CheckIcon from '@mui/icons-material/Check'
 
 type CreateAskInput = RouterInput['ask']['create']
 
@@ -41,10 +40,8 @@ export const createAskInput = z.object({
     title: z.string().min(6).max(80),
     content: z.string().max(2000),
     amount: z.number().min(1),
-    tags: z.array(z.string().max(32)).max(5),
+    tags: z.array(z.string().max(32)).max(5).optional(),
     headerImageId: z.string().optional(),
-    untilClosed: zodDuration,
-    acceptedAfterClosed: zodDuration,
     askKind: z.enum(['PUBLIC', 'BUMP_PUBLIC', 'PRIVATE']),
 })
 
@@ -85,8 +82,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
             askKind: 'PUBLIC',
             amount: 100,
             headerImageId: '',
-            acceptedAfterClosed: { hours: 6 },
-            untilClosed: { days: 1 },
         },
     })
 
@@ -110,6 +105,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
     }
 
     const onSubmit = async (data: CreateAskInput) => {
+        console.log(data)
         try {
             await createAskMutation.mutateAsync({
                 title: data.title,
@@ -118,8 +114,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 tags: tags.map((t) => t.label),
                 headerImageId: uploadedImageId ?? '',
                 content: tempEditorState,
-                untilClosed: getValues('untilClosed'),
-                acceptedAfterClosed: { hours: 3 },
             })
             showToast('success', 'Ask created')
             await utils.ask.invalidate()
@@ -185,59 +179,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
         })
     }
 
-    const mapRunningTimeSliderValue = (time: RunningTimes) => {
-        return {
-            '0': { minutes: 30 },
-            '12.5': { hours: 1 },
-            '25': { hours: 2 },
-            '37.5': { hours: 3 },
-            '50': { hours: 6 },
-            '62.5': { hours: 12 },
-            '75': { days: 1 },
-            '87.5': { days: 3 },
-            '100': { days: 7 },
-        }[time]
-    }
-
-    const marks = [
-        {
-            value: 0,
-            label: '30min',
-        },
-        {
-            value: 12.5,
-            label: '1h',
-        },
-        {
-            value: 25,
-            label: '2h',
-        },
-        {
-            value: 37.5,
-            label: '3h',
-        },
-        {
-            value: 50,
-            label: '6h',
-        },
-        {
-            value: 62.5,
-            label: '12h',
-        },
-        {
-            value: 75,
-            label: '1d',
-        },
-        {
-            value: 87.5,
-            label: '3d',
-        },
-        {
-            value: 100,
-            label: '7d',
-        },
-    ]
-
     const handleTagClick = (option: { label: string; id: string; isNew: boolean }) => {
         setTags([...tags, option])
         setPossibleTags([])
@@ -254,7 +195,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
     }
 
     return (
-        <form className={'flex flex-col gap-4 py-4'} onSubmit={handleSubmit(onSubmit)}>
+        <form className={'flex flex-col gap-4 py-4'}>
             <div className={'flex flex-col lg:flex-row'}>
                 {uploadedImage ? (
                     <img
@@ -301,14 +242,20 @@ export const CreateAsk = ({}: CreateAskProps) => {
                             <Select
                                 labelId="demo-simple-select-label"
                                 label="Select an option"
-                                id="demo-simple-select"
+                                id="select-bump-kind"
                                 {...register('askKind', { required: true })}
                                 error={Boolean(errors.askKind)}
                                 defaultValue={'PUBLIC'}
                             >
-                                <MenuItem value={'PUBLIC'}>Public</MenuItem>
-                                <MenuItem value={'BUMP_PUBLIC'}>Bump Public</MenuItem>
-                                <MenuItem value={'PRIVATE'}>Private</MenuItem>
+                                <MenuItem id={'bump-kind-public'} value={'PUBLIC'}>
+                                    Public
+                                </MenuItem>
+                                <MenuItem id={'bump-kind-bump-public'} value={'BUMP_PUBLIC'}>
+                                    Bump Public
+                                </MenuItem>
+                                <MenuItem id={'bump-kind-private'} value={'PRIVATE'}>
+                                    Private
+                                </MenuItem>
                             </Select>
                         </FormControl>
                         <Tooltip title={bumpInfoText}>
@@ -333,7 +280,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
                         />
                     </div>
                     <div className={'flex w-full flex-col justify-between gap-4 lg:flex-row'}>
-                        <Button variant="contained" component="label" size={`${matches ? 'medium' : 'small'}`}>
+                        <Button variant="contained" component="div" size={`${matches ? 'medium' : 'small'}`}>
                             Upload File
                             <input
                                 type="file"
@@ -342,18 +289,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
                                 onChange={(e) => handleFileChange(e?.target?.files?.[0])}
                             />
                         </Button>
-                        <Slider
-                            size={`${matches ? 'medium' : 'small'}`}
-                            aria-label="Custom marks"
-                            className={`mx-10`}
-                            defaultValue={75}
-                            step={12.5}
-                            valueLabelDisplay="off"
-                            marks={marks}
-                            onChange={(e: any) => {
-                                setValue('untilClosed', mapRunningTimeSliderValue(e.target.value as RunningTimes))
-                            }}
-                        />
                     </div>
                 </div>
             </div>
@@ -402,11 +337,16 @@ export const CreateAsk = ({}: CreateAskProps) => {
             }
 
             <Button
-                variant={'outlined'}
+                variant={'contained'}
+                id={'create-ask-submit'}
                 color={'primary'}
+                component="div"
                 disabled={Boolean(errors.title || errors.amount || errors.askKind)}
-                type="submit"
-                onClick={() => onSubmit(getValues())}
+                onClick={() => {
+                    console.log('submitting', getValues())
+                    console.log('submitting', errors)
+                    handleSubmit(onSubmit)()
+                }}
                 endIcon={<PlayArrowIcon />}
             >
                 Submit

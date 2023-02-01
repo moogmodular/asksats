@@ -25,16 +25,11 @@ const tabs = {
 
 type Tab = keyof typeof tabs
 
-const a11yProps = (index: number) => ({
-    id: `simple-tab-${index}`,
-    'aria-controls': `simple-tabpanel-${index}`,
-})
-
 export const Sidebar = ({}: SidebarProps) => {
     const [currentTab, setCurrentTab] = useState<Tab>('stats')
 
     return (
-        <div className={'no-scrollbar flex flex-col justify-center gap-2 overflow-y-scroll'}>
+        <div className={'no-scrollbar flex flex-col justify-center gap-2 overflow-y-scroll text-btcgrey'}>
             <div className={'grow'}>
                 <Tabs
                     value={currentTab}
@@ -42,10 +37,10 @@ export const Sidebar = ({}: SidebarProps) => {
                     onChange={(event, value) => setCurrentTab(value)}
                     aria-label="basic tabs example"
                 >
-                    <Tab value={'stats'} label="Stats" />
-                    <Tab value={'taxonomy'} label="Taxonomy" />
-                    <Tab value={'myStats'} label="My Stats" />
-                    <Tab value={'about'} label="About" />
+                    <Tab id={'sidebar-tabs-stats'} value={'stats'} label="Stats" />
+                    <Tab id={'sidebar-tabs-taxonomy'} value={'taxonomy'} label="Taxonomy" />
+                    <Tab id={'sidebar-tabs-myStats'} value={'myStats'} label="My Stats" />
+                    <Tab id={'sidebar-tabs-about'} value={'about'} label="About" />
                 </Tabs>
                 {
                     {

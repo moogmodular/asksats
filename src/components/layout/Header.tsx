@@ -1,8 +1,7 @@
-import useAuthStore from '~/store/useAuthStore'
 import { useEffect, useRef } from 'react'
 import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
 import autoAnimate from '@formkit/auto-animate'
-import useActionStore from '~/store/actionStore'
+import { useActionStore } from '~/store/actionStore'
 import Link from 'next/link'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import KeyIcon from '@mui/icons-material/Key'
@@ -14,14 +13,16 @@ import OfflineBoltOutlinedIcon from '@mui/icons-material/OfflineBoltOutlined'
 import AccountCircleOutlinedIcon from '@mui/icons-material/AccountCircleOutlined'
 import { Avatar, IconButton, Tooltip } from '@mui/material'
 import useMediaQuery from '@mui/material/useMediaQuery'
-import useNodeConnectionStore from '~/store/nodeConnectionStore'
+import { useNodeConnectionStore } from '~/store/nodeConnectionStore'
 import { trpc } from '~/utils/trpc'
+import { useStore } from 'zustand'
+import { authedUserStore } from '~/store/authedUserStore'
 
 interface HeaderProps {}
 
 export const Header = ({}: HeaderProps) => {
     const { setCurrentModal } = useActionStore()
-    const { user, logout } = useAuthStore()
+    const { user, logout } = useStore(authedUserStore)
     const { connectionAddress, setConnectionAddress } = useNodeConnectionStore()
 
     trpc.nodeUtils.nodeConnection.useQuery(undefined, {
@@ -32,7 +33,7 @@ export const Header = ({}: HeaderProps) => {
         },
     })
 
-    const matches = useMediaQuery('(min-width:1024px)')
+    const matches = useMediaQuery('(min-width:1600px)')
     const parent = useRef(null)
 
     useEffect(() => {
@@ -71,7 +72,7 @@ export const Header = ({}: HeaderProps) => {
                                             : user.publicKey?.slice(0, 14) + '...'
                                     }`}
                                 >
-                                    <KeyIcon fontSize={'small'} />
+                                    <KeyIcon fontSize={'small'} color={'white'} />
                                 </IconPropertyDisplay>
                             </Tooltip>
                             <Tooltip title={user.userName}>
@@ -86,7 +87,7 @@ export const Header = ({}: HeaderProps) => {
                     </div>
                     <div className={'flex flex-row'}>
                         <Tooltip title="Blog">
-                            <IconButton color="primary" id={'open-authenticate-button'}>
+                            <IconButton id={'blog-button'} color={'white'}>
                                 <Link href={`/ask/blog`}>
                                     <BookIcon fontSize={`${matches ? 'large' : 'small'}`} />
                                 </Link>
@@ -95,10 +96,10 @@ export const Header = ({}: HeaderProps) => {
                         <Tooltip title="Transact">
                             <span>
                                 <IconButton
-                                    color="primary"
                                     disabled={!connectionAddress}
                                     onClick={() => setCurrentModal('transact')}
                                     id={'button-transact'}
+                                    color={'white'}
                                 >
                                     <CurrencyBitcoinIcon fontSize={`${matches ? 'large' : 'small'}`} />
                                 </IconButton>
@@ -106,23 +107,27 @@ export const Header = ({}: HeaderProps) => {
                         </Tooltip>
                         <Tooltip title="Create new ask">
                             <IconButton
-                                color="primary"
                                 onClick={() => setCurrentModal('createAsk')}
                                 id={'create-ask-button'}
+                                color={'white'}
                             >
                                 <AddIcon fontSize={`${matches ? 'large' : 'small'}`} />
                             </IconButton>
                         </Tooltip>
                         <Tooltip title="Unauthenticate">
-                            <IconButton color="primary" onClick={handleLogout} id={'logout-button'}>
-                                <BoltIcon fontSize={`${matches ? 'large' : 'small'}`} color={'primary'} />
+                            <IconButton onClick={handleLogout} id={'logout-button'} color={'white'}>
+                                <BoltIcon fontSize={`${matches ? 'large' : 'small'}`} />
                             </IconButton>
                         </Tooltip>
                     </div>
                 </div>
             ) : (
                 <Tooltip title="Authenticate">
-                    <IconButton onClick={() => setCurrentModal('authenticate')} id={'open-authenticate-button'}>
+                    <IconButton
+                        onClick={() => setCurrentModal('authenticate')}
+                        id={'open-authenticate-button'}
+                        color={'white'}
+                    >
                         <OfflineBoltOutlinedIcon fontSize={`${matches ? 'large' : 'small'}`} />
                     </IconButton>
                 </Tooltip>

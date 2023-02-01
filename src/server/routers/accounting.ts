@@ -7,7 +7,7 @@ import { MSATS_UNIT_FACTOR } from '~/server/service/constants'
 
 export const accountingRouter = t.router({
     myBalance: t.procedure.use(isAuthed).query(async ({ ctx }) => {
-        return await userBalance(prisma, ctx?.user?.id)
+        return await userBalance(ctx?.user?.id)
     }),
     transactions: t.procedure.use(isAuthed).query(async ({ ctx }) => {
         return await prisma.transaction
@@ -34,7 +34,7 @@ export const accountingRouter = t.router({
         .use(isAuthed)
         .input(z.object({ userId: z.string() }))
         .query(async ({ ctx, input }) => {
-            const balance = await userBalance(prisma, input.userId)
+            const balance = await userBalance(input.userId)
             return balance
         }),
 })

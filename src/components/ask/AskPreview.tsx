@@ -4,23 +4,21 @@ import { BumpDisplay } from '~/components/common/BumpDisplay'
 import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
 import { CreateBumpButton } from '~/components/common/CreateBump'
 import { AskTypeDisplay } from '~/components/common/AskTypeDisplay'
-import useAuthStore from '~/store/useAuthStore'
 import { RouterOutput } from '~/utils/trpc'
-import { CountdownDisplay } from '~/components/common/CountdownDisplay'
-import { AskStatus, CountdownProgress } from '~/components/common/CountdownProgress'
-import useActionStore from '~/store/actionStore'
+import { useActionStore } from '~/store/actionStore'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { TagList } from '~/components/common/TagList'
 import { Avatar, Button, Tooltip } from '@mui/material'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
-import AccessTimeIcon from '@mui/icons-material/AccessTime'
 import CheckIcon from '@mui/icons-material/Check'
 import ClearIcon from '@mui/icons-material/Clear'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
-import DoneAllIcon from '@mui/icons-material/DoneAll'
-import DoDisturbIcon from '@mui/icons-material/DoDisturb'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
+import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled'
+import { AskStatus } from '~/components/ask/Ask'
+import { useStore } from 'zustand'
+import { authedUserStore } from '~/store/authedUserStore'
 
 type AskPreviewOutput = RouterOutput['ask']['list']['items'][0]
 
@@ -31,14 +29,19 @@ export const createBumpForAsk = z.object({
 
 interface AskPreviewProps {
     ask: AskPreviewOutput
+    index: number
 }
 
-export const AskPreview = ({ ask }: AskPreviewProps) => {
+export const AskPreview = ({ ask, index }: AskPreviewProps) => {
     const { createOffer } = useActionStore()
-    const { user } = useAuthStore()
+    const { user } = useStore(authedUserStore)
 
     return (
-        <div id="ask-preview-host" className={`card-container flex flex-col justify-between`}>
+        <div
+            id={`ask-preview-host-${index}`}
+            data-testid={'ask-preview-host'}
+            className={`card-container flex flex-col justify-between`}
+        >
             {ask.askContext && (
                 <>
                     <div className={'relative cursor-pointer object-cover'}>
@@ -59,7 +62,7 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                         />
                                         <div
                                             className={
-                                                'absolute bottom-8 right-0 rounded-tl-global bg-blue-700 px-6 py-2 opacity-70'
+                                                'absolute bottom-0 right-0 w-full rounded-tl-global bg-info px-6 py-2 opacity-70'
                                             }
                                         >
                                             <NoPhotographyIcon color={'warning'} />
@@ -72,79 +75,43 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                 <TagList tags={ask.tags ?? []} />
                             </div>
                         </div>
-                        <CountdownProgress
-                            creationDate={ask.createdAt}
-                            endDate={ask.deadlineAt ?? 0}
-                            acceptedDate={ask.acceptedDeadlineAt}
-                            status={ask.status}
-                        />
                     </div>
-                    <div className={'flex flex-col justify-between gap-4 p-4'}>
-                        <div className={'flex flex-row'}>
+                    <div className={'flex flex-col justify-between gap-4 p-4 text-btcgrey'}>
+                        <div className={'flex flex-row gap-2'}>
                             {ask.user && <Avatar alt="User avatar" src={ask.user.profileImage ?? ''} />}
                             <div className={'flex w-full flex-col'}>
                                 <div className={'flex flex-row justify-between'}>
                                     {ask.user && (
                                         <IconPropertyDisplay
-                                            identifier={'userName'}
-                                            value={ask.user.userName}
-                                            link={true}
+                                            identifier={'createdAt'}
+                                            value={format(ask.createdAt ?? 0, standardDateFormat)}
                                         >
-                                            <AccountCircleIcon fontSize={'small'} />
+                                            <PlayCircleFilledIcon fontSize={'small'} />
                                         </IconPropertyDisplay>
                                     )}
                                     <BumpDisplay
                                         bumps={ask.bumps}
                                         offerCount={ask.offerCount}
-                                        hasFavouritedOffer={ask.hasFavouritedOffer}
+                                        hasFavouritedOffer={Boolean(ask.settledForOffer)}
                                     />
                                 </div>
                                 <div className={'flex flex-row justify-between'}>
-                                    <div className={'flex flex-col'}>
-                                        <div className={'flex flex-row items-center gap-1'}>
-                                            {
-                                                {
-                                                    active: <CountdownDisplay endDate={ask.deadlineAt ?? 0} />,
-                                                    pending_acceptance: (
-                                                        <CountdownDisplay endDate={ask.acceptedDeadlineAt ?? 0} />
-                                                    ),
-                                                    settled: (
-                                                        <IconPropertyDisplay
-                                                            identifier={'id'}
-                                                            value={format(
-                                                                ask.acceptedDeadlineAt ?? 0,
-                                                                standardDateFormat,
-                                                            )}
-                                                        >
-                                                            <DoneAllIcon fontSize={'small'} />
-                                                        </IconPropertyDisplay>
-                                                    ),
-                                                    expired: (
-                                                        <IconPropertyDisplay
-                                                            identifier={'id'}
-                                                            value={format(ask.deadlineAt ?? 0, standardDateFormat)}
-                                                        >
-                                                            <DoDisturbIcon fontSize={'small'} />
-                                                        </IconPropertyDisplay>
-                                                    ),
-                                                    no_status: 'NO_STATUS',
-                                                }[ask.status as AskStatus]
-                                            }
-                                        </div>
-                                    </div>
+                                    <IconPropertyDisplay identifier={'userName'} value={ask.user?.userName} link={true}>
+                                        <AccountCircleIcon fontSize={'small'} />
+                                    </IconPropertyDisplay>
                                     <AskTypeDisplay data-popover-target="popover-default" type={ask.askKind} />
                                 </div>
                             </div>
                         </div>
-                        <div className={'h-16 grow'}>
-                            <Link href={`/ask/single/${ask.askContext.slug}`}>
+                        <div className={'h-16 grow text-btcgrey'}>
+                            <Link id={'ask-title-in-ask-preview'} href={`/ask/single/${ask.askContext.slug}`}>
                                 <b className={'lg:text-md cursor-pointer'}>{ask.askContext.title}</b>
                             </Link>
                         </div>
                     </div>
                     {
                         {
-                            active: (
+                            OPEN: (
                                 <div id="active-indicator" className={'card-status-indicator-running'}>
                                     {(ask.askKind === 'BUMP_PUBLIC' || ask.askKind === 'PUBLIC') && (
                                         <Tooltip title={'bump this ask with some sats'}>
@@ -153,23 +120,13 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                             </div>
                                         </Tooltip>
                                     )}
-                                    {/*{ask?.user?.userName !== user?.userName && (*/}
-                                    {/*    <Button*/}
-                                    {/*        onClick={() => createOffer(ask.id)}*/}
-                                    {/*        variant={'contained'}*/}
-                                    {/*        component="label"*/}
-                                    {/*        size={'small'}*/}
-                                    {/*        startIcon={<LocalOfferIcon />}*/}
-                                    {/*    >*/}
-                                    {/*        Add Offer*/}
-                                    {/*    </Button>*/}
-                                    {/*)}*/}
                                     <Tooltip title={`add an offer for this ask`}>
                                         <Button
+                                            id={'add-offer-button'}
                                             onClick={() => createOffer(ask.id)}
+                                            color={'primary'}
+                                            component="div"
                                             variant={'contained'}
-                                            component="label"
-                                            size={'small'}
                                             startIcon={<LocalOfferIcon />}
                                         >
                                             Add Offer
@@ -177,28 +134,20 @@ export const AskPreview = ({ ask }: AskPreviewProps) => {
                                     </Tooltip>
                                 </div>
                             ),
-                            pending_acceptance: (
-                                <div id="pending-indicator" className={'card-status-indicator-pending'}>
-                                    <AccessTimeIcon />
-                                    acceptance pending
-                                </div>
-                            ),
-                            settled: (
+                            SETTLED: (
                                 <div id="settled-indicator" className={'card-status-indicator-settled'}>
                                     <CheckIcon />
                                     settled
                                 </div>
                             ),
-                            expired: (
+                            CANCELED: (
                                 <div id="expired-indicator" className={'card-status-indicator-expired'}>
                                     <ClearIcon />
-                                    expired
+                                    cancelled
                                 </div>
                             ),
-                            no_status: <div>NO_STATUS</div>,
-                        }[ask.status]
+                        }[ask.askStatus as AskStatus]
                     }
-                    {/*</div>*/}
                 </>
             )}
         </div>

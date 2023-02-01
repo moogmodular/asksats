@@ -13,6 +13,18 @@ import path from 'path'
 import { Buffer } from 'buffer'
 import { z } from 'zod'
 
+const getKeyConditionsFieldsExpires = (imageKey: string) => ({
+    Fields: {
+        key: imageKey,
+    },
+    Conditions: [
+        ['content-length-range', 0, 9999999],
+        ['starts-with', '$Content-Type', 'image/'],
+    ],
+    Expires: 60,
+    Bucket: `${process.env.DO_API_NAME}`,
+    Key: imageKey,
+})
 const doBlurredImage = async (imageBuffer: Buffer, blurLevel: BlurLevels) =>
     await sharp(imageBuffer)
         .blur(parseInt(blurLevel ?? '5'))
@@ -89,6 +101,76 @@ export const assetRouter = t.router({
 
             return true
         }),
+    preSignedPair: t.procedure.use(isAuthed).mutation(async ({ ctx, input }) => {
+        const filePair = await prisma.offerFilePair.create({
+            data: {
+                user: {
+                    connect: {
+                        id: ctx.user.id,
+                    },
+                },
+                offerFile: {
+                    create: {},
+                },
+                obscureFile: {
+                    create: {},
+                },
+                fileName: 'input.fileName',
+                obscureMethod: 'input.obscureMethod',
+            },
+            include: {
+                offerFile: true,
+                obscureFile: true,
+            },
+        })
+
+        const originalImageKey = `${ctx.user.id}/${filePair.offerFile.id}`
+        const obscureImageKey = `${ctx.user.id}/${filePair.obscureFile.id}`
+
+        const offerUploadUrl = await createPresignedPost(s3Client, {
+            Fields: {
+                key: originalImageKey,
+            },
+            Conditions: [
+                ['content-length-range', 0, 9999999],
+                ['starts-with', '$Content-Type', 'image/'],
+            ],
+            Expires: 60,
+            Bucket: `${process.env.DO_API_NAME}`,
+            Key: originalImageKey,
+        })
+        const obscuredUploadUrl = await createPresignedPost(s3Client, {
+            Fields: {
+                key: obscureImageKey,
+            },
+            Conditions: [
+                ['content-length-range', 0, 9999999],
+                ['starts-with', '$Content-Type', 'image/'],
+            ],
+            Expires: 60,
+            Bucket: `${process.env.DO_API_NAME}`,
+            Key: obscureImageKey,
+        })
+
+        await prisma.file.update({
+            where: { id: filePair.offerFile.id },
+            data: {
+                s3Key: originalImageKey,
+            },
+        })
+        await prisma.file.update({
+            where: { id: filePair.obscureFile.id },
+            data: {
+                s3Key: obscureImageKey,
+            },
+        })
+
+        return {
+            filePairId: filePair.id,
+            originalImageUploadUrl: offerUploadUrl,
+            obscuredImageUploadUrl: obscuredUploadUrl,
+        }
+    }),
     preSignedUrl: t.procedure.use(isAuthed).query(async ({ ctx, input }) => {
         const dbImage = await prisma.file.create({ data: {} })
         const imageKey = `${ctx.user.id}/${dbImage.id}`

@@ -10,6 +10,7 @@ import { PER_USER_BALANCE_CAP, SINGLE_TRANSACTION_CAP, TRANSACTION_MAX_AGE } fro
 import { createInvoiceInput } from '~/components/modal/Transact'
 import { isAuthed } from '~/server/middlewares/authed'
 import { belowInvoiceLimit, recentSettledTransaction, userBalance } from '~/server/service/accounting'
+import { doInvoiceBalanceTransaction } from '~/server/service/finalise'
 
 export const invoiceRouter = t.router({
     createInvoice: t.procedure
@@ -48,7 +49,7 @@ export const invoiceRouter = t.router({
                 'dd.MM.yyyy hh:mm:ss',
             )}`
 
-            const balance = await userBalance(prisma, ctx.user.id)
+            const balance = await userBalance(ctx.user.id)
 
             if (balance.availableBalance >= PER_USER_BALANCE_CAP) {
                 throw new TRPCError({ code: 'FORBIDDEN', message: 'user balance too high' })
@@ -88,16 +89,7 @@ export const invoiceRouter = t.router({
 
                 invoiceSub.on('invoice_updated', async (invoice) => {
                     if (invoice.is_confirmed) {
-                        return await prisma.transaction
-                            .update({
-                                where: { id: newTransaction.id },
-                                data: {
-                                    mSatsSettled: Number(invoice.received_mtokens),
-                                    confirmedAt: new Date(),
-                                    transactionStatus: 'SETTLED',
-                                },
-                            })
-                            .catch(console.log)
+                        return await doInvoiceBalanceTransaction(newTransaction.id, Number(invoice.received_mtokens))
                     } else if (invoice.is_canceled) {
                         return await prisma.transaction
                             .update({

@@ -1,6 +1,6 @@
 import { RouterOutput } from '~/utils/trpc'
 import { CreateComment } from '~/components/comments/CreateComment'
-import useQuestionsUXStore from '~/store/askQuestionsUXStore'
+import { useQuestionsUXStore } from '~/store/askQuestionsUXStore'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { MDRender } from '~/components/common/MDRender'
@@ -36,7 +36,7 @@ export const CommentDisplay = ({ comment }: CommentDisplayProps) => {
                     <Button
                         onClick={() => setCurrentOpenQuestionIdId(comment.id)}
                         variant={'contained'}
-                        component="label"
+                        component="div"
                     >
                         Reply
                     </Button>

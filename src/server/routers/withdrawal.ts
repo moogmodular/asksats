@@ -13,11 +13,12 @@ import {
 } from '~/server/service/constants'
 import { recentSettledTransaction, userBalance } from '~/server/service/accounting'
 import { isAuthed } from '~/server/middlewares/authed'
+import { doWithdrawalBalanceTransaction } from '~/server/service/finalise'
 
 export const withdrawalRouter = t.router({
     getWithdrawalUrl: t.procedure.use(isAuthed).query(async ({ ctx }) => {
         const secret = k1()
-        const currentBalance = await userBalance(prisma, ctx.user.id)
+        const currentBalance = await userBalance(ctx.user.id)
         const maxAmount = Math.min(currentBalance.availableBalance, SINGLE_TRANSACTION_CAP)
 
         const encoded = encodedUrl(`${process.env.LN_WITH_CREATE_URL}`, 'withdrawRequest', secret)
@@ -66,9 +67,7 @@ export const withdrawalRouter = t.router({
                         where: { id: lnWithdrawal.userId! },
                         include: { transaction: true },
                     })
-                    const maxAmount = user
-                        ? await userBalance(prisma, user?.id).then((balance) => balance.availableBalance)
-                        : 0
+                    const maxAmount = user ? await userBalance(user?.id).then((balance) => balance.availableBalance) : 0
                     const cappedAmount = Math.min(maxAmount, SINGLE_TRANSACTION_CAP)
                     if (maxAmount) {
                         const lnUrlWithdrawal = {
@@ -142,7 +141,7 @@ export const withdrawalRouter = t.router({
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'your invoice must specify an amount' })
             }
 
-            const maxAmount = user ? await userBalance(prisma, user?.id).then((balance) => balance.availableBalance) : 0
+            const maxAmount = user ? await userBalance(user?.id).then((balance) => balance.availableBalance) : 0
 
             if (!maxAmount) {
                 return new TRPCError({ code: 'BAD_REQUEST', message: 'user not found' })
@@ -160,15 +159,7 @@ export const withdrawalRouter = t.router({
             })
 
             sub.once('confirmed', async (payment) => {
-                await prisma.transaction.update({
-                    where: { k1Hash: getK1Hash(k1) },
-                    data: {
-                        transactionStatus: 'SETTLED',
-                        mSatsTarget: parseInt(payment.mtokens),
-                        mSatsSettled: parseInt(payment.mtokens) - parseInt(payment.fee_mtokens),
-                        confirmedAt: new Date(),
-                    },
-                })
+                await doWithdrawalBalanceTransaction(k1, payment.mtokens, payment.fee_mtokens)
             })
 
             return { status: 'OK' }

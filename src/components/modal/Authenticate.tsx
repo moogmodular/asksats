@@ -1,14 +1,15 @@
 import { RouterOutput, trpc } from '~/utils/trpc'
-import useAuthStore from '~/store/useAuthStore'
 import { useEffect, useState } from 'react'
 import { PollingQRCode } from '~/components/common/PollingQRCode'
-import useActionStore from '~/store/actionStore'
+import { useActionStore } from '~/store/actionStore'
+import { useStore } from 'zustand'
+import { authedUserStore } from '~/store/authedUserStore'
 
 type LoginUrlResponse = RouterOutput['auth']['loginUrl']
 
 export const Authenticate = ({}) => {
     const utils = trpc.useContext()
-    const { storeToken, storeLogin } = useAuthStore()
+    const { storeToken, storeLogin } = useStore(authedUserStore)
     const { setCurrentModal } = useActionStore()
 
     const [loginUrl, setLoginUrl] = useState<LoginUrlResponse>({ secret: '', encoded: '' })
@@ -30,6 +31,7 @@ export const Authenticate = ({}) => {
                             setCurrentModal('welcome')
                         }, 1000)
                     }
+                    // utils.invalidate()
                     return false
                 }
                 return false

@@ -41,7 +41,9 @@ export const Transact = ({}) => {
                                     <div id={'transact-balance-display'}>
                                         Available balance: {myBalance.availableBalance}
                                     </div>
-                                    <div id={'transact-balance-display'}>Locked balance: {myBalance.lockedBalance}</div>
+                                    <div id={'transact-locked-balance-display'}>
+                                        Locked balance: {myBalance.lockedBalance}
+                                    </div>
                                 </div>
                             ) : (
                                 <LinearProgress />
@@ -63,9 +65,9 @@ export const Transact = ({}) => {
                             </div>
                             <div className={'flex w-full flex-row justify-between'}>
                                 <Button
+                                    component="div"
                                     id={'transact-deposit-button'}
                                     variant={'contained'}
-                                    component="label"
                                     disabled={!!errors.amount}
                                     onClick={() => setTransactMode('deposit')}
                                     startIcon={
@@ -80,7 +82,7 @@ export const Transact = ({}) => {
                                 <Button
                                     id={'transact-deposit-button'}
                                     variant={'contained'}
-                                    component="label"
+                                    component="div"
                                     disabled={!!errors.amount}
                                     onClick={() => setTransactMode('withdraw')}
                                     startIcon={

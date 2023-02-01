@@ -10,8 +10,8 @@ import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
 import { RouterInput, trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
-import useMessageStore from '~/store/messageStore'
-import useBlogUXStore from '~/store/blogUXStore'
+import { useMessageStore } from '~/store/messageStore'
+import { useBlogUXStore } from '~/store/blogUXStore'
 import { Button, Tabs } from '@mui/material'
 import Tab from '@mui/material/Tab'
 
@@ -117,7 +117,7 @@ export const CreateBlogItem = ({ parentId }: CreateBlogItemProps) => {
     }
 
     return (
-        <form className={'mt-4 flex w-1/2 flex-col gap-8 border border-black p-4'} onSubmit={handleSubmit(onSubmit)}>
+        <form className={'mt-4 flex w-1/2 flex-col gap-8 border border-black p-4'}>
             {!parentId && (
                 <div className={'flex flex-col gap-4'}>
                     <label className={'text-lg font-bold'}>Title</label>
@@ -162,7 +162,7 @@ export const CreateBlogItem = ({ parentId }: CreateBlogItemProps) => {
                     }
                 </div>
             </div>
-            <Button variant={'contained'} type={'submit'}>
+            <Button variant={'contained'} onClick={handleSubmit(onSubmit)} component="div">
                 Create Blog Post
             </Button>
         </form>

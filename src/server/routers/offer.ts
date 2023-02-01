@@ -6,47 +6,31 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { s3Client } from '~/server/service/s3-client'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { z } from 'zod'
-import { TRPCError } from '@trpc/server'
-import { getAskStatus } from '~/server/service/ask'
 
 export const offerRouter = t.router({
     create: t.procedure
         .use(isAuthed)
         .input(createOfferForAskInput)
         .mutation(async ({ ctx, input }) => {
-            const ask = await prisma.ask
-                .findUnique({
-                    where: { id: input.askId },
-                    include: {
-                        askContext: { include: { headerImage: true } },
-                        bumps: true,
-                        user: { select: { userName: true, publicKey: true } },
-                        offer: true,
-                        favouriteOffer: true,
-                        tags: {
-                            include: { tag: true },
-                        },
+            const ask = await prisma.ask.findUnique({
+                where: { id: input.askId },
+                include: {
+                    askContext: { include: { headerImage: true } },
+                    bumps: true,
+                    user: { select: { userName: true, publicKey: true } },
+                    offer: true,
+                    settledForOffer: true,
+                    tags: {
+                        include: { tag: true },
                     },
-                })
-                .then((ask) => {
-                    return ask
-                        ? {
-                              ...ask,
-                              status: getAskStatus(
-                                  ask.deadlineAt,
-                                  ask.acceptedDeadlineAt,
-                                  Boolean(ask.offer.length),
-                                  Boolean(ask.favouriteOffer),
-                              ),
-                          }
-                        : undefined
-                })
+                },
+            })
 
             // if (ask?.userId === ctx?.user?.id) {
             //     throw new Error('You cannot create an offer for your own ask')
             // }
 
-            if (ask?.status !== 'active') {
+            if (ask?.askStatus !== 'OPEN') {
                 throw new Error('This ask si not active')
             }
 
@@ -69,33 +53,20 @@ export const offerRouter = t.router({
         .use(isAuthed)
         .input(z.object({ askId: z.string() }))
         .query(async ({ ctx, input }) => {
-            const ask = await prisma.ask
-                .findUnique({
-                    where: { id: input.askId },
-                    include: {
-                        offer: true,
-                        favouriteOffer: true,
-                        bumps: true,
-                    },
-                })
-                .then((ask) => {
-                    return ask
-                        ? {
-                              ...ask,
-                              status: getAskStatus(
-                                  ask.deadlineAt,
-                                  ask.acceptedDeadlineAt,
-                                  Boolean(ask.offer.length),
-                                  Boolean(ask.favouriteOffer),
-                              ),
-                          }
-                        : undefined
-                })
+            const ask = await prisma.ask.findUnique({
+                where: { id: input.askId },
+                include: {
+                    offer: true,
+                    settledForOffer: true,
+                    bumps: true,
+                },
+            })
 
             const offersForAsk = await prisma.offer.findMany({
                 where: { askId: input.askId },
                 include: {
                     offerContext: { include: { filePairs: { include: { offerFile: true, obscureFile: true } } } },
+                    author: { select: { userName: true } },
                 },
                 orderBy: { createdAt: 'desc' },
             })
@@ -104,10 +75,10 @@ export const offerRouter = t.router({
                 offersForAsk.map(async (offer) => {
                     const conditionIsMyOffer = offer.authorId === ctx.user.id
 
-                    const isAskSettled = ask?.status === 'settled'
+                    const isAskSettled = ask?.askStatus === 'SETTLED'
                     const isBumpPublic = ask?.askKind === 'BUMP_PUBLIC'
                     const haveIBumped = ask?.bumps.some((bump) => bump.bidderId === ctx.user.id)
-                    const isTheFavouriteOffer = ask?.favouriteOffer?.id === offer.id
+                    const isTheFavouriteOffer = ask?.settledForOffer?.id === offer.id
 
                     const conditionIsSettledBumpPublicAndIHaveBumped =
                         isBumpPublic && haveIBumped && isAskSettled && isTheFavouriteOffer
@@ -166,53 +137,6 @@ export const offerRouter = t.router({
                     }
                 }),
             )
-        }),
-    setFavoutieForAsk: t.procedure
-        .use(isAuthed)
-        .input(z.object({ askId: z.string(), offerId: z.string() }))
-        .mutation(async ({ ctx, input }) => {
-            const ask = await prisma.ask.findUnique({ where: { id: input.askId } })
-
-            if (ask?.userId !== ctx?.user?.id) {
-                throw new TRPCError({
-                    code: 'FORBIDDEN',
-                    message: `You cannot set a favourite for an ask that is not yours`,
-                })
-            }
-
-            return await prisma.ask.update({
-                where: { id: input.askId },
-                data: {
-                    favouriteOffer: { connect: { id: input.offerId } },
-                },
-            })
-        }),
-    unSetFavoutieForAsk: t.procedure
-        .use(isAuthed)
-        .input(z.object({ askId: z.string(), offerId: z.string() }))
-        .mutation(async ({ ctx, input }) => {
-            const ask = await prisma.ask.findUnique({ where: { id: input.askId }, include: { favouriteOffer: true } })
-
-            if (ask?.userId !== ctx?.user?.id) {
-                throw new TRPCError({
-                    code: 'FORBIDDEN',
-                    message: `You cannot set a favourite for an ask that is not yours`,
-                })
-            }
-
-            if (!ask?.favouriteOffer?.id) {
-                throw new TRPCError({
-                    code: 'NOT_FOUND',
-                    message: `There is no favourite offer for this ask`,
-                })
-            }
-
-            return await prisma.ask.update({
-                where: { id: input.askId },
-                data: {
-                    favouriteOffer: { disconnect: true },
-                },
-            })
         }),
     myOffers: t.procedure.use(isAuthed).query(async ({ ctx, input }) => {
         return await prisma.offer.findMany({

@@ -1,4 +1,4 @@
-import create from 'zustand'
+import { create } from 'zustand'
 
 export type MessageTypes = 'error' | 'success' | 'info' | 'warning'
 
@@ -9,7 +9,7 @@ interface Message {
     showToast: (messageType: MessageTypes, message: string) => void
 }
 
-const useMessageStore = create<Message>((set) => ({
+export const useMessageStore = create<Message>((set) => ({
     currentMessage: '',
     currentMessageType: 'info',
     visible: false,
@@ -28,5 +28,3 @@ const useMessageStore = create<Message>((set) => ({
         }, 3000)
     },
 }))
-
-export default useMessageStore

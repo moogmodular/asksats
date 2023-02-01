@@ -1,18 +1,16 @@
 import { getParams, LNURLAuthParams } from 'js-lnurl'
 import { randomBytes } from 'crypto'
 import { expect, test } from '@playwright/test'
-import { createUser, deleteUser, getSigAndKey } from './test-utils'
+import { authenticateNewUser, authenticateUserByPrivateKey, deleteUser, getSigAndKey } from './test-utils'
 
 test.setTimeout(35e3)
-
-test.describe('user auth', async () => {
+test.describe('auth', async () => {
     test('user creates an account', async ({ page, request }) => {
         await page.goto('/')
-        const privateKey = randomBytes(32).toString('hex')
 
         // Login
 
-        const key = await createUser(page, privateKey, request)
+        const key = await authenticateNewUser(page, request)
         const publicKeyContainer = await page.waitForSelector(`id=header-property-publicKey`)
         const publicKeyText = await publicKeyContainer?.innerText()
 
@@ -27,7 +25,7 @@ test.describe('user auth', async () => {
 
         // First login
 
-        const key = await createUser(page, privateKey, request)
+        const key = await authenticateUserByPrivateKey(page, privateKey, request, true)
 
         const publicKeyContainer = await page.waitForSelector(`id=header-property-publicKey`)
         const publicKeyTextTarget = await publicKeyContainer?.innerText()
@@ -35,17 +33,8 @@ test.describe('user auth', async () => {
         // Second login
 
         await page.click('id=logout-button')
-        await page.click('id=open-authenticate-button')
-        const bolt11Container2 = await page.waitForSelector('id=bolt11-text')
-        const bolt11Text2 = await bolt11Container2?.innerText()
+        const key2 = authenticateUserByPrivateKey(page, privateKey, request)
 
-        const cb2 = await getParams(bolt11Text2 ?? '').then((params) => {
-            return params as LNURLAuthParams
-        })
-
-        const { sig: sig2, key: key2 } = getSigAndKey(cb2, privateKey)
-        const authenticateUrl2 = `${cb2.callback}&sig=${sig2}&key=${key2}`
-        await request.get(authenticateUrl2)
         const publicKeyContainer2 = await page.waitForSelector(`id=header-property-publicKey`)
         const publicKeyTextTarget2 = await publicKeyContainer2?.innerText()
 

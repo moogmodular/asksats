@@ -35,19 +35,6 @@ export const BumpDisplay = ({ bumps, offerCount, hasFavouritedOffer }: BumpDispl
                     {bumps.bumpSum}
                 </div>
             </Tooltip>
-            {hasFavouritedOffer ? (
-                <Tooltip title={'already has a favourited offer'}>
-                    <div className={'flex flex-row items-center'}>
-                        <StarIcon color={'success'} />
-                    </div>
-                </Tooltip>
-            ) : (
-                <Tooltip title={'has no favourited offer yet'}>
-                    <div className={'flex flex-row items-center'}>
-                        <StarBorderIcon />
-                    </div>
-                </Tooltip>
-            )}
         </div>
     )
 }

@@ -17,7 +17,7 @@ export const TagPill = ({ tagValue }: TagPillProps) => {
     return (
         <Link href={`/ask/tag/${tagValue}`}>
             <Chip
-                className={'cursor-pointer'}
+                className={'cursor-pointer text-white'}
                 icon={
                     <div
                         className={`aspect-square w-6 rounded-full`}

@@ -1,17 +1,18 @@
 import { Link } from '@mui/material'
 import { trpc } from '~/utils/trpc'
-import { CountdownDisplay } from '~/components/common/CountdownDisplay'
-import { CountdownProgress } from '~/components/common/CountdownProgress'
 import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
-import { intervalToDuration } from 'date-fns'
 import { SatoshiIcon } from '~/components/common/SatishiIcon'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { LinkBehaviour } from '~/components/common/LinkBehaviour'
+import { CreateOffer } from '~/components/offer/CreateOffer'
+import React from 'react'
+import LocalOfferIcon from '@mui/icons-material/LocalOffer'
+import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
 
 interface SidebarStatsProps {}
 
 export const SidebarStats = ({}: SidebarStatsProps) => {
-    const { data: endingSoonData } = trpc.stats.endingSoon.useQuery()
+    const { data: oldestTopBountyNotSettledData } = trpc.stats.oldestTopBountyNotSettled.useQuery()
     const { data: topEarnersData } = trpc.stats.topEarners.useQuery()
     const { data: topSpendersData } = trpc.stats.topSpenders.useQuery()
     const { data: biggestGrossingAsksData } = trpc.stats.biggestGrossingAsks.useQuery()
@@ -19,37 +20,7 @@ export const SidebarStats = ({}: SidebarStatsProps) => {
 
     return (
         <div className={'flex flex-col gap-6 pt-8'}>
-            <div className={'emphasis-container'}>
-                <b>ending soon:</b>
-                <div className={'flex flex-col gap-1'}>
-                    {endingSoonData?.map((ask, index) => {
-                        return (
-                            <div key={index} className={'flex flex-row items-center gap-4'}>
-                                <Link
-                                    component={LinkBehaviour}
-                                    href={`/ask/single/${ask?.askContext?.slug ?? ''}`}
-                                    variant="body2"
-                                    className={'w-2/5'}
-                                >
-                                    {ask?.askContext?.title}
-                                </Link>
-                                <div className={'w-1/5 text-center'}>
-                                    <CountdownDisplay endDate={ask.deadlineAt ?? new Date()} />
-                                </div>
-                                <div className={'hidden w-2/5 border-r border-l border-black lg:block'}>
-                                    <CountdownProgress
-                                        creationDate={ask.createdAt}
-                                        endDate={ask.deadlineAt}
-                                        acceptedDate={ask.acceptedDeadlineAt}
-                                        status={ask.status}
-                                    />
-                                </div>
-                            </div>
-                        )
-                    })}
-                </div>
-            </div>
-            <div className={'emphasis-container'}>
+            <div>
                 <b>site:</b>
                 <div>
                     {siteStatsData && (
@@ -66,23 +37,70 @@ export const SidebarStats = ({}: SidebarStatsProps) => {
                     )}
                 </div>
             </div>
-            <div className={'emphasis-container'}>
-                <b>by gross:</b>
-                <div>
-                    {biggestGrossingAsksData?.map((ask, index) => {
+            <div>
+                <b>open tasks with high bounties:</b>
+                <div className={'flex flex-col gap-1'}>
+                    {oldestTopBountyNotSettledData?.map((ask, index) => {
                         return (
-                            <div key={index} className={'flex flex-row items-center gap-1'}>
+                            <div
+                                key={index}
+                                className={'flex flex-row items-center gap-2 p-2 shadow-md hover:bg-gray-50'}
+                            >
                                 <Link
                                     component={LinkBehaviour}
                                     href={`/ask/single/${ask?.askContext?.slug ?? ''}`}
                                     variant="body2"
-                                    className={'w-2/5'}
+                                    className={'grow'}
                                 >
                                     {ask?.askContext?.title}
                                 </Link>
-                                <div className={'flex flex-row items-center'}>
-                                    {ask.grossed}
+                                <div className={'flex w-48 flex-row items-center gap-1'}>
+                                    <i>Sum:</i>
+                                    <b>{ask.bumpSum}</b>
                                     <SatoshiIcon />
+                                </div>
+                                <div className={'flex w-12 flex-row items-center gap-1'}>
+                                    <b>{ask.bumpCount}</b>
+                                    <RocketLaunchOutlinedIcon color={'success'} />
+                                </div>
+                                <div className={'flex w-12 flex-row items-center gap-1'}>
+                                    <b>{ask.offerCount}</b>
+                                    <LocalOfferIcon color={'success'} />
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+            <div>
+                <b>by gross:</b>
+                <div>
+                    {biggestGrossingAsksData?.map((ask, index) => {
+                        return (
+                            <div
+                                key={index}
+                                className={'flex flex-row items-center gap-2 p-2 shadow-md hover:bg-gray-50'}
+                            >
+                                <Link
+                                    component={LinkBehaviour}
+                                    href={`/ask/single/${ask?.askContext?.slug ?? ''}`}
+                                    variant="body2"
+                                    className={'grow'}
+                                >
+                                    {ask?.askContext?.title}
+                                </Link>
+                                <div className={'flex w-48 flex-row items-center'}>
+                                    <i>Sum:</i>
+                                    <b>{ask.grossed}</b>
+                                    <SatoshiIcon />
+                                </div>
+                                <div className={'flex w-12 flex-row items-center gap-1'}>
+                                    <b>{ask.bumpCount}</b>
+                                    <RocketLaunchOutlinedIcon color={'success'} />
+                                </div>
+                                <div className={'flex w-12 flex-row items-center gap-1'}>
+                                    <b>{ask.offerCount}</b>
+                                    <LocalOfferIcon color={'success'} />
                                 </div>
                             </div>
                         )

@@ -9,77 +9,87 @@ import {
     TRANSACTION_FREQUENCY_SECONDS_LIMIT,
     TRANSACTION_MAX_AGE,
 } from '~/server/service/constants'
-import { ACTIVE_SELECT, PENDING_ACCEPTANCE_SELECT, SETTLED_SELECT } from '~/server/service/selects'
+import { prisma } from '~/server/prisma'
 
-export const userBalance = async (prisma: PrismaClient, userId: string) => {
+// export const userBalance = async (prisma: PrismaClient, userId: string) => {
+//     const user = await prisma.user.findUnique({
+//         where: { id: userId },
+//         include: { transaction: { where: { transactionStatus: 'SETTLED' } } },
+//     })
+//
+//     const settledBumpsToPay = await prisma.bump.findMany({
+//         where: {
+//             AND: [
+//                 { bidder: { id: userId } },
+//                 {
+//                     ask: { askStatus: 'SETTLED' },
+//                 },
+//             ],
+//         },
+//         include: { ask: true },
+//     })
+//
+//     const settledOffersToReceive = await prisma.offer.findMany({
+//         where: {
+//             AND: [
+//                 { author: { id: userId } },
+//                 {
+//                     ask: { askStatus: 'SETTLED' },
+//                 },
+//                 { favouritedById: { not: null } },
+//             ],
+//         },
+//         include: { ask: { include: { bumps: true } } },
+//     })
+//
+//     const lockedBumpsToPay = await prisma.bump.findMany({
+//         where: {
+//             AND: [
+//                 { bidder: { id: userId } },
+//                 {
+//                     ask: { askStatus: 'SETTLED' },
+//                 },
+//             ],
+//         },
+//         include: { ask: { include: { bumps: true } } },
+//     })
+//
+//     const settledBumpsToPaySum = settledBumpsToPay.reduce((acc, bump) => acc + bump.amount, 0)
+//
+//     const settledOffersToReceiveSum =
+//         settledOffersToReceive.reduce((acc, offer) => {
+//             const awardedAsk = offer.ask
+//             const sum = awardedAsk?.bumps.reduce((accBump, bump) => accBump + bump.amount, 0)
+//             return acc + (sum ?? 0)
+//         }, 0) * PAYOUT_FACTOR
+//
+//     const lockedBumpsToPaySum = lockedBumpsToPay.reduce((acc, bump) => acc + bump.amount, 0)
+//
+//     const transactionSum =
+//         user?.transaction.reduce((acc, cur) => {
+//             if (cur.mSatsSettled) {
+//                 const transactionValue = {
+//                     INVOICE: cur.mSatsSettled,
+//                     WITHDRAWAL: -cur.mSatsSettled,
+//                 }[cur.transactionKind]
+//                 return acc + transactionValue / MSATS_UNIT_FACTOR
+//             }
+//             return acc
+//         }, 0) ?? 0
+//
+//     return {
+//         availableBalance: transactionSum + settledOffersToReceiveSum - settledBumpsToPaySum - lockedBumpsToPaySum,
+//         lockedBalance: lockedBumpsToPaySum,
+//     }
+// }
+
+export const userBalance = async (userId: string) => {
     const user = await prisma.user.findUnique({
         where: { id: userId },
-        include: { transaction: { where: { transactionStatus: 'SETTLED' } } },
     })
-
-    const settledBumpsToPay = await prisma.bump.findMany({
-        where: {
-            AND: [
-                { bidder: { id: userId } },
-                {
-                    ask: SETTLED_SELECT,
-                },
-            ],
-        },
-        include: { ask: true },
-    })
-
-    const settledOffersToReceive = await prisma.offer.findMany({
-        where: {
-            AND: [
-                { author: { id: userId } },
-                {
-                    ask: SETTLED_SELECT,
-                },
-                { favouritedById: { not: null } },
-            ],
-        },
-        include: { ask: { include: { bumps: true } } },
-    })
-
-    const lockedBumpsToPay = await prisma.bump.findMany({
-        where: {
-            AND: [
-                { bidder: { id: userId } },
-                {
-                    OR: [{ ask: PENDING_ACCEPTANCE_SELECT }, { ask: ACTIVE_SELECT }],
-                },
-            ],
-        },
-        include: { ask: { include: { bumps: true } } },
-    })
-
-    const settledBumpsToPaySum = settledBumpsToPay.reduce((acc, bump) => acc + bump.amount, 0)
-
-    const settledOffersToReceiveSum =
-        settledOffersToReceive.reduce((acc, offer) => {
-            const awardedAsk = offer.ask
-            const sum = awardedAsk?.bumps.reduce((accBump, bump) => accBump + bump.amount, 0)
-            return acc + (sum ?? 0)
-        }, 0) * PAYOUT_FACTOR
-
-    const lockedBumpsToPaySum = lockedBumpsToPay.reduce((acc, bump) => acc + bump.amount, 0)
-
-    const transactionSum =
-        user?.transaction.reduce((acc, cur) => {
-            if (cur.mSatsSettled) {
-                const transactionValue = {
-                    INVOICE: cur.mSatsSettled,
-                    WITHDRAWAL: -cur.mSatsSettled,
-                }[cur.transactionKind]
-                return acc + transactionValue / MSATS_UNIT_FACTOR
-            }
-            return acc
-        }, 0) ?? 0
-
     return {
-        availableBalance: transactionSum + settledOffersToReceiveSum - settledBumpsToPaySum - lockedBumpsToPaySum,
-        lockedBalance: lockedBumpsToPaySum,
+        availableBalance: (user?.balance ?? 0) / MSATS_UNIT_FACTOR,
+        lockedBalance: (user?.lockedBalance ?? 0) / MSATS_UNIT_FACTOR,
     }
 }
 

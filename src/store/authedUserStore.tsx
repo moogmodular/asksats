@@ -1,4 +1,4 @@
-import create from 'zustand/vanilla'
+import { createStore } from 'zustand/vanilla'
 import { RouterOutput } from '~/utils/trpc'
 
 type GetMeOutput = RouterOutput['user']['getMe']
@@ -14,7 +14,7 @@ interface AuthedUser {
     logout: () => void
 }
 
-const authedUserStore = create<AuthedUser>((set) => ({
+export const authedUserStore = createStore<AuthedUser>((set) => ({
     user: undefined,
     setUser: (user: GetMeOutput) => {
         set({ user })
@@ -38,5 +38,3 @@ const authedUserStore = create<AuthedUser>((set) => ({
         set({ user: undefined, storeToken: '' })
     },
 }))
-
-export default authedUserStore

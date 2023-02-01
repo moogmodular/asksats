@@ -17,25 +17,27 @@ generator dbml {
 }
 
 model User {
-  id           String          @id @default(uuid())
-  createdAt    DateTime        @default(now())
-  updatedAt    DateTime        @updatedAt
+  id            String          @id @default(uuid())
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
   // props
-  lastLogin    DateTime?
-  publicKey    String          @unique
-  userName     String          @unique
-  profileImage String?
-  bio          String?
-  role         UserRole        @default(USER)
+  lastLogin     DateTime?
+  publicKey     String          @unique
+  userName      String          @unique
+  profileImage  String?
+  bio           String?
+  role          UserRole        @default(USER)
+  balance       Int             @default(0)
+  lockedBalance Int             @default(0)
   // rel
-  transaction  Transaction[]
-  asks         Ask[]
-  offers       Offer[]
-  bumps        Bump[]
-  askComment   AskComment[]
-  excludedTags Tag[]
-  blogItems    BlogItem[]
-  filePairs    OfferFilePair[]
+  transaction   Transaction[]
+  asks          Ask[]
+  offers        Offer[]
+  bumps         Bump[]
+  askComment    AskComment[]
+  excludedTags  Tag[]
+  blogItems     BlogItem[]
+  filePairs     OfferFilePair[]
 }
 
 enum UserRole {
@@ -102,22 +104,27 @@ enum TransactionStatus {
 }
 
 model Ask {
-  id                 String       @id @default(uuid())
-  createdAt          DateTime     @default(now())
-  updatedAt          DateTime     @updatedAt
+  id              String       @id @default(uuid())
+  createdAt       DateTime     @default(now())
+  updatedAt       DateTime     @updatedAt
   // props
-  userId             String?
-  deadlineAt         DateTime
-  acceptedDeadlineAt DateTime
-  askKind            AskKind
+  askKind         AskKind
+  askStatus       AskStatus
   // rel
-  user               User?        @relation(fields: [userId], references: [id])
-  askContext         AskContext?
-  offer              Offer[]
-  comments           AskComment[]
-  favouriteOffer     Offer?       @relation("favouriteOffer")
-  bumps              Bump[]
-  tags               TagsOnAsks[]
+  user            User?        @relation(fields: [userId], references: [id])
+  userId          String?
+  askContext      AskContext?
+  offer           Offer[]
+  comments        AskComment[]
+  settledForOffer Offer?       @relation("settledForOffer")
+  bumps           Bump[]
+  tags            TagsOnAsks[]
+}
+
+enum AskStatus {
+  OPEN
+  SETTLED
+  CANCELED
 }
 
 model Tag {
@@ -184,7 +191,7 @@ model Offer {
   // rel
   ask            Ask?          @relation(fields: [askId], references: [id])
   askId          String?
-  favouritedBy   Ask?          @relation(name: "favouriteOffer", fields: [favouritedById], references: [id])
+  favouritedBy   Ask?          @relation(name: "settledForOffer", fields: [favouritedById], references: [id])
   favouritedById String?       @unique
   author         User?         @relation(fields: [authorId], references: [id])
   authorId       String?
