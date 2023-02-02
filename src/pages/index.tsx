@@ -32,6 +32,7 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import theme from '~/theme'
 import { authedUserStore } from '~/store/authedUserStore'
 import { useStore } from 'zustand'
+import { EditAsk } from '~/components/ask/EditAsk'
 
 const IndexPage: NextPageWithLayout = () => {
     const { setUser, storeToken, storeLogin } = useStore(authedUserStore)
@@ -145,6 +146,11 @@ const IndexPage: NextPageWithLayout = () => {
                         welcome: (
                             <InteractionModal title={'Welcome!'}>
                                 <WelcomeScreen />
+                            </InteractionModal>
+                        ),
+                        editAsk: (
+                            <InteractionModal title={'Edit Ask'}>
+                                <EditAsk />
                             </InteractionModal>
                         ),
                         none: null,

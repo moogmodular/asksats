@@ -5,6 +5,7 @@ export const PER_USER_BALANCE_CAP = 60000
 export const MSATS_UNIT_FACTOR = 1000
 export const TRANSACTION_FREQUENCY_SECONDS_LIMIT = 60
 export const TRANSACTION_MAX_AGE = 60 * 60
+export const ASK_EDITABLE_TIME = 60 * 60 * 3
 export const INVOICE_LIMIT = 10
 export const BUMP_PUBLIC_MIN_BUMP_FACTOR = 0.1
 export const GLOBAL_MIN_BUMP_SATS = 10

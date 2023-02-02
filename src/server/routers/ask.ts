@@ -2,7 +2,6 @@ import { t } from '../trpc'
 import { prisma } from '~/server/prisma'
 import { isAuthed, isAuthedOrGuest } from '~/server/middlewares/authed'
 import { createAskInput } from '~/components/ask/CreateAsk'
-import { slugify } from '~/utils/string'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { s3Client } from '~/server/service/s3-client'
@@ -11,7 +10,7 @@ import { Prisma } from '@prisma/client'
 import { askListProps } from '~/store/listStore'
 import { minBumpForAsk, userBalance } from '~/server/service/accounting'
 import { TRPCError } from '@trpc/server'
-import { DEFAULT_EXCLUDED_TAG, MSATS_UNIT_FACTOR, PAYOUT_FACTOR } from '~/server/service/constants'
+import { ASK_EDITABLE_TIME, DEFAULT_EXCLUDED_TAG, MSATS_UNIT_FACTOR } from '~/server/service/constants'
 import { byAskKind, byTags, byUser, getOrder, getSearch } from '~/server/service/ask'
 import { AskStatus } from '~/components/ask/Ask'
 import {
@@ -19,6 +18,8 @@ import {
     doCreateAskBalanceTransaction,
     doSettleAskBalanceTransaction,
 } from '~/server/service/finalise'
+import { editAskInput } from '~/components/ask/EditAsk'
+import { add, isFuture } from 'date-fns'
 
 const byAskStatus = (status?: AskStatus) => {
     return status
@@ -181,6 +182,10 @@ export const askRouter = t.router({
                 listWithStatus.map(async (ask) => {
                     return {
                         ...ask,
+                        editable:
+                            isFuture(add(ask.createdAt, { seconds: ASK_EDITABLE_TIME })) &&
+                            ask.askStatus === 'OPEN' &&
+                            ask?.userId === ctx?.user?.id,
                         bumps: {
                             bumpCount: ask.bumps.length,
                             bumpSum: ask.bumps.reduce((acc, cur) => acc + cur.amount / MSATS_UNIT_FACTOR, 0),
@@ -206,6 +211,117 @@ export const askRouter = t.router({
                 items,
                 nextCursor,
             }
+        }),
+    getAskContext: t.procedure
+        .use(isAuthed)
+        .input(z.object({ askId: z.string() }))
+        .query(async ({ ctx, input }) => {
+            const ask = await prisma.ask.findUnique({
+                where: {
+                    id: input.askId,
+                },
+                include: {
+                    tags: {
+                        include: { tag: true },
+                    },
+                    askContext: {
+                        include: {
+                            headerImage: true,
+                        },
+                    },
+                },
+            })
+
+            return {
+                ask: ask,
+                ...ask?.askContext,
+                headerImageUrl: ask?.askContext?.headerImage?.s3Key
+                    ? await getSignedUrl(
+                          s3Client,
+                          new GetObjectCommand({
+                              Bucket: `${process.env.DO_API_NAME}`,
+                              Key: ask.askContext.headerImage.s3Key,
+                          }),
+                      )
+                    : '',
+            }
+        }),
+    edit: t.procedure
+        .use(isAuthed)
+        .input(editAskInput)
+        .mutation(async ({ ctx, input }) => {
+            const allTags = input.tags
+                ? await Promise.all(
+                      input.tags.map(async (tag) => {
+                          const existingTag = await prisma.tag.findUnique({ where: { name: tag } })
+
+                          if (existingTag) {
+                              return existingTag
+                          }
+
+                          return await prisma.tag.create({ data: { name: tag } })
+                      }),
+                  )
+                : []
+
+            const askCheck = await prisma.ask.findUnique({
+                where: {
+                    id: input.askId,
+                },
+            })
+
+            if (askCheck?.userId !== ctx?.user?.id) {
+                throw new TRPCError({ code: 'BAD_REQUEST', message: 'not your ask' })
+            }
+
+            if (!askCheck) {
+                throw new TRPCError({ code: 'BAD_REQUEST', message: 'ask not found' })
+            }
+
+            if (!isFuture(add(askCheck?.createdAt, { seconds: ASK_EDITABLE_TIME })) && askCheck?.askStatus === 'OPEN') {
+                throw new TRPCError({ code: 'BAD_REQUEST', message: 'ask not editable' })
+            }
+
+            await prisma.ask.update({
+                where: {
+                    id: input.askId,
+                },
+                data: {
+                    tags: {
+                        deleteMany: {},
+                    },
+                },
+            })
+
+            const ask = await prisma.ask.update({
+                where: {
+                    id: input.askId,
+                },
+                data: {
+                    tags: {
+                        createMany: {
+                            data: allTags.map((tag) => {
+                                return {
+                                    tagId: tag!.id,
+                                }
+                            }),
+                        },
+                    },
+                },
+                include: {
+                    askContext: true,
+                },
+            })
+
+            return await prisma.askContext.update({
+                where: {
+                    id: ask?.askContext?.id ?? '',
+                },
+                data: {
+                    content: input.content,
+                    headerImageId: input.headerImageId,
+                },
+            })
         }),
     create: t.procedure
         .use(isAuthed)
@@ -266,6 +382,10 @@ export const askRouter = t.router({
             ...askContext,
             ask: {
                 ...askContext?.ask,
+                editable:
+                    isFuture(add(askContext?.ask?.createdAt ?? new Date(), { seconds: ASK_EDITABLE_TIME })) &&
+                    askContext?.ask?.askStatus === 'OPEN' &&
+                    askContext?.ask?.userId === ctx?.user?.id,
                 minBump: minBumpForAsk(bumpSum, askContext?.ask?.askKind ?? 'PRIVATE'),
                 bumpSummary: askContext?.ask.bumps
                     .map((bump) => {

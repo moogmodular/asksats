@@ -15,6 +15,7 @@ import { SatoshiIcon } from '~/components/common/SatishiIcon'
 import { TagList } from '~/components/common/TagList'
 import { useEffect, useState } from 'react'
 import { AskTypeDisplay } from '~/components/common/AskTypeDisplay'
+import EditIcon from '@mui/icons-material/Edit'
 import {
     Accordion,
     AccordionDetails,
@@ -77,7 +78,7 @@ interface AskProps {
 }
 
 export const Ask = ({ slug }: AskProps) => {
-    const { createOffer, openImage } = useActionStore()
+    const { createOffer, openImage, openEditAsk } = useActionStore()
     const { user } = useStore(authedUserStore)
     const { showToast } = useMessageStore()
 
@@ -131,6 +132,10 @@ export const Ask = ({ slug }: AskProps) => {
         utils.ask.invalidate()
     }
 
+    const handleEditAsk = async () => {
+        openEditAsk(askData?.ask.id ?? '')
+    }
+
     return (
         <>
             {askData && askData.ask && (
@@ -171,18 +176,34 @@ export const Ask = ({ slug }: AskProps) => {
                                     <TagList tags={askData.ask.tags ?? []} />
                                 </div>
                                 {askData?.ask?.user?.id === user?.id && askData.ask.askStatus === 'OPEN' && (
-                                    <Tooltip title={`cancel this ask`}>
-                                        <Button
-                                            id="cancel-ask-button"
-                                            variant="contained"
-                                            color="warning"
-                                            component="div"
-                                            onClick={() => handleCancelAsk()}
-                                            startIcon={<DoNotDisturbIcon />}
-                                        >
-                                            cancel
-                                        </Button>
-                                    </Tooltip>
+                                    <div className={'flex flex-row gap-4'}>
+                                        {askData.ask.editable && (
+                                            <Tooltip title={`edit this ask`}>
+                                                <Button
+                                                    id="edit-ask-button"
+                                                    variant="contained"
+                                                    color="info"
+                                                    component="div"
+                                                    onClick={() => handleEditAsk()}
+                                                    startIcon={<EditIcon />}
+                                                >
+                                                    edit
+                                                </Button>
+                                            </Tooltip>
+                                        )}
+                                        <Tooltip title={`cancel this ask`}>
+                                            <Button
+                                                id="cancel-ask-button"
+                                                variant="contained"
+                                                color="warning"
+                                                component="div"
+                                                onClick={() => handleCancelAsk()}
+                                                startIcon={<DoNotDisturbIcon />}
+                                            >
+                                                cancel
+                                            </Button>
+                                        </Tooltip>
+                                    </div>
                                 )}
                             </div>
                             <h1 className={'my-4 py-2 text-3xl'}>{askData.title}</h1>

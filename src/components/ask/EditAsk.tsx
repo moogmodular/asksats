@@ -13,7 +13,7 @@ import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { useActionStore } from '~/store/actionStore'
 import { useMessageStore } from '~/store/messageStore'
 import { TagPill } from '~/components/common/TagPill'
-import { askTextDefault, bumpInfoText } from '~/server/service/constants'
+import { bumpInfoText } from '~/server/service/constants'
 import {
     Autocomplete,
     Button,
@@ -33,37 +33,38 @@ import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Tab from '@mui/material/Tab'
 
-type CreateAskInput = RouterInput['ask']['create']
+type EditAskInput = RouterInput['ask']['edit']
 
-export const createAskInput = z.object({
-    title: z.string().min(6).max(80),
-    content: z.string().max(2000),
-    amount: z.number().min(1),
+export const editAskInput = z.object({
+    askId: z.string().uuid(),
+    content: z.string().max(2000).optional(),
     tags: z.array(z.string().max(32)).max(5).optional(),
     headerImageId: z.string().optional(),
-    askKind: z.enum(['PUBLIC', 'BUMP_PUBLIC', 'PRIVATE']),
 })
+interface EditAskProps {}
 
-export const uploadedImageById = z.object({
-    imageId: z.string(),
-})
-
-interface CreateAskProps {}
-
-export const CreateAsk = ({}: CreateAskProps) => {
-    const { closeModal } = useActionStore()
+export const EditAsk = ({}: EditAskProps) => {
+    const { closeModal, askId } = useActionStore()
     const { showToast } = useMessageStore()
-    const [tempEditorState, setTempEditorState] = useState<string>(askTextDefault)
+
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
-    const [uploadedImageId, setUploadedImageId] = useState<string | null>(null)
-    const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-    const [tags, setTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const [possibleTags, setPossibleTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const matches = useMediaQuery('(min-width:1024px)')
-
     const inputRef = useRef<HTMLInputElement>(null)
 
-    const createAskMutation = trpc.ask.create.useMutation()
+    const { data: askContextData } = trpc.ask.getAskContext.useQuery({ askId })
+
+    const [tags, setTags] = useState<{ label: string; id: string; isNew: boolean }[]>(
+        askContextData?.ask?.tags.map((tag) => {
+            return { label: tag.tag.name, id: tag.tagId, isNew: false }
+        }) ?? [],
+    )
+    const [tempEditorState, setTempEditorState] = useState<string>(askContextData?.content ?? '')
+    const [uploadedImage, setUploadedImage] = useState<string | null>(askContextData?.headerImageUrl ?? null)
+
+    const [uploadedImageId, setUploadedImageId] = useState<string | null>(askContextData?.headerImageId ?? null)
+
+    const editAskMutation = trpc.ask.edit.useMutation()
     const utils = trpc.useContext()
 
     const {
@@ -74,13 +75,12 @@ export const CreateAsk = ({}: CreateAskProps) => {
         watch,
         formState: { errors },
     } = useZodForm({
-        schema: createAskInput,
+        schema: editAskInput,
         defaultValues: {
-            title: '',
-            content: '',
-            askKind: 'PUBLIC',
-            amount: 100,
-            headerImageId: '',
+            askId: askId,
+            content: askContextData?.content,
+            tags: askContextData?.ask?.tags.map((tag) => tag.tag.name) ?? [],
+            headerImageId: askContextData?.headerImageId ?? '',
         },
     })
 
@@ -94,7 +94,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
         editorState: () => {
             const root = $getRoot()
             const pNode = $createParagraphNode()
-            pNode.append($createTextNode(tempEditorState))
+            pNode.append($createTextNode(askContextData?.content))
             root.append(pNode)
             return
         },
@@ -103,23 +103,21 @@ export const CreateAsk = ({}: CreateAskProps) => {
         onError,
     }
 
-    const onSubmit = async (data: CreateAskInput) => {
+    const onSubmit = async (data: EditAskInput) => {
         console.log(data)
         try {
-            await createAskMutation.mutateAsync({
-                title: data.title,
-                askKind: data.askKind,
-                amount: data.amount,
+            await editAskMutation.mutateAsync({
+                askId: askId,
                 tags: tags.map((t) => t.label),
                 headerImageId: uploadedImageId ?? '',
                 content: tempEditorState,
             })
-            showToast('success', 'Ask created')
-            await utils.ask.invalidate()
+            showToast('success', 'Ask updated')
+            await utils.invalidate()
             closeModal()
         } catch (error: any) {
             showToast('error', error.message)
-            await utils.ask.invalidate()
+            await utils.invalidate()
         }
     }
 
@@ -166,6 +164,8 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 imageId: url.imageId,
             })
 
+            console.log('uploadedImage', uploadedImage)
+
             setUploadedImage(uploadedImage)
 
             return
@@ -202,11 +202,13 @@ export const CreateAsk = ({}: CreateAskProps) => {
 
     return (
         <form className={'flex flex-col gap-4 py-4'}>
+            <b className={'text-2xl'}>{askContextData?.title}</b>
+            <b>{askContextData?.ask?.askKind}</b>
             <div className={'flex flex-col gap-4 lg:flex-row'}>
                 {uploadedImage ? (
                     <img
                         className={'aspect-square w-12 lg:w-36 lg:object-cover'}
-                        src={uploadedImage}
+                        src={uploadedImage ?? ''}
                         alt="uploaded image"
                     />
                 ) : (
@@ -214,56 +216,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 )}
                 <div className={'flex h-full w-full flex-col justify-between gap-2'}>
                     <div className={'flex w-full flex-col items-center gap-6 lg:flex-row'}>
-                        <TextField
-                            id="create-ask-title"
-                            className={'w-full lg:w-1/2'}
-                            size={`${matches ? 'medium' : 'small'}`}
-                            error={Boolean(errors.title)}
-                            label={'Title'}
-                            placeholder={'Title...'}
-                            type="text"
-                            variant="outlined"
-                            {...register('title', {
-                                required: true,
-                            })}
-                            helperText={errors.title?.message}
-                        />
-                        <TextField
-                            id="create-ask-amount"
-                            size={`${matches ? 'medium' : 'small'}`}
-                            error={Boolean(errors.amount)}
-                            {...register('amount', {
-                                required: true,
-                                valueAsNumber: true,
-                            })}
-                            label="Amount"
-                            type="number"
-                            InputLabelProps={{
-                                shrink: true,
-                            }}
-                            helperText={errors.amount && errors.amount.message}
-                        />
-                        <FormControl className={'w-60'} size={`${matches ? 'medium' : 'small'}`}>
-                            <InputLabel id="ask-kind-label">Select an option</InputLabel>
-                            <Select
-                                labelId="demo-simple-select-label"
-                                label="Select an option"
-                                id="select-bump-kind"
-                                {...register('askKind', { required: true })}
-                                error={Boolean(errors.askKind)}
-                                defaultValue={'PUBLIC'}
-                            >
-                                <MenuItem id={'bump-kind-public'} value={'PUBLIC'}>
-                                    Public
-                                </MenuItem>
-                                <MenuItem id={'bump-kind-bump-public'} value={'BUMP_PUBLIC'}>
-                                    Bump Public
-                                </MenuItem>
-                                <MenuItem id={'bump-kind-private'} value={'PRIVATE'}>
-                                    Private
-                                </MenuItem>
-                            </Select>
-                        </FormControl>
                         <Tooltip title={bumpInfoText}>
                             <InfoIcon />
                         </Tooltip>
@@ -354,7 +306,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
                 id={'create-ask-submit'}
                 color={'primary'}
                 component="div"
-                disabled={Boolean(errors.title || errors.amount || errors.askKind)}
                 onClick={() => {
                     handleSubmit(onSubmit)()
                 }}

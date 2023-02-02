@@ -1,10 +1,21 @@
 import { create } from 'zustand'
 
-type Modals = 'none' | 'authenticate' | 'transact' | 'editUser' | 'createAsk' | 'addOffer' | 'viewImage' | 'welcome'
+type Modals =
+    | 'none'
+    | 'authenticate'
+    | 'transact'
+    | 'editUser'
+    | 'createAsk'
+    | 'addOffer'
+    | 'viewImage'
+    | 'editAsk'
+    | 'welcome'
 
 interface Action {
     currentModal: Modals
     setCurrentModal: (modal: Modals) => void
+    openEditAsk: (askId: string) => void
+    askToEdit: string
     closeModal: () => void
     askId: string
     createOffer: (askId: string) => void
@@ -17,6 +28,10 @@ export const useActionStore = create<Action>((set) => ({
     setCurrentModal: (modal: Modals) => {
         set({ currentModal: modal })
     },
+    openEditAsk: (askId: string) => {
+        set({ askId: askId, currentModal: 'editAsk' })
+    },
+    askToEdit: '',
     closeModal: () => {
         set({ currentModal: 'none' })
     },
