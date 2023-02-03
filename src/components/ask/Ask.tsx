@@ -169,6 +169,11 @@ export const Ask = ({ slug }: AskProps) => {
                         <div className={'p-4'}>
                             <div className={'flex flex-row justify-between '}>
                                 <div className={'flex flex-row items-center gap-4'}>
+                                    {askData?.ask?.space?.name && (
+                                        <Tooltip title={'space'}>
+                                            <div className={'w-28 text-xs'}>s:{askData.ask.space.name}</div>
+                                        </Tooltip>
+                                    )}
                                     <AskTypeDisplay
                                         data-popover-target="popover-default"
                                         type={askData.ask.askKind ?? 'PRIVATE'}

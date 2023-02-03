@@ -86,11 +86,7 @@ export const AskPreview = ({ ask, index }: AskPreviewProps) => {
                                             <PlayCircleFilledIcon fontSize={'small'} />
                                         </IconPropertyDisplay>
                                     )}
-                                    <BumpDisplay
-                                        bumps={ask.bumps}
-                                        offerCount={ask.offerCount}
-                                        hasFavouritedOffer={Boolean(ask.settledForOffer)}
-                                    />
+                                    <BumpDisplay bumps={ask.bumps} offerCount={ask.offerCount} />
                                 </div>
                                 <div className={'flex flex-row justify-between'}>
                                     <IconPropertyDisplay identifier={'userName'} value={ask.user?.userName} link={true}>
@@ -105,6 +101,11 @@ export const AskPreview = ({ ask, index }: AskPreviewProps) => {
                                 <b className={'lg:text-md cursor-pointer'}>{ask.askContext.title}</b>
                             </Link>
                         </div>
+                        {ask?.space?.name && (
+                            <Tooltip title={'space'}>
+                                <div className={'w-44 text-xs'}>s:{ask.space.name}</div>
+                            </Tooltip>
+                        )}
                     </div>
                     {
                         {

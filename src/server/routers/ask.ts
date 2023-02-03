@@ -179,6 +179,9 @@ export const askRouter = t.router({
                         tags: {
                             include: { tag: true },
                         },
+                        space: {
+                            select: { name: true },
+                        },
                     },
                 })
                 .then((list) =>
@@ -402,6 +405,7 @@ export const askRouter = t.router({
                         offer: true,
                         settledForOffer: true,
                         tags: { include: { tag: true } },
+                        space: true,
                     },
                 },
                 headerImage: true,
