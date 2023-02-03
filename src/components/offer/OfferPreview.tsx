@@ -3,11 +3,9 @@ import { MDRender } from '~/components/common/MDRender'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
 import { FileView } from '~/components/FileView'
-import { Accordion, AccordionDetails, AccordionSummary, Button, IconButton, Tooltip } from '@mui/material'
-import StarIcon from '@mui/icons-material/Star'
+import { Accordion, AccordionDetails, AccordionSummary, Button, Tooltip } from '@mui/material'
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 import DesignServicesIcon from '@mui/icons-material/DesignServices'
-import StarBorderIcon from '@mui/icons-material/StarBorder'
 import CheckIcon from '@mui/icons-material/Check'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
@@ -65,7 +63,6 @@ export const OfferPreview = ({ offer, canFavourite, index }: OfferPreviewProps) 
                                 <FileView
                                     index={index}
                                     key={index}
-                                    filePairId={pair.id}
                                     offerFileUrl={pair.offerFileUrl}
                                     obscureFileUrl={pair.obscureFileUrl}
                                 />

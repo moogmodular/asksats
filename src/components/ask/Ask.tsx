@@ -217,11 +217,7 @@ export const Ask = ({ slug }: AskProps) => {
                                         {askData.ask.bumpSummary && bumpSummary(askData.ask.bumpSummary)}
                                     </div>
                                 </Tooltip>
-                                <BumpDisplay
-                                    bumps={askData.ask.bumps}
-                                    offerCount={askData.ask.offerCount ?? 0}
-                                    hasFavouritedOffer={Boolean(askData.ask.settledForOffer)}
-                                />
+                                <BumpDisplay bumps={askData.ask.bumps} offerCount={askData.ask.offerCount ?? 0} />
                                 {askData.ask.askStatus === 'OPEN' && (
                                     <div className={'flex-row-end flex min-w-fit items-center justify-between gap-2'}>
                                         {(askData.ask.askKind === 'BUMP_PUBLIC' ||
@@ -285,14 +281,15 @@ export const Ask = ({ slug }: AskProps) => {
                             <>
                                 <Divider className={'my-8'} />
                                 <h3 className={'mb-6 text-xl'}>Offers</h3>
-                                <div className={'flex flex-row gap-4'}>
-                                    <InfoIcon />
-                                    <i>
-                                        if you have any offers you can set any one of them as your favourite and change
-                                        your mind at any time, however when the ask runs out your favourite offer will
-                                        be the one that is accepted
-                                    </i>
-                                </div>
+                                {askData.ask.userId === user.id && (
+                                    <div className={'flex flex-row gap-4'}>
+                                        <InfoIcon />
+                                        <i>
+                                            If you received an offer you like, you can settle for it. This will close
+                                            the ask and the offer will be marked as settled.
+                                        </i>
+                                    </div>
+                                )}
                                 {askData.ask.askKind !== 'PRIVATE' || askData.ask.user === user.id ? (
                                     <OfferList
                                         askId={askData.ask.id ?? ''}

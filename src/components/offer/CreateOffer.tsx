@@ -123,12 +123,12 @@ export const CreateOffer = ({}: CreateOfferProps) => {
             rawImagePairs.map(async (pair) => {
                 const uploadData = await getPreSignedPairUrlMutation.mutateAsync()
 
-                const originalRes = await resolveImage(
+                await resolveImage(
                     pair.originalImage,
                     uploadData.originalImageUploadUrl.fields,
                     uploadData.originalImageUploadUrl.url,
                 )
-                const obfuscatedRes = await resolveImage(
+                await resolveImage(
                     pair.obfuscatedImage,
                     uploadData.obscuredImageUploadUrl.fields,
                     uploadData.obscuredImageUploadUrl.url,
