@@ -29,7 +29,7 @@
         "postinstall": "prisma generate"
     },
     "prisma": {
-        "seed": "yarn ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed.ts"
+        "seed": "yarn ts-node --compiler-options {\"module\":\"CommonJS\"} prisma/seed-prod.ts"
     },
     "prettier": {
         "printWidth": 120,
