@@ -1,4 +1,4 @@
-import { Link } from '@mui/material'
+import { Alert, Link } from '@mui/material'
 import { trpc } from '~/utils/trpc'
 import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
 import { SatoshiIcon } from '~/components/common/SatishiIcon'
@@ -17,8 +17,17 @@ export const SidebarStats = ({}: SidebarStatsProps) => {
     const { data: biggestGrossingAsksData } = trpc.stats.biggestGrossingAsks.useQuery()
     const { data: siteStatsData } = trpc.stats.siteStats.useQuery()
 
+    const { data: serverMessagesData } = trpc.staticData.serverMessages.useQuery()
+
     return (
         <div className={'flex flex-col gap-4 pt-8'}>
+            {serverMessagesData?.messages.map((message, index) => {
+                return message.enabled ? (
+                    <Alert key={index} severity={message.type}>
+                        {message.message}
+                    </Alert>
+                ) : null
+            })}
             <div>
                 <b>site:</b>
                 <div>

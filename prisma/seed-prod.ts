@@ -1,4 +1,6 @@
 import { PrismaClient } from '@prisma/client'
+import { ServerMessage } from '~/server/routers/staticData'
+import { JsonArray, JsonValue } from 'type-fest'
 
 const prisma = new PrismaClient()
 
@@ -119,6 +121,28 @@ async function main() {
                     'wss://nostr.oxtr.dev',
                     'wss://nostr.fmt.wiz.biz',
                 ],
+            },
+        },
+    })
+
+    const messages = [
+        {
+            message: 'This site is in beta and under active development. Please report any bugs you find.',
+            type: 'warning',
+            enabled: true,
+        },
+        {
+            message: 'This site is in beta and under active development. Do not transfer any funds.',
+            type: 'warning',
+            enabled: true,
+        },
+    ] as ServerMessage[]
+
+    await prisma.staticData.create({
+        data: {
+            key: 'serverMessages',
+            value: {
+                messages: messages as unknown as JsonArray,
             },
         },
     })

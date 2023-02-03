@@ -1,6 +1,12 @@
 import { t } from '../trpc'
 import { prisma } from '~/server/prisma'
 
+export interface ServerMessage {
+    message: string
+    type: 'error' | 'warning' | 'info' | 'success'
+    enabled: boolean
+}
+
 export const staticDataRouter = t.router({
     walletList: t.procedure.query(async ({ ctx, input }) => {
         const wallets = await prisma.staticData.findUnique({ where: { key: 'wallets' } }).then((data) => data?.value)
@@ -21,5 +27,12 @@ export const staticDataRouter = t.router({
     nostrRelays: t.procedure.query(async ({ ctx, input }) => {
         const relays = await prisma.staticData.findUnique({ where: { key: 'nostrRelays' } }).then((data) => data?.value)
         return relays as { relays: string }
+    }),
+    serverMessages: t.procedure.query(async ({ ctx, input }) => {
+        const serverMessages = await prisma.staticData
+            .findUnique({ where: { key: 'warningMessages' } })
+            .then((data) => data?.value)
+        console.log(serverMessages)
+        return serverMessages as unknown as { messages: ServerMessage[] }
     }),
 })
