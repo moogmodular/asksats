@@ -14,6 +14,7 @@ export const SidebarAbout = ({}: SidebarAboutProps) => {
     return (
         <div className={'prose flex h-full flex-col items-center pt-8'}>
             <h2>About:</h2>
+            <img src={'/artisats_big_logo.svg'} className={'h-48 w-48'} />
             {data && <MDRender content={data.message} />}
             <div className={'flex grow flex-col items-center justify-between'}>
                 <div className={'flex flex-row items-center'}>
