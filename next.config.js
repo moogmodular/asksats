@@ -58,18 +58,6 @@ module.exports = getConfig({
                 destination: '/',
             },
             {
-                source: '/ask/bumps',
-                destination: '/',
-            },
-            {
-                source: '/ask/offers',
-                destination: '/',
-            },
-            {
-                source: '/ask/files',
-                destination: '/',
-            },
-            {
                 source: '/ask/timeline/:space',
                 destination: '/',
             },

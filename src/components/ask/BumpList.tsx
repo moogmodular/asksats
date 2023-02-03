@@ -9,7 +9,7 @@ export const BumpList = ({}: BumpListProps) => {
     const { data: bumpListData } = trpc.bump.myBumps.useQuery()
 
     return (
-        <div className={'flex w-full flex-col gap-4 overflow-y-scroll xl:grid-cols-3'}>
+        <div className={'flex flex-col gap-2'}>
             <h3 className={'text-lg font-bold'}>my bumps:</h3>
             {bumpListData?.map((bump, index) => {
                 return (

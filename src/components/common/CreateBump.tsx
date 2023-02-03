@@ -35,10 +35,11 @@ export const CreateBumpButton = ({ askId, minBump }: CreateBumpButtonProps) => {
                 askId: askId,
             })
             showToast('success', 'Bump created')
-            utils.ask.invalidate()
+            void utils.ask.invalidate()
+            void utils.bump.invalidate()
         } catch (error: any) {
             showToast('error', error.message)
-            utils.ask.invalidate()
+            void utils.ask.invalidate()
         }
     }
 

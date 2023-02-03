@@ -13,8 +13,6 @@ import { CreateOffer } from '~/components/offer/CreateOffer'
 import { useRouter } from 'next/router'
 import { Ask } from '~/components/ask/Ask'
 import { useActionStore } from '~/store/actionStore'
-import { BumpList } from '~/components/ask/BumpList'
-import { OfferList } from '~/components/ask/OfferList'
 import { Logo } from '~/components/layout/Logo'
 import { ImageView } from '~/components/common/ImageView'
 import { useMessageStore } from '~/store/messageStore'
@@ -22,7 +20,6 @@ import { Sidebar } from '~/components/layout/Sidebar'
 import { ToasterDisplay } from '~/components/common/Toaster'
 import { useUXStore } from '~/store/uxStore'
 import { BlogList } from '~/components/blog/BlogList'
-import { FileList } from '~/components/FileList'
 import { useAutoAnimate } from '@formkit/auto-animate/react'
 import MenuIcon from '@mui/icons-material/Menu'
 import { Button, ThemeProvider } from '@mui/material'
@@ -72,7 +69,7 @@ const IndexPage: NextPageWithLayout = () => {
     return (
         <ThemeProvider theme={theme}>
             <div className={'index-background flex max-h-screen flex-col lg:flex-row'}>
-                <div className={'flex w-full flex-col gap-4 shadow-2xl lg:w-4/12'}>
+                <div className={'flex w-full flex-col shadow-2xl lg:w-4/12'}>
                     <header className={'flex flex-row gap-1 bg-primary p-2 shadow-xl lg:gap-4 lg:p-4'}>
                         {!matches && (
                             <Button
@@ -101,9 +98,7 @@ const IndexPage: NextPageWithLayout = () => {
                     )}
                 </div>
                 <main
-                    className={
-                        'bg-sidebar flex grow flex-col gap-4 overflow-hidden bg-gray-100 lg:w-8/12 lg:pb-6 lg:pl-6 lg:pr-6'
-                    }
+                    className={'flex max-h-fit grow flex-col gap-4 bg-gray-100 lg:w-8/12 lg:pb-6 lg:pl-6 lg:pr-6'}
                     ref={parent}
                 >
                     {routerPath(router.asPath) === 'timeline' && <SpaceBar />}
@@ -112,10 +107,7 @@ const IndexPage: NextPageWithLayout = () => {
                             single: <Ask slug={router.query.slug as string} />,
                             timeline: <AskList />,
                             tag: <AskList />,
-                            bumps: <BumpList />,
-                            offers: <OfferList />,
                             user: <AskList />,
-                            files: <FileList />,
                             blog: <BlogList />,
                         }[routerPath(router.asPath)]
                     }

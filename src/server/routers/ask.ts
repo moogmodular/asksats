@@ -39,7 +39,18 @@ const bySpace = (space = 'all') => {
 
 export const askRouter = t.router({
     myList: t.procedure.use(isAuthed).query(async ({ ctx, input }) => {
-        return await prisma.ask.findMany({ where: { user: { id: ctx.user.id } } })
+        const myAsks = await prisma.ask.findMany({
+            where: { user: { id: ctx.user.id } },
+            include: { askContext: true, bumps: true, offer: true },
+        })
+        return myAsks.map((ask) => {
+            return {
+                ...ask,
+                bumpSum: ask.bumps.reduce((acc, bump) => acc + bump.amount / MSATS_UNIT_FACTOR, 0),
+                offerCount: ask.offer.length,
+                bumpCount: ask.bumps.length,
+            }
+        })
     }),
     cancel: t.procedure
         .use(isAuthed)

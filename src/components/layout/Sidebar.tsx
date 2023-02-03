@@ -29,7 +29,7 @@ export const Sidebar = ({}: SidebarProps) => {
     const [currentTab, setCurrentTab] = useState<Tab>('stats')
 
     return (
-        <div className={'no-scrollbar flex flex-col justify-center gap-2 overflow-y-scroll text-btcgrey'}>
+        <div className={'flex flex-col justify-center gap-2 text-btcgrey'}>
             <div className={'grow'}>
                 <Tabs
                     value={currentTab}
