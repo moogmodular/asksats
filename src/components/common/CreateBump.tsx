@@ -34,7 +34,6 @@ export const CreateBumpButton = ({ askId, minBump }: CreateBumpButtonProps) => {
                 amount: getValues('amount'),
                 askId: askId,
             })
-            console.log('bump created')
             showToast('success', 'Bump created')
             utils.ask.invalidate()
         } catch (error: any) {

@@ -63,7 +63,6 @@ export const CreateComment = ({ askId, commentId, invalidate }: CreateCommentPro
                     content: tempEditorState,
                 })
                 .then(() => {
-                    console.log('comment created')
                     showToast('success', 'Comment created')
                 })
                 .catch((error) => {

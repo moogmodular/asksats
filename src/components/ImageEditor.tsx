@@ -63,9 +63,7 @@ interface ImageEditorProps {
 }
 
 export const ImageEditor = ({ currentImage, editedImage, preset }: ImageEditorProps) => {
-    const handleImageEdited = (editedImageObject: SavedImageData, designState: ImageDesignState) => {
-        console.log('editedImageObject', editedImageObject)
-        console.log('designState', designState)
+    const handleImageEdited = (editedImageObject: SavedImageData) => {
         editedImage(editedImageObject.imageBase64 ?? '')
     }
 
@@ -93,7 +91,7 @@ export const ImageEditor = ({ currentImage, editedImage, preset }: ImageEditorPr
         <div style={{ height: '80vh' }}>
             <FilerobotImageEditor
                 source={currentImage ?? 'https://scaleflex.airstore.io/demo/stephen-walker-unsplash.jpg'}
-                onSave={(editedImageObject, designState) => handleImageEdited(editedImageObject, designState)}
+                onSave={(editedImageObject, designState) => handleImageEdited(editedImageObject)}
                 annotationsCommon={{
                     fill: '#ff0000',
                 }}

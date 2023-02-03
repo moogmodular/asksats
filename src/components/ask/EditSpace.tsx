@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useZodForm } from '~/utils/useZodForm'
 import { useState } from 'react'
-import { RouterInput, RouterOutput, trpc } from '~/utils/trpc'
+import { RouterInput, trpc } from '~/utils/trpc'
 import { useActionStore } from '~/store/actionStore'
 import { useMessageStore } from '~/store/messageStore'
 import { Button, Checkbox, FormControlLabel, TextField, Tooltip } from '@mui/material'
@@ -10,17 +10,12 @@ import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 type EditSpaceInput = RouterInput['space']['editSpace']
-type Space = RouterOutput['space']['list'][0]
 
 export const editSpaceInput = z.object({
     spaceId: z.string(),
     description: z.string().min(1).max(500),
     nsfw: z.boolean(),
     headerImageId: z.string().optional(),
-})
-
-export const uploadedImageById = z.object({
-    imageId: z.string(),
 })
 
 interface EditSpaceProps {}
@@ -58,7 +53,6 @@ export const EditSpace = ({}: EditSpaceProps) => {
         },
     })
     const onSubmit = async (data: EditSpaceInput) => {
-        console.log(data)
         try {
             await editSpaceMutation.mutateAsync({
                 spaceId: spaceId,

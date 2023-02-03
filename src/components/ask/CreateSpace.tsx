@@ -1,7 +1,7 @@
 import { z } from 'zod'
 import { useZodForm } from '~/utils/useZodForm'
 import { useState } from 'react'
-import { RouterInput, RouterOutput, trpc } from '~/utils/trpc'
+import { RouterInput, trpc } from '~/utils/trpc'
 import { useActionStore } from '~/store/actionStore'
 import { useMessageStore } from '~/store/messageStore'
 import { SPACE_CREATION_COST } from '~/server/service/constants'
@@ -11,17 +11,12 @@ import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 
 type CreateSpaceInput = RouterInput['space']['create']
-type Space = RouterOutput['space']['list'][0]
 
 export const createSpaceInput = z.object({
     name: z.string().min(1).max(50),
     description: z.string().min(1).max(500),
     nsfw: z.boolean(),
     headerImageId: z.string().optional(),
-})
-
-export const uploadedImageById = z.object({
-    imageId: z.string(),
 })
 
 interface CreateSpaceProps {}
@@ -32,7 +27,6 @@ export const CreateSpace = ({}: CreateSpaceProps) => {
     const utils = trpc.useContext()
     const [uploadedImageId, setUploadedImageId] = useState<string | null>(null)
     const [uploadedImage, setUploadedImage] = useState<string | null>(null)
-    const [tags, setTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const matches = useMediaQuery('(min-width:1024px)')
 
     const createSpaceMutation = trpc.space.create.useMutation()
@@ -54,7 +48,6 @@ export const CreateSpace = ({}: CreateSpaceProps) => {
         },
     })
     const onSubmit = async (data: CreateSpaceInput) => {
-        console.log(data)
         try {
             await createSpaceMutation.mutateAsync({
                 name: data.name,

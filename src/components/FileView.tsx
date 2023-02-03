@@ -1,13 +1,12 @@
 import { useActionStore } from '~/store/actionStore'
 
 interface FileViewProps {
-    filePairId: string
     offerFileUrl: string
     obscureFileUrl: string
     index: number
 }
 
-export const FileView = ({ filePairId, offerFileUrl, obscureFileUrl, index }: FileViewProps) => {
+export const FileView = ({ offerFileUrl, obscureFileUrl, index }: FileViewProps) => {
     const { openImage } = useActionStore()
 
     return (

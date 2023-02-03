@@ -13,7 +13,6 @@ export const isAuthed = t.middleware(async ({ ctx, next }) => {
 })
 
 export const isAdmin = t.middleware(async ({ ctx, next }) => {
-    console.log('isAdmin', ctx)
     if (!ctx.user) {
         throw new TRPCError({ code: 'UNAUTHORIZED', message: 'Not authenticated. Please log in.' })
     }

@@ -1,4 +1,3 @@
-import { EditorThemeClasses } from 'lexical'
 import { MDRender } from '~/components/common/MDRender'
 import { RouterOutput } from '~/utils/trpc'
 import { CreateBlogItem } from '~/components/blog/CreateBlogItem'
@@ -15,12 +14,6 @@ interface BlogItemViewProps {
 
 export const BlogItemView = ({ blogItem }: BlogItemViewProps) => {
     const { currentOpenModalId, setCurrentOpenModalId } = useBlogUXStore()
-
-    const onError = (error: Error) => {
-        console.error(error)
-    }
-
-    const theme: EditorThemeClasses = {}
 
     return (
         <div className={'content-block'}>

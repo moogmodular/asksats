@@ -17,8 +17,6 @@ import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import NoPhotographyIcon from '@mui/icons-material/NoPhotography'
 import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled'
 import { AskStatus } from '~/components/ask/Ask'
-import { useStore } from 'zustand'
-import { authedUserStore } from '~/store/authedUserStore'
 
 type AskPreviewOutput = RouterOutput['ask']['list']['items'][0]
 
@@ -34,7 +32,6 @@ interface AskPreviewProps {
 
 export const AskPreview = ({ ask, index }: AskPreviewProps) => {
     const { createOffer } = useActionStore()
-    const { user } = useStore(authedUserStore)
 
     return (
         <div

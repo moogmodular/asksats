@@ -1,14 +1,10 @@
 import { FilterForInput, OrderByDirectionInput, OrderByInput, useListStore } from '~/store/listStore'
-import { useEffect, useState } from 'react'
-import { useAutoAnimate } from '@formkit/auto-animate/react'
-import { useRouter } from 'next/router'
+import { useState } from 'react'
 import { Button, InputAdornment, Menu, MenuItem, TextField } from '@mui/material'
 import KeyboardArrowDownIcon from '@mui/icons-material/KeyboardArrowDown'
 import SearchIcon from '@mui/icons-material/Search'
 import SouthIcon from '@mui/icons-material/South'
 import NorthIcon from '@mui/icons-material/North'
-import { useStore } from 'zustand'
-import { authedUserStore } from '~/store/authedUserStore'
 
 interface SubHeaderToolbarHeaderProps {}
 
@@ -23,7 +19,6 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
         orderByDirection,
         setTemplate,
     } = useListStore()
-    const { user } = useStore(authedUserStore)
 
     const [anchorElFilterFor, setAnchorElFilterFor] = useState<null | HTMLElement>(null)
     const [anchorElOrderBy, setAnchorElOrderBy] = useState<null | HTMLElement>(null)
@@ -71,23 +66,6 @@ export const SubHeaderToolbarHeader = ({}: SubHeaderToolbarHeaderProps) => {
         setOrderByDirection(direction)
         handleCloseDirection()
     }
-
-    const router = useRouter()
-    const [hideForSingle, setHideForSingle] = useState(false)
-    const [parent] = useAutoAnimate<HTMLDivElement>()
-
-    const userNameFromPath = (path: any): string => {
-        return path.split('/')[2]
-    }
-
-    useEffect(() => {
-        const path = userNameFromPath(router.asPath)
-        if (path === 'single') {
-            setHideForSingle(true)
-        } else {
-            setHideForSingle(false)
-        }
-    }, [router])
 
     return (
         <>

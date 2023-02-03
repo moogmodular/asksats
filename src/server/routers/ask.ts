@@ -142,8 +142,6 @@ export const askRouter = t.router({
         .use(isAuthedOrGuest)
         .input(askListProps)
         .query(async ({ ctx, input }) => {
-            console.log('list', input)
-
             const excludedTags = ctx?.user
                 ? await prisma.user.findUnique({ where: { id: ctx?.user?.id } }).excludedTags()
                 : undefined
@@ -339,8 +337,6 @@ export const askRouter = t.router({
         .input(createAskInput)
         .mutation(async ({ ctx, input }) => {
             const { availableBalance } = await userBalance(ctx?.user?.id)
-
-            console.log('input', input)
 
             if (availableBalance < input.amount) {
                 throw new TRPCError({

@@ -1,7 +1,6 @@
 import { PlaywrightTestConfig, devices } from '@playwright/test'
 
 const baseUrl = process.env.COMPOSITE_DOMAIN || 'http://192.168.0.199:3000'
-console.log(`ℹ️ Using base URL "${baseUrl}"`)
 
 const opts = {
     // launch headless on CI, in browser locally

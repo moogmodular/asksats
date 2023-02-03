@@ -24,17 +24,16 @@ export const SidebarTaxonomy = ({}: SidebarTaxonomyProps) => {
 
     const handleUncheckTag = async (tagName: string) => {
         await unExcludeTagMutation.mutateAsync({ tagName })
-        utils.taxonomy.invalidate()
+        void utils.taxonomy.invalidate()
     }
 
     const handleAddTag = async (tagName: string) => {
         await excludeTagMutation.mutateAsync({ tagName })
-        utils.taxonomy.invalidate()
+        void utils.taxonomy.invalidate()
     }
 
     const handleSearchInput = async (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const searchTerm = e.target.value
-        console.log(searchTerm)
         await utils.taxonomy.searchTags.fetch({ search: searchTerm }).then((data) => {
             const tagResults = data.map((tag) => tag.name)
             const contains = tagResults.includes(searchTerm)

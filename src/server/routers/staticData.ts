@@ -32,7 +32,6 @@ export const staticDataRouter = t.router({
         const serverMessages = await prisma.staticData
             .findUnique({ where: { key: 'warningMessages' } })
             .then((data) => data?.value)
-        console.log(serverMessages)
         return serverMessages as unknown as { messages: ServerMessage[] }
     }),
 })

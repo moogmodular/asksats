@@ -12,7 +12,6 @@ export const Withdraw = ({ done }: WithdrawProps) => {
         { k1: withdrawData?.secret ?? '' },
         {
             refetchInterval: (data) => {
-                console.log('data', data)
                 if (!(data?.transactionStatus === 'SETTLED')) {
                     return 1000
                 }

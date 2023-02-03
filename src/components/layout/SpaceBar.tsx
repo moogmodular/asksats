@@ -57,7 +57,6 @@ export const SpaceBar = ({}) => {
         }
 
         utils.space.list.fetch().then((data) => {
-            console.log(data)
             if (active) {
                 setOptions([{ name: 'all', nsfw: false }, ...data])
             }
@@ -76,15 +75,12 @@ export const SpaceBar = ({}) => {
 
     useEffect(() => {
         setValue({ name: router.query.space as string, nsfw: false })
-        console.log('space changed', router.query.space)
         if (router.query.space === undefined || router.query.space === 'all') {
             setExpanded(false)
 
             setSpaceInfo({ name: 'all', nsfw: false, description: '', headerImageId: '', headerImageUrl: '' })
         } else {
-            console.log('fetching space info', router.query.space)
             utils.space.spaceInfo.fetch({ spaceName: router.query.space as string }).then((data) => {
-                console.log(data)
                 setSpaceInfo(data)
             })
         }

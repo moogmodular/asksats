@@ -41,8 +41,6 @@ export const spaceRouter = t.router({
             where: { name: input.spaceName },
             include: { headerImage: true },
         })
-        console.log(input)
-        console.log(space)
         return {
             ...space,
             headerImageUrl: space?.headerImage?.s3Key

@@ -136,7 +136,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
     }
 
     const onSubmit = async (data: CreateAskInput) => {
-        console.log(data)
         try {
             await createAskMutation.mutateAsync({
                 title: data.title,
@@ -158,7 +157,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
 
     const handleSearchInput = async (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const searchTerm = e.target.value
-        console.log(searchTerm)
         await utils.taxonomy.searchTags.fetch({ search: searchTerm }).then((data) => {
             const tagResults = data.map((tag) => {
                 return {
@@ -167,7 +165,6 @@ export const CreateAsk = ({}: CreateAskProps) => {
                     isNew: false,
                 }
             })
-            console.log(tagResults)
             const contains = tagResults.some((name) => name.label === searchTerm)
             if (!contains) {
                 setPossibleTags([{ label: searchTerm, isNew: true, id: '0' }, ...tagResults])
