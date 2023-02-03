@@ -1,12 +1,12 @@
 import { AskKind, PrismaClient } from '@prisma/client'
 import { randomBytes } from 'crypto'
 import { faker } from '@faker-js/faker'
-import { add, sub } from 'date-fns'
 import secp256k1 from 'secp256k1'
 import { adjectives, animals, colors, Config, uniqueNamesGenerator } from 'unique-names-generator'
 import { markdown } from './seed/markdown'
-const bip39 = require('bip39')
 import { wallets } from './seed/wallets'
+
+const bip39 = require('bip39')
 const BitcoinWIF = require('bitcoin-wif')
 
 const MSATS_UNIT_FACTOR = 1000
@@ -83,9 +83,6 @@ const getRandomAskKind = () => {
     return kinds[randomIntFromTo(0, 2)] as AskKind
 }
 
-const randomDate = (start: Date, end: Date) =>
-    new Date(start.getTime() + Math.random() * (end.getTime() - start.getTime()))
-
 const randomIntFromTo = (from: number, to: number) => Math.floor(Math.random() * (to - from + 1) + from)
 
 function getIdOfOtherUser(index: number, newUsers: Awaited<any>[]) {
@@ -93,9 +90,10 @@ function getIdOfOtherUser(index: number, newUsers: Awaited<any>[]) {
 }
 
 async function main() {
-    return // no need to run this script for prod
+    // return // no need to run this script for prod
     await Promise.all([
         await prisma.ask.deleteMany(),
+        await prisma.space.deleteMany(),
         await prisma.tag.deleteMany(),
         await prisma.askContext.deleteMany(),
         await prisma.offer.deleteMany(),
@@ -108,6 +106,55 @@ async function main() {
     ])
 
     const btcWIF = new BitcoinWIF('testnet')
+
+    await Promise.all(
+        [
+            {
+                name: 'artisats',
+                description: 'In this space you will find everything related to Artisats. Lets see what happens here',
+                nsfw: false,
+            },
+            {
+                name: 'photography',
+                description:
+                    'In this space you will find everything related to Photography. Lets see what happens here',
+                nsfw: false,
+            },
+            {
+                name: 'memes4sats',
+                description: 'In this space you will find everything related to Memes4sats. Lets see what happens here',
+                nsfw: false,
+            },
+            {
+                name: 'funny',
+                description: 'In this space you will find everything related to Funny. Lets see what happens here',
+                nsfw: false,
+            },
+            {
+                name: 'porn',
+                description: 'In this space you will find everything related to Funny. Lets see what happens here',
+                nsfw: true,
+            },
+        ].map(async (space) => {
+            return await prisma.space.create({
+                data: {
+                    name: space.name,
+                    description: space.description,
+                    nsfw: space.nsfw,
+                    headerImage: {
+                        create: {
+                            s3Key: 'test/test_hidden.png',
+                        },
+                    },
+                },
+            })
+        }),
+    )
+
+    const getRandomSpace = async () => {
+        const allSpaces = await prisma.space.findMany()
+        return allSpaces[randomIntFromTo(0, allSpaces.length - 1)]?.name ?? 'artisats'
+    }
 
     await Promise.all(
         ['nsfw', 'photo', 'sketch', 'logo', 'drawing', 'hi-rez', 'color-palette'].map(async (tagName) => {
@@ -127,6 +174,7 @@ async function main() {
                     userName: randomName,
                     publicKey: key,
                     balance: 5000000,
+                    space: { connect: { name: await getRandomSpace() } },
                     lockedBalance: 0,
                     excludedTags: { connectOrCreate: { where: { name: 'nsfw' }, create: { name: 'nsfw' } } },
                     bio: faker.lorem.paragraph(3),
@@ -209,6 +257,11 @@ async function main() {
             data: {
                 user: { connect: { id: user.id } },
                 askStatus: 'CANCELED',
+                space: {
+                    connect: {
+                        name: await getRandomSpace(),
+                    },
+                },
                 tags: {
                     createMany: {
                         data: [
@@ -248,6 +301,11 @@ async function main() {
             data: {
                 user: { connect: { id: user.id } },
                 askStatus: 'OPEN',
+                space: {
+                    connect: {
+                        name: await getRandomSpace(),
+                    },
+                },
                 tags: {
                     createMany: {
                         data: [
@@ -397,6 +455,11 @@ async function main() {
             data: {
                 user: { connect: { id: user.id } },
                 askStatus: 'SETTLED',
+                space: {
+                    connect: {
+                        name: await getRandomSpace(),
+                    },
+                },
                 tags: {
                     createMany: {
                         data: [
@@ -442,6 +505,11 @@ async function main() {
             data: {
                 user: { connect: { id: user.id } },
                 askStatus: 'OPEN',
+                space: {
+                    connect: {
+                        name: await getRandomSpace(),
+                    },
+                },
                 tags: {
                     createMany: {
                         data: [

@@ -30,6 +30,15 @@ module.exports = getConfig({
     typescript: {
         ignoreBuildErrors: true,
     },
+    async redirects() {
+        return [
+            {
+                source: '/',
+                destination: '/ask/timeline/all',
+                permanent: true,
+            },
+        ]
+    },
     async rewrites() {
         return [
             {
@@ -61,7 +70,7 @@ module.exports = getConfig({
                 destination: '/',
             },
             {
-                source: '/ask/timeline',
+                source: '/ask/timeline/:space',
                 destination: '/',
             },
         ]

@@ -15,8 +15,8 @@ const tabs = {
     myStats: {
         label: 'My Stats',
     },
-    taxonomy: {
-        label: 'Taxonomy',
+    spaces: {
+        label: 'Spaces',
     },
     about: {
         label: 'About',
@@ -38,7 +38,7 @@ export const Sidebar = ({}: SidebarProps) => {
                     aria-label="basic tabs example"
                 >
                     <Tab id={'sidebar-tabs-stats'} value={'stats'} label="Stats" />
-                    <Tab id={'sidebar-tabs-taxonomy'} value={'taxonomy'} label="Taxonomy" />
+                    <Tab id={'sidebar-tabs-spaces'} value={'spaces'} label="Spaces" />
                     <Tab id={'sidebar-tabs-myStats'} value={'myStats'} label="My Stats" />
                     <Tab id={'sidebar-tabs-about'} value={'about'} label="About" />
                 </Tabs>
@@ -46,7 +46,7 @@ export const Sidebar = ({}: SidebarProps) => {
                     {
                         stats: <SidebarStats />,
                         about: <SidebarAbout />,
-                        taxonomy: <SidebarTaxonomy />,
+                        spaces: <SidebarTaxonomy />,
                         myStats: <SidebarMyStats />,
                     }[currentTab]
                 }

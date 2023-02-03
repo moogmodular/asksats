@@ -14,20 +14,7 @@ import { useActionStore } from '~/store/actionStore'
 import { useMessageStore } from '~/store/messageStore'
 import { TagPill } from '~/components/common/TagPill'
 import { bumpInfoText } from '~/server/service/constants'
-import {
-    Autocomplete,
-    Button,
-    Checkbox,
-    FormControl,
-    FormControlLabel,
-    InputLabel,
-    MenuItem,
-    Select,
-    Tabs,
-    TextField,
-    Tooltip,
-    Typography,
-} from '@mui/material'
+import { Autocomplete, Button, Checkbox, FormControlLabel, Tabs, TextField, Tooltip, Typography } from '@mui/material'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
@@ -163,8 +150,6 @@ export const EditAsk = ({}: EditAskProps) => {
             const uploadedImage = await utils.asset.uploadedImageById.fetch({
                 imageId: url.imageId,
             })
-
-            console.log('uploadedImage', uploadedImage)
 
             setUploadedImage(uploadedImage)
 

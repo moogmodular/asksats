@@ -4,6 +4,9 @@ import { isAuthed } from '~/server/middlewares/authed'
 import { MSATS_UNIT_FACTOR } from '~/server/service/constants'
 
 export const statsRouter = t.router({
+    topSpaces: t.procedure.query(async ({ ctx }) => {
+        return await prisma.space.findMany({ orderBy: { createdAt: 'desc' } })
+    }),
     oldestTopBountyNotSettled: t.procedure.query(async ({ ctx }) => {
         const openAsks = await prisma.ask.findMany({
             where: { askStatus: 'OPEN' },
@@ -24,7 +27,7 @@ export const statsRouter = t.router({
                 }
             })
             .sort((a, b) => b.bumpSum - a.bumpSum)
-            .slice(0, 5)
+            .slice(0, 3)
     }),
     topEarners: t.procedure.query(async ({ ctx }) => {
         const topEarners = await prisma.user.findMany({

@@ -64,24 +64,28 @@ export const Header = ({}: HeaderProps) => {
 
                         <div className={'flex max-w-xs flex-col content-center'}>
                             <Tooltip title={user.publicKey}>
-                                <IconPropertyDisplay
-                                    identifier={'publicKey'}
-                                    value={`${
-                                        matches
-                                            ? user.publicKey?.slice(0, 32) + '...'
-                                            : user.publicKey?.slice(0, 14) + '...'
-                                    }`}
-                                >
-                                    <KeyIcon fontSize={'small'} color={'white'} />
-                                </IconPropertyDisplay>
+                                <>
+                                    <IconPropertyDisplay
+                                        identifier={'publicKey'}
+                                        value={`${
+                                            matches
+                                                ? user.publicKey?.slice(0, 32) + '...'
+                                                : user.publicKey?.slice(0, 14) + '...'
+                                        }`}
+                                    >
+                                        <KeyIcon fontSize={'small'} color={'white'} />
+                                    </IconPropertyDisplay>
+                                </>
                             </Tooltip>
                             <Tooltip title={user.userName}>
-                                <IconPropertyDisplay
-                                    identifier={'userName'}
-                                    value={'@' + `${matches ? user.userName : user.userName?.slice(0, 14) + '...'}`}
-                                >
-                                    <AccountCircleIcon fontSize={'small'} />
-                                </IconPropertyDisplay>
+                                <>
+                                    <IconPropertyDisplay
+                                        identifier={'userName'}
+                                        value={'@' + `${matches ? user.userName : user.userName?.slice(0, 14) + '...'}`}
+                                    >
+                                        <AccountCircleIcon fontSize={'small'} />
+                                    </IconPropertyDisplay>
+                                </>
                             </Tooltip>
                         </div>
                     </div>

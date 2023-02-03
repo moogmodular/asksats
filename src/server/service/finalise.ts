@@ -84,6 +84,7 @@ export const doCanceleAskBalanceTransaction = async (askId: string) =>
 
 export const doCreateAskBalanceTransaction = async (
     askKind: AskKind,
+    space: string,
     tags: { id: string }[],
     userId: string,
     amount: number,
@@ -96,6 +97,11 @@ export const doCreateAskBalanceTransaction = async (
             data: {
                 user: { connect: { id: userId } },
                 askKind: askKind,
+                space: {
+                    connect: {
+                        name: space,
+                    },
+                },
                 askStatus: 'OPEN',
                 tags: {
                     createMany: {

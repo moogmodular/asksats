@@ -14,6 +14,7 @@ import { statsRouter } from '~/server/routers/stats'
 import { taxonomyRouter } from '~/server/routers/taxonomy'
 import { blogRouter } from '~/server/routers/blog'
 import { invoiceRouter } from '~/server/routers/invoice'
+import { spaceRouter } from '~/server/routers/space'
 
 export const appRouter = t.router({
     auth: authRouter,
@@ -31,6 +32,7 @@ export const appRouter = t.router({
     stats: statsRouter,
     taxonomy: taxonomyRouter,
     blog: blogRouter,
+    space: spaceRouter,
 })
 
 export type AppRouter = typeof appRouter

@@ -33,6 +33,9 @@ import theme from '~/theme'
 import { authedUserStore } from '~/store/authedUserStore'
 import { useStore } from 'zustand'
 import { EditAsk } from '~/components/ask/EditAsk'
+import { SpaceBar } from '~/components/layout/SpaceBar'
+import { CreateSpace } from '~/components/ask/CreateSpace'
+import { EditSpace } from '~/components/ask/EditSpace'
 
 const IndexPage: NextPageWithLayout = () => {
     const { setUser, storeToken, storeLogin } = useStore(authedUserStore)
@@ -85,8 +88,8 @@ const IndexPage: NextPageWithLayout = () => {
                     </header>
                     {(matches || mobileMenuOpen) && (
                         <div className={'grow'}>
-                            <SubHeaderToolbarHeader />
-                            <div className={'p-6'}>
+                            {matches ? null : <SubHeaderToolbarHeader />}
+                            <div className={'p-4'}>
                                 <Sidebar />
                             </div>
                         </div>
@@ -97,7 +100,13 @@ const IndexPage: NextPageWithLayout = () => {
                         </footer>
                     )}
                 </div>
-                <main className={'bg-sidebar grow overflow-hidden bg-gray-100 lg:w-8/12 lg:p-6'} ref={parent}>
+                <main
+                    className={
+                        'bg-sidebar flex grow flex-col gap-4 overflow-hidden bg-gray-100 lg:w-8/12 lg:pb-6 lg:pl-6 lg:pr-6'
+                    }
+                    ref={parent}
+                >
+                    {routerPath(router.asPath) === 'timeline' && <SpaceBar />}
                     {
                         {
                             single: <Ask slug={router.query.slug as string} />,
@@ -151,6 +160,16 @@ const IndexPage: NextPageWithLayout = () => {
                         editAsk: (
                             <InteractionModal title={'Edit Ask'}>
                                 <EditAsk />
+                            </InteractionModal>
+                        ),
+                        createSpace: (
+                            <InteractionModal title={'Create Space'}>
+                                <CreateSpace />
+                            </InteractionModal>
+                        ),
+                        editSpace: (
+                            <InteractionModal title={'Edit Space'}>
+                                <EditSpace />
                             </InteractionModal>
                         ),
                         none: null,

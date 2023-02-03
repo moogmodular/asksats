@@ -4,11 +4,11 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThemeClasses } from 'lexical'
-import { ChangeEvent, SyntheticEvent, useRef, useState } from 'react'
+import { ChangeEvent, SyntheticEvent, useEffect, useRef, useState } from 'react'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
-import { RouterInput, trpc } from '~/utils/trpc'
+import { RouterInput, RouterOutput, trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { useActionStore } from '~/store/actionStore'
 import { useMessageStore } from '~/store/messageStore'
@@ -18,6 +18,7 @@ import {
     Autocomplete,
     Button,
     Checkbox,
+    CircularProgress,
     FormControl,
     FormControlLabel,
     InputLabel,
@@ -34,11 +35,13 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import Tab from '@mui/material/Tab'
 
 type CreateAskInput = RouterInput['ask']['create']
+type Space = RouterOutput['space']['list'][0]
 
 export const createAskInput = z.object({
     title: z.string().min(6).max(80),
     content: z.string().max(2000),
     amount: z.number().min(1),
+    space: z.string(),
     tags: z.array(z.string().max(32)).max(5).optional(),
     headerImageId: z.string().optional(),
     askKind: z.enum(['PUBLIC', 'BUMP_PUBLIC', 'PRIVATE']),
@@ -53,6 +56,7 @@ interface CreateAskProps {}
 export const CreateAsk = ({}: CreateAskProps) => {
     const { closeModal } = useActionStore()
     const { showToast } = useMessageStore()
+    const utils = trpc.useContext()
     const [tempEditorState, setTempEditorState] = useState<string>(askTextDefault)
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
     const [uploadedImageId, setUploadedImageId] = useState<string | null>(null)
@@ -61,10 +65,37 @@ export const CreateAsk = ({}: CreateAskProps) => {
     const [possibleTags, setPossibleTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const matches = useMediaQuery('(min-width:1024px)')
 
+    const [open, setOpen] = useState(false)
+    const [options, setOptions] = useState<Space[]>([])
+    const loading = open && options.length === 0
+
+    useEffect(() => {
+        let active = true
+
+        if (!loading) {
+            return undefined
+        }
+
+        utils.space.list.fetch().then((data) => {
+            if (active) {
+                setOptions(data)
+            }
+        })
+
+        return () => {
+            active = false
+        }
+    }, [loading])
+
+    useEffect(() => {
+        if (!open) {
+            setOptions([])
+        }
+    }, [open])
+
     const inputRef = useRef<HTMLInputElement>(null)
 
     const createAskMutation = trpc.ask.create.useMutation()
-    const utils = trpc.useContext()
 
     const {
         register,
@@ -78,6 +109,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
         defaultValues: {
             title: '',
             content: '',
+            space: '',
             askKind: 'PUBLIC',
             amount: 100,
             headerImageId: '',
@@ -109,6 +141,7 @@ export const CreateAsk = ({}: CreateAskProps) => {
             await createAskMutation.mutateAsync({
                 title: data.title,
                 askKind: data.askKind,
+                space: data.space,
                 amount: data.amount,
                 tags: tags.map((t) => t.label),
                 headerImageId: uploadedImageId ?? '',
@@ -242,6 +275,37 @@ export const CreateAsk = ({}: CreateAskProps) => {
                                 shrink: true,
                             }}
                             helperText={errors.amount && errors.amount.message}
+                        />
+                        <Autocomplete
+                            id="asynchronous-demo"
+                            sx={{ width: 300 }}
+                            open={open}
+                            onOpen={() => {
+                                setOpen(true)
+                            }}
+                            onClose={() => {
+                                setOpen(false)
+                            }}
+                            isOptionEqualToValue={(option, value) => option.name === value.name}
+                            getOptionLabel={(option) => option.name}
+                            options={options}
+                            loading={loading}
+                            renderInput={(params) => (
+                                <TextField
+                                    {...params}
+                                    {...register('space', { required: true })}
+                                    label="Space"
+                                    InputProps={{
+                                        ...params.InputProps,
+                                        endAdornment: (
+                                            <>
+                                                {loading ? <CircularProgress color="inherit" size={20} /> : null}
+                                                {params.InputProps.endAdornment}
+                                            </>
+                                        ),
+                                    }}
+                                />
+                            )}
                         />
                         <FormControl className={'w-60'} size={`${matches ? 'medium' : 'small'}`}>
                             <InputLabel id="ask-kind-label">Select an option</InputLabel>

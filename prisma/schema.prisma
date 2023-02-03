@@ -38,6 +38,7 @@ model User {
   excludedTags  Tag[]
   blogItems     BlogItem[]
   filePairs     OfferFilePair[]
+  space         Space[]
 }
 
 enum UserRole {
@@ -103,6 +104,22 @@ enum TransactionStatus {
   EXPIRED
 }
 
+model Space {
+  id            String   @id @default(uuid())
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  // props
+  name          String   @unique
+  description   String
+  nsfw          Boolean  @default(false)
+  // rel
+  creator       User?    @relation(fields: [creatorId], references: [id])
+  creatorId     String?
+  ask           Ask[]
+  headerImage   File?    @relation(fields: [headerImageId], references: [id])
+  headerImageId String?  @unique
+}
+
 model Ask {
   id              String       @id @default(uuid())
   createdAt       DateTime     @default(now())
@@ -119,6 +136,8 @@ model Ask {
   settledForOffer Offer?       @relation("settledForOffer")
   bumps           Bump[]
   tags            TagsOnAsks[]
+  space           Space?       @relation(fields: [spaceName], references: [name])
+  spaceName       String?
 }
 
 enum AskStatus {
@@ -239,6 +258,7 @@ model File {
   askContext             AskContext?
   offerFilePairAsOffer   OfferFilePair? @relation("offerFilePairAsOffer")
   offerFilePairAsObscure OfferFilePair? @relation("offerFilePairAsObscure")
+  space                  Space?
 }
 
 model Bump {

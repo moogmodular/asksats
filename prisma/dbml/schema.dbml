@@ -22,6 +22,7 @@ Table User {
   excludedTags Tag [not null]
   blogItems BlogItem [not null]
   filePairs OfferFilePair [not null]
+  space Space [not null]
 }
 
 Table BlogItem {
@@ -64,6 +65,20 @@ Table Transaction {
   userId String
 }
 
+Table Space {
+  id String [pk]
+  createdAt DateTime [default: `now()`, not null]
+  updatedAt DateTime [not null]
+  name String [unique, not null]
+  description String [not null]
+  nsfw Boolean [not null, default: false]
+  creator User
+  creatorId String
+  ask Ask [not null]
+  headerImage File
+  headerImageId String [unique]
+}
+
 Table Ask {
   id String [pk]
   createdAt DateTime [default: `now()`, not null]
@@ -78,6 +93,8 @@ Table Ask {
   settledForOffer Offer
   bumps Bump [not null]
   tags TagsOnAsks [not null]
+  space Space
+  spaceName String
 }
 
 Table Tag {
@@ -175,6 +192,7 @@ Table File {
   askContext AskContext
   offerFilePairAsOffer OfferFilePair
   offerFilePairAsObscure OfferFilePair
+  space Space
 }
 
 Table Bump {
@@ -237,7 +255,13 @@ Ref: BlogItem.parentId - BlogItem.id
 
 Ref: Transaction.userId > User.id
 
+Ref: Space.creatorId > User.id
+
+Ref: Space.headerImageId - File.id
+
 Ref: Ask.userId > User.id
+
+Ref: Ask.spaceName > Space.name
 
 Ref: TagsOnAsks.askId > Ask.id [delete: Cascade]
 

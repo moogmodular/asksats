@@ -4,7 +4,6 @@ import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
 import { SatoshiIcon } from '~/components/common/SatishiIcon'
 import AccountCircleIcon from '@mui/icons-material/AccountCircle'
 import { LinkBehaviour } from '~/components/common/LinkBehaviour'
-import { CreateOffer } from '~/components/offer/CreateOffer'
 import React from 'react'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import RocketLaunchOutlinedIcon from '@mui/icons-material/RocketLaunchOutlined'
@@ -19,7 +18,7 @@ export const SidebarStats = ({}: SidebarStatsProps) => {
     const { data: siteStatsData } = trpc.stats.siteStats.useQuery()
 
     return (
-        <div className={'flex flex-col gap-6 pt-8'}>
+        <div className={'flex flex-col gap-4 pt-8'}>
             <div>
                 <b>site:</b>
                 <div>

@@ -29,6 +29,14 @@ const byAskStatus = (status?: AskStatus) => {
         : {}
 }
 
+const bySpace = (space = 'all') => {
+    return space === 'all'
+        ? {}
+        : {
+              spaceName: space,
+          }
+}
+
 export const askRouter = t.router({
     myList: t.procedure.use(isAuthed).query(async ({ ctx, input }) => {
         return await prisma.ask.findMany({ where: { user: { id: ctx.user.id } } })
@@ -134,6 +142,8 @@ export const askRouter = t.router({
         .use(isAuthedOrGuest)
         .input(askListProps)
         .query(async ({ ctx, input }) => {
+            console.log('list', input)
+
             const excludedTags = ctx?.user
                 ? await prisma.user.findUnique({ where: { id: ctx?.user?.id } }).excludedTags()
                 : undefined
@@ -141,6 +151,7 @@ export const askRouter = t.router({
             const listWithStatus = await prisma.ask
                 .findMany({
                     where: {
+                        ...bySpace(input.spaceName),
                         ...getSearch(input.searchTerm),
                         ...byAskStatus(input.filterFor),
                         ...byUser(input.userName),
@@ -328,11 +339,24 @@ export const askRouter = t.router({
         .input(createAskInput)
         .mutation(async ({ ctx, input }) => {
             const { availableBalance } = await userBalance(ctx?.user?.id)
+
+            console.log('input', input)
+
             if (availableBalance < input.amount) {
                 throw new TRPCError({
                     code: 'FORBIDDEN',
                     message: `Insufficient balance. Available: ${availableBalance} sats`,
                 })
+            }
+
+            const space = await prisma.space.findUnique({
+                where: {
+                    name: input.space,
+                },
+            })
+
+            if (!space) {
+                throw new TRPCError({ code: 'BAD_REQUEST', message: 'space not found' })
             }
 
             const allTags = input.tags
@@ -351,6 +375,7 @@ export const askRouter = t.router({
 
             return await doCreateAskBalanceTransaction(
                 input.askKind,
+                space.name,
                 allTags,
                 ctx.user.id,
                 input.amount,

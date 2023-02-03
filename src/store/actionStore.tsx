@@ -10,6 +10,8 @@ type Modals =
     | 'viewImage'
     | 'editAsk'
     | 'welcome'
+    | 'createSpace'
+    | 'editSpace'
 
 interface Action {
     currentModal: Modals
@@ -21,6 +23,8 @@ interface Action {
     createOffer: (askId: string) => void
     imageUrl: string
     openImage: (imageUrl: string) => void
+    editSpace: (spaceId: string) => void
+    spaceId: string
 }
 
 export const useActionStore = create<Action>((set) => ({
@@ -43,4 +47,8 @@ export const useActionStore = create<Action>((set) => ({
     openImage: (imageUrl: string) => {
         set({ imageUrl: imageUrl, currentModal: 'viewImage' })
     },
+    editSpace: (spaceId: string) => {
+        set({ spaceId: spaceId, currentModal: 'editSpace' })
+    },
+    spaceId: '',
 }))

@@ -14,6 +14,7 @@ export const AskList = ({}: AskListProps) => {
     const router = useRouter()
     const [userName, setUserName] = useState<string | undefined>(undefined)
     const [tag, setTag] = useState<string | undefined>(undefined)
+    const [space, setSpace] = useState<string>('all')
 
     const handleLoadMore = useCallback(() => {
         infiniteQuery.fetchNextPage()
@@ -27,6 +28,7 @@ export const AskList = ({}: AskListProps) => {
             orderBy,
             orderByDirection,
             searchTerm,
+            spaceName: space,
             tagName: tag,
             userName,
             pageSize: 9,
@@ -54,6 +56,11 @@ export const AskList = ({}: AskListProps) => {
             const tag = identifierFromPath(router.asPath)
             setTag(tag)
             setUserName(undefined)
+        } else if (type === 'timeline') {
+            const space = identifierFromPath(router.asPath)
+            setTag(undefined)
+            setUserName(undefined)
+            setSpace(space)
         } else {
             setUserName(undefined)
             setTag(undefined)

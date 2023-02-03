@@ -1,9 +1,7 @@
 import { Tag } from '@prisma/client'
 
-export const getOrder = (orderBy: 'deadline' | 'acceptance' | 'creation', orderByDirection: 'asc' | 'desc') => {
+export const getOrder = (orderBy: 'creation', orderByDirection: 'asc' | 'desc') => {
     return {
-        deadline: { deadlineAt: orderByDirection },
-        acceptance: { acceptedDeadlineAt: orderByDirection },
         creation: { createdAt: orderByDirection },
     }[orderBy]
 }

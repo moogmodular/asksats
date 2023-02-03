@@ -1,11 +1,13 @@
 import { trpc } from '~/utils/trpc'
 import { TagPill } from '~/components/common/TagPill'
-import { ChangeEvent, useState } from 'react'
+import React, { ChangeEvent, useState } from 'react'
 import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
-import { Autocomplete, Checkbox, TextField, Typography } from '@mui/material'
+import { Autocomplete, Checkbox, Link, TextField, Typography } from '@mui/material'
+import { LinkBehaviour } from '~/components/common/LinkBehaviour'
+import { SatoshiIcon } from '~/components/common/SatishiIcon'
 
 interface SidebarTaxonomyProps {}
 
@@ -14,6 +16,8 @@ export const SidebarTaxonomy = ({}: SidebarTaxonomyProps) => {
     const { data: excludedTagsData } = trpc.taxonomy.excludedTagsForUser.useQuery()
     const excludeTagMutation = trpc.taxonomy.addExcludedTagForUser.useMutation()
     const unExcludeTagMutation = trpc.taxonomy.unExcludeTagForUser.useMutation()
+    const { data: topSpacesData } = trpc.stats.topSpaces.useQuery()
+
     const utils = trpc.useContext()
 
     const [possibleTags, setPossibleTags] = useState<string[]>([])
@@ -44,9 +48,37 @@ export const SidebarTaxonomy = ({}: SidebarTaxonomyProps) => {
 
     return (
         <div className={'flex flex-col gap-2 gap-6 pt-8'}>
+            <div>
+                <b>spaces:</b>
+                <div className={'flex flex-col gap-1'}>
+                    {topSpacesData?.map((space, index) => {
+                        return (
+                            <div
+                                key={index}
+                                className={'flex flex-row items-center gap-2 p-2 shadow-md hover:bg-gray-50'}
+                            >
+                                <Link
+                                    component={LinkBehaviour}
+                                    href={`/ask/timeline/${space.name}`}
+                                    variant="body2"
+                                    className={'grow'}
+                                >
+                                    {space.name}
+                                </Link>
+                                <div className={'flex w-48 flex-row items-center gap-1'}>
+                                    <i>nsfw:</i>
+                                    <b>{space.nsfw}</b>
+                                    <SatoshiIcon />
+                                </div>
+                            </div>
+                        )
+                    })}
+                </div>
+            </div>
+
             <div className={'emphasis-container'}>
                 <b>top tags:</b>
-                <div className={'flex flex-col gap-2'}>
+                <div className={'flex flex-row gap-2'}>
                     {topTagsData?.map((tag, index) => {
                         return (
                             <div key={index} className={'flex flex-row items-center justify-between gap-1'}>

@@ -7,7 +7,7 @@ export const Logo = ({}: LogoProps) => {
     return (
         <Tooltip title="Home">
             <div className={'flex cursor-pointer flex-row items-center'}>
-                <Link id={'logo-link'} href={`/`}>
+                <Link id={'logo-link'} href={`/ask/timeline/all`}>
                     <img className={'h-10'} src={'/logo.svg'} alt={'Logo'} />
                 </Link>
             </div>
