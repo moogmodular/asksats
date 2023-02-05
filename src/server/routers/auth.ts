@@ -108,11 +108,11 @@ export const authRouter = t.router({
                                     profileImage: `data:image/png;base64,${image}`,
                                 },
                             })
-                            void sendDMToWebsiteAccount(
-                                `[${format(new Date(), standardDateFormat)}] New user: ${
-                                    innerUser.userName
-                                } with public key ${innerUser.publicKey} has joined ArtiSats.com.`,
-                            )
+                            // void sendDMToWebsiteAccount(
+                            //     `[${format(new Date(), standardDateFormat)}] New user: ${
+                            //         innerUser.userName
+                            //     } with public key ${innerUser.publicKey} has joined ArtiSats.com.`,
+                            // )
                         } else {
                             await transactionPrisma.user.update({
                                 where: { id: innerUser.id },
