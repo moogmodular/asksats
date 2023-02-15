@@ -47,6 +47,7 @@ export const authRouter = t.router({
                             userName: true,
                             role: true,
                             lastLogin: true,
+                            nostrPubKey: true,
                         },
                     })
                 }

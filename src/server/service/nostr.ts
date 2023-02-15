@@ -18,23 +18,33 @@ const getConnectedRelays = async () => {
                 const timeoutId = setTimeout(() => {
                     reject(undefined)
                 }, 1000)
-                const connected = pool.ensureRelay(rel).then((relay) => {
-                    if (relay.status === 1) {
-                        clearTimeout(timeoutId)
-                        resolve(relay.url)
-                    } else {
-                        reject(undefined)
-                    }
-                })
+                const connected = pool
+                    .ensureRelay(rel)
+                    .then((relay) => {
+                        if (relay.status === 1) {
+                            clearTimeout(timeoutId)
+                            resolve(relay.url)
+                        } else {
+                            reject(undefined)
+                        }
+                    })
+                    .catch((e) => {
+                        reject(e)
+                        console.log(`Error connecting to relay ${index}: ${e}`)
+                    })
+            }).catch((e) => {
+                console.log(`Error connecting to relay ${index}: ${e}`)
             })
         }),
     ).then((res) =>
         res
             .filter((res) => res.status === 'fulfilled')
+
             .map((res) => {
                 const value = res as PromiseFulfilledResult<string>
                 return value.value
-            }),
+            })
+            .filter((res) => res),
     )
 
     return { pool, ensuredRelaysAfterSomeTime }
@@ -65,6 +75,8 @@ export const sendMessageToServerOwner = async (message: string) => {
 
     event.id = getEventHash(event)
     event.sig = signEvent(event, websitePrivateKey)
+
+    console.log('ensuredRelaysAfterSomeTime', ensuredRelaysAfterSomeTime)
 
     pool.publish(ensuredRelaysAfterSomeTime, event)
 }

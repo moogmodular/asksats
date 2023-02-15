@@ -6,6 +6,7 @@ import { TRPCError } from '@trpc/server'
 import { isAuthed } from '~/server/middlewares/authed'
 import { userBalance } from '~/server/service/accounting'
 import { sendMessageToPubKey } from '~/server/service/nostr'
+import jwt from 'jsonwebtoken'
 
 export const userRouter = t.router({
     getMe: t.procedure.use(isAuthed).query(async ({ ctx }) => {
@@ -16,7 +17,10 @@ export const userRouter = t.router({
                     id: tokenUser?.id,
                 },
             })
-            return { ...user, balance: await userBalance(user?.id ?? '') }
+            return {
+                ...user,
+                balance: await userBalance(user?.id ?? ''),
+            }
         } catch (error) {
             throw new TRPCError({
                 code: 'UNAUTHORIZED',
@@ -40,7 +44,7 @@ export const userRouter = t.router({
         .use(isAuthed)
         .input(editUserInput)
         .mutation(async ({ input, ctx }) => {
-            return await prisma.user
+            const updatedUser = await prisma.user
                 .update({
                     where: { id: ctx.user.id },
                     data: {
@@ -50,18 +54,29 @@ export const userRouter = t.router({
                         nostrPubKey: input.nostrPubKey,
                     },
                 })
-                .then((user) => {
-                    if (user.nostrPubKey && !ctx.user.nostrPubKey) {
-                        void sendMessageToPubKey(
-                            user.nostrPubKey,
-                            `Welcome to AtriSats.com ${user.userName}.\n You can follow us on @ArtiSats.com.\n You will now receive notifications when anything happens to your aks, asks that you bumped and asks that you offered for.`,
-                        )
-                    }
-                    return user
-                })
                 .catch((error) => {
                     throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })
                 })
+
+            if (updatedUser.nostrPubKey && !ctx.user.nostrPubKey) {
+                void sendMessageToPubKey(
+                    updatedUser.nostrPubKey,
+                    `Welcome to AtriSats.com ${updatedUser.userName}.\nYou can follow us on @ArtiSats.com.\nYou will now receive notifications when anything happens to your aks, asks that you bumped and asks that you offered for.`,
+                )
+            }
+
+            const updatedUserNoImage = {
+                ...updatedUser,
+                profileImage: undefined,
+            }
+
+            return {
+                user: {
+                    ...updatedUser,
+                    balance: await userBalance(updatedUser?.id ?? ''),
+                },
+                token: jwt.sign({ ...updatedUserNoImage }, process.env.JWT_SECRET ?? ''),
+            }
         }),
     deleteMe: t.procedure.use(isAuthed).mutation(async ({ ctx }) => {
         return await prisma.user

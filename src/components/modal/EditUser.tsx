@@ -23,7 +23,7 @@ export const editUserInput = z.object({
 interface EditUserProps {}
 
 export const EditUser = ({}: EditUserProps) => {
-    const { user, logout, setUser } = useStore(authedUserStore)
+    const { user, logout, setUser, storeLogin } = useStore(authedUserStore)
     const { closeModal } = useActionStore()
     const { showToast } = useMessageStore()
     const [base64EncodedImage, setBase64EncodedImage] = useState<string | undefined>(user?.profileImage ?? undefined)
@@ -64,12 +64,12 @@ export const EditUser = ({}: EditUserProps) => {
 
     const onSubmit = async (data: EditUserInput) => {
         try {
-            await editUserMutation.mutateAsync({ ...data, base64EncodedImage })
+            await editUserMutation.mutateAsync({ ...data, base64EncodedImage }).then((res) => {
+                storeLogin(res.token)
+                setUser(res.user)
+            })
             showToast('success', 'User edited')
             await utils.invalidate()
-            utils.user.getMe.fetch().then((res) => {
-                setUser(res)
-            })
             closeModal()
         } catch (error: any) {
             await utils.invalidate()
