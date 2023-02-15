@@ -42,6 +42,10 @@ module.exports = getConfig({
     async rewrites() {
         return [
             {
+                source: '/.well-known/nostr.json',
+                destination: '/api/nostr/nipfive',
+            },
+            {
                 source: '/ask/single/:slug',
                 destination: '/',
             },
