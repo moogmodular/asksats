@@ -139,7 +139,7 @@ export const EditAsk = ({}: EditAskProps) => {
                 formData.append(name, ulData[name])
             }
 
-            await fetch(url.uploadUrl.url.replace('//', '//asksats.'), {
+            await fetch(url.uploadUrl.url, {
                 method: 'POST',
                 body: formData,
             })

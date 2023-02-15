@@ -25,16 +25,6 @@ export const createOfferForAskInput = z.object({
     content: z.string(),
     filePairs: z.array(z.object({ id: z.string().uuid() })).max(3),
 })
-
-export const createFilePair = z.object({
-    offerFileId: z.string().uuid(),
-    blurLevel: z.enum(['2', '5', '10', '20']).optional(),
-})
-
-export const preSignedUrl = z.object({
-    obscureMethod: z.enum(['NONE', 'BLUR', 'CHECKER']).optional(),
-})
-
 interface CreateOfferProps {}
 
 export const CreateOffer = ({}: CreateOfferProps) => {
@@ -112,7 +102,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
             formDataOriginal.append(name, ulDataOriginal[name])
         }
 
-        return await fetch(uploadUrl.replace('//', '//asksats.'), {
+        return await fetch(uploadUrl, {
             method: 'POST',
             body: formDataOriginal,
         })

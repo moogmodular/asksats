@@ -44,11 +44,6 @@ module.exports = getConfig({
     async headers() {
         return [
             {
-                source: '/_next/:asset*',
-                headers: corsHeaders,
-            },
-
-            {
                 source: '/.well-known',
                 headers: [...corsHeaders],
             },
