@@ -9,6 +9,7 @@ Table User {
   lastLogin DateTime
   publicKey String [unique, not null]
   userName String [unique, not null]
+  nostrPubKey String [unique]
   profileImage String
   bio String
   role UserRole [not null, default: 'USER']
@@ -212,11 +213,6 @@ Table StaticData {
   updatedAt DateTime [not null]
   key String [unique, not null]
   value Json [not null]
-}
-
-Table TagToUser {
-  excludedtagsId String [ref: > Tag.id]
-  excludedbyId String [ref: > User.id]
 }
 
 Enum UserRole {

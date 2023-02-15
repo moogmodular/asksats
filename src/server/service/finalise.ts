@@ -4,52 +4,78 @@ import { TRPCError } from '@trpc/server'
 import { getK1Hash } from '~/server/service/lnurl'
 import { slugify } from '~/utils/string'
 import { AskKind } from '@prisma/client'
+import { sendMessageToPubKey, sendPublicWebsiteEventMessage } from '~/server/service/nostr'
 
 export const doSettleAskBalanceTransaction = async (askId: string, offerId: string, offererId: string) =>
-    await prisma.$transaction(async (tx) => {
-        const ask = await tx.ask.update({
-            where: {
-                id: askId,
-            },
-            data: {
-                askStatus: 'SETTLED',
-                settledForOffer: {
-                    connect: {
-                        id: offerId,
-                    },
+    await prisma
+        .$transaction(async (tx) => {
+            const ask = await tx.ask.update({
+                where: {
+                    id: askId,
                 },
-            },
-            include: {
-                bumps: true,
-            },
-        })
-
-        const bounty = (ask?.bumps?.reduce((acc, bump) => acc + bump.amount, 0) || 0) * PAYOUT_FACTOR
-
-        const payers = await Promise.all(
-            ask?.bumps?.map(async (bump) => {
-                return await tx.user.update({
-                    where: { id: bump.bidderId ?? '' },
-                    data: {
-                        lockedBalance: {
-                            decrement: bump.amount,
+                data: {
+                    askStatus: 'SETTLED',
+                    settledForOffer: {
+                        connect: {
+                            id: offerId,
                         },
                     },
-                })
-            }),
-        )
-
-        const recipient = await tx.user.update({
-            where: { id: offererId },
-            data: {
-                balance: {
-                    increment: bounty,
                 },
-            },
-        })
+                include: {
+                    bumps: true,
+                    askContext: true,
+                },
+            })
 
-        return { ask, bounty, payers, recipient }
-    })
+            const bounty = (ask?.bumps?.reduce((acc, bump) => acc + bump.amount, 0) || 0) * PAYOUT_FACTOR
+
+            const payers = await Promise.all(
+                ask?.bumps?.map(async (bump) => {
+                    return await tx.user.update({
+                        where: { id: bump.bidderId ?? '' },
+                        data: {
+                            lockedBalance: {
+                                decrement: bump.amount,
+                            },
+                        },
+                    })
+                }),
+            )
+
+            const recipient = await tx.user.update({
+                where: { id: offererId },
+                data: {
+                    balance: {
+                        increment: bounty,
+                    },
+                },
+            })
+
+            return { ask, bounty, payers, recipient }
+        })
+        .then(async (res) => {
+            if (res.recipient.nostrPubKey) {
+                const bounty = res.bounty / MSATS_UNIT_FACTOR
+                void sendMessageToPubKey(
+                    res.recipient.publicKey,
+                    `Congratulations! An ask that you offered for has been settled for a total bounty of ${bounty} sats. \n
+                    https://atrisats.com/ask/single/${res?.ask?.askContext?.slug} \n
+                    Your withdrawable amount for this ask is ${bounty * PAYOUT_FACTOR} = ${bounty} * ${PAYOUT_FACTOR}\n
+                    You can view your balance at https://atrisats.com and withdraw your funds to your wallet.`,
+                )
+            }
+
+            res.payers.map(async (payer) => {
+                if (payer.nostrPubKey) {
+                    void sendMessageToPubKey(
+                        payer.publicKey,
+                        `Your ask has been settled for ${res.bounty / MSATS_UNIT_FACTOR} sats.`,
+                    )
+                }
+            })
+
+            return res
+        })
 
 export const doCanceleAskBalanceTransaction = async (askId: string) =>
     await prisma.$transaction(async (tx) => {
@@ -92,93 +118,117 @@ export const doCreateAskBalanceTransaction = async (
     content: string,
     headerImageId?: string,
 ) =>
-    await prisma.$transaction(async (tx) => {
-        const ask = await tx.ask.create({
-            data: {
-                user: { connect: { id: userId } },
-                askKind: askKind,
-                space: {
-                    connect: {
-                        name: space,
+    await prisma
+        .$transaction(async (tx) => {
+            const ask = await tx.ask.create({
+                data: {
+                    user: { connect: { id: userId } },
+                    askKind: askKind,
+                    space: {
+                        connect: {
+                            name: space,
+                        },
+                    },
+                    askStatus: 'OPEN',
+                    tags: {
+                        createMany: {
+                            data: tags.map((tag) => {
+                                return {
+                                    tagId: tag!.id,
+                                }
+                            }),
+                        },
+                    },
+                    bumps: {
+                        create: {
+                            bidder: { connect: { id: userId } },
+                            amount: amount * MSATS_UNIT_FACTOR,
+                        },
+                    },
+                    askContext: {
+                        create: {
+                            title: title,
+                            slug: slugify(title),
+                            content: content,
+                            headerImage: headerImageId ? { connect: { id: headerImageId } } : undefined,
+                        },
                     },
                 },
-                askStatus: 'OPEN',
-                tags: {
-                    createMany: {
-                        data: tags.map((tag) => {
-                            return {
-                                tagId: tag!.id,
-                            }
-                        }),
-                    },
+                include: {
+                    askContext: true,
                 },
-                bumps: {
-                    create: {
-                        bidder: { connect: { id: userId } },
-                        amount: amount * MSATS_UNIT_FACTOR,
-                    },
-                },
-                askContext: {
-                    create: {
-                        title: title,
-                        slug: slugify(title),
-                        content: content,
-                        headerImage: headerImageId ? { connect: { id: headerImageId } } : undefined,
-                    },
-                },
-            },
-            include: {
-                askContext: true,
-            },
-        })
+            })
 
-        const bumper = await tx.user.update({
-            where: { id: userId },
-            data: {
-                balance: {
-                    decrement: amount * MSATS_UNIT_FACTOR,
+            const bumper = await tx.user.update({
+                where: { id: userId },
+                data: {
+                    balance: {
+                        decrement: amount * MSATS_UNIT_FACTOR,
+                    },
+                    lockedBalance: {
+                        increment: amount * MSATS_UNIT_FACTOR,
+                    },
                 },
-                lockedBalance: {
-                    increment: amount * MSATS_UNIT_FACTOR,
-                },
-            },
-        })
+            })
 
-        return { ask, bumper }
-    })
+            return { ask, bumper }
+        })
+        .then(async (res) => {
+            void sendPublicWebsiteEventMessage(
+                `A new ${askKind} Ask with the title "${title}" was created in the space "${space}" for an initial bounty of ${amount} sats on Artisats.com. \n You can check it out here here: https://artisats.com/ask/single/${slugify(
+                    title,
+                )} \n Description preview: ${content.slice(0, 120)}...`,
+            )
+            return res
+        })
 
 export const doBumpBalanceTransaction = async (askId: string, userId: string, amount: number) =>
-    await prisma.$transaction(async (tx) => {
-        const ask = await tx.ask.update({
-            where: { id: askId },
-            data: {
-                bumps: {
-                    create: {
-                        bidder: { connect: { id: userId } },
-                        amount: amount * MSATS_UNIT_FACTOR,
+    await prisma
+        .$transaction(async (tx) => {
+            const ask = await tx.ask.update({
+                where: { id: askId },
+                data: {
+                    bumps: {
+                        create: {
+                            bidder: { connect: { id: userId } },
+                            amount: amount * MSATS_UNIT_FACTOR,
+                        },
                     },
                 },
-            },
-        })
-
-        if (!ask) {
-            throw new TRPCError({ code: 'BAD_REQUEST', message: 'bump failed' })
-        }
-
-        const bumper = await tx.user.update({
-            where: { id: userId },
-            data: {
-                balance: {
-                    decrement: amount * MSATS_UNIT_FACTOR,
+                include: {
+                    user: true,
+                    askContext: true,
                 },
-                lockedBalance: {
-                    increment: amount * MSATS_UNIT_FACTOR,
-                },
-            },
-        })
+            })
 
-        return { ask, bumper }
-    })
+            if (!ask) {
+                throw new TRPCError({ code: 'BAD_REQUEST', message: 'bump failed' })
+            }
+
+            const bumper = await tx.user.update({
+                where: { id: userId },
+                data: {
+                    balance: {
+                        decrement: amount * MSATS_UNIT_FACTOR,
+                    },
+                    lockedBalance: {
+                        increment: amount * MSATS_UNIT_FACTOR,
+                    },
+                },
+            })
+
+            return { ask, askAuthor: ask.user, bumper, amount }
+        })
+        .then(async (res) => {
+            if (res?.askAuthor?.nostrPubKey) {
+                void sendMessageToPubKey(
+                    res.askAuthor.publicKey,
+                    `Your ask has been bumped with ${res.amount} sats. \n https://atrisats.com/ask/single/${res?.ask?.askContext?.slug}`,
+                )
+            }
+
+            return res
+        })
 
 export const doInvoiceBalanceTransaction = async (transactionId: string, targetAmountMSats: number) =>
     await prisma.$transaction(async (tx) => {

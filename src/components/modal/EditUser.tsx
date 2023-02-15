@@ -16,6 +16,7 @@ type EditUserInput = RouterInput['user']['edit']
 export const editUserInput = z.object({
     userName: z.string().max(24).optional(),
     base64EncodedImage: z.string().optional(),
+    nostrPubKey: z.string().optional(),
     bio: z.string().max(256).optional(),
 })
 
@@ -40,6 +41,7 @@ export const EditUser = ({}: EditUserProps) => {
         defaultValues: {
             userName: user?.userName,
             base64EncodedImage: user?.profileImage ?? '',
+            nostrPubKey: user?.nostrPubKey ?? '',
             bio: user?.bio ?? '',
         },
     })
@@ -91,7 +93,7 @@ export const EditUser = ({}: EditUserProps) => {
 
     return (
         <form className={'flex flex-col gap-8'}>
-            <div>
+            <div className={'w-72'}>
                 <label htmlFor="edit-user-profileImage">Profile image</label>
                 <img
                     id={'edit-user-profileImage'}
@@ -116,6 +118,12 @@ export const EditUser = ({}: EditUserProps) => {
                 label={'user name'}
                 variant="outlined"
                 {...register('userName', { required: true })}
+            />
+            <TextField
+                id="edit-user-nostrPubKey"
+                label={'nostr pub key'}
+                variant="outlined"
+                {...register('nostrPubKey', { required: true })}
             />
             <TextField
                 multiline

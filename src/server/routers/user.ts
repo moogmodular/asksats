@@ -5,6 +5,7 @@ import { editUserInput } from '~/components/modal/EditUser'
 import { TRPCError } from '@trpc/server'
 import { isAuthed } from '~/server/middlewares/authed'
 import { userBalance } from '~/server/service/accounting'
+import { sendMessageToPubKey } from '~/server/service/nostr'
 
 export const userRouter = t.router({
     getMe: t.procedure.use(isAuthed).query(async ({ ctx }) => {
@@ -42,7 +43,21 @@ export const userRouter = t.router({
             return await prisma.user
                 .update({
                     where: { id: ctx.user.id },
-                    data: { userName: input.userName, profileImage: input.base64EncodedImage, bio: input.bio },
+                    data: {
+                        userName: input.userName,
+                        profileImage: input.base64EncodedImage,
+                        bio: input.bio,
+                        nostrPubKey: input.nostrPubKey,
+                    },
+                })
+                .then((user) => {
+                    if (user.nostrPubKey && !ctx.user.nostrPubKey) {
+                        void sendMessageToPubKey(
+                            user.nostrPubKey,
+                            `Welcome to AtriSats.com ${user.userName}.\n You can follow us on @ArtiSats.com.\n You will now receive notifications when anything happens to your aks, asks that you bumped and asks that you offered for.`,
+                        )
+                    }
+                    return user
                 })
                 .catch((error) => {
                     throw new TRPCError({ code: 'INTERNAL_SERVER_ERROR', message: error.message })

@@ -24,6 +24,7 @@ model User {
   lastLogin     DateTime?
   publicKey     String          @unique
   userName      String          @unique
+  nostrPubKey   String?         @unique
   profileImage  String?
   bio           String?
   role          UserRole        @default(USER)
