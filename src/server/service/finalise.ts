@@ -175,9 +175,9 @@ export const doCreateAskBalanceTransaction = async (
         })
         .then(async (res) => {
             void sendPublicWebsiteEventMessage(
-                `A new ${askKind} Ask with the title "${title}" was created in the space "${space}" for an initial bounty of ${amount} sats on Artisats.com. \n You can check it out here here: https://artisats.com/ask/single/${slugify(
-                    title,
-                )} \n Description preview: ${content.slice(0, 120)}...`,
+                `A new ${askKind} Ask with the title "${title}" was created in the space "${space}" for an initial bounty of ${amount} sats on Artisats.com. \n You can check it out here here: https://artisats.com/ask/single/${
+                    res?.ask?.askContext?.slug
+                } \n Description preview: ${content.slice(0, 120)}...`,
             )
             return res
         })
