@@ -14,6 +14,17 @@ function getConfig(config) {
     return config
 }
 
+const corsHeaders = [
+    {
+        key: 'Access-Control-Allow-Origin',
+        value: '*',
+    },
+    {
+        key: 'Access-Control-Allow-Methods',
+        value: 'GET, HEAD, OPTIONS',
+    },
+]
+
 /**
  * @link https://nextjs.org/docs/api-reference/next.config.js/introduction
  */
@@ -29,6 +40,19 @@ module.exports = getConfig({
     transpilePackages: ['FilerobotImageEditor'],
     typescript: {
         ignoreBuildErrors: true,
+    },
+    async headers() {
+        return [
+            {
+                source: '/_next/:asset*',
+                headers: corsHeaders,
+            },
+
+            {
+                source: '/.well-known',
+                headers: [...corsHeaders],
+            },
+        ]
     },
     async redirects() {
         return [
