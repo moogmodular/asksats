@@ -31,13 +31,13 @@ export const invoiceRouter = t.router({
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'amount must be positive' })
             }
 
-            if (!(await belowInvoiceLimit(prisma, ctx.user.id))) {
-                throw new TRPCError({ code: 'FORBIDDEN', message: 'too many pending invoices' })
-            }
+            // if (!(await belowInvoiceLimit(prisma, ctx.user.id))) {
+            //     throw new TRPCError({ code: 'FORBIDDEN', message: 'too many pending invoices' })
+            // }
 
-            if (await recentSettledTransaction(prisma, ctx.user.id, 'INVOICE')) {
-                throw new TRPCError({ code: 'FORBIDDEN', message: 'last deposit too recent' })
-            }
+            // if (await recentSettledTransaction(prisma, ctx.user.id, 'INVOICE')) {
+            //     throw new TRPCError({ code: 'FORBIDDEN', message: 'last deposit too recent' })
+            // }
 
             if (input.amount > SINGLE_TRANSACTION_CAP) {
                 throw new TRPCError({ code: 'FORBIDDEN', message: 'invoice amount too high' })

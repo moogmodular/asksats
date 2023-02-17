@@ -119,9 +119,9 @@ export const withdrawalRouter = t.router({
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'user not found' })
             }
 
-            if (await recentSettledTransaction(prisma, user.id, 'WITHDRAWAL')) {
-                throw new TRPCError({ code: 'FORBIDDEN', message: 'last withdrawal too recent' })
-            }
+            // if (await recentSettledTransaction(prisma, user.id, 'WITHDRAWAL')) {
+            //     throw new TRPCError({ code: 'FORBIDDEN', message: 'last withdrawal too recent' })
+            // }
 
             let decoded: any
             try {
