@@ -6,6 +6,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner'
 import { s3Client } from '~/server/service/s3-client'
 import { GetObjectCommand } from '@aws-sdk/client-s3'
 import { z } from 'zod'
+import { sendMessageToPubKey } from '~/server/service/nostr'
 
 export const offerRouter = t.router({
     create: t.procedure
@@ -17,7 +18,7 @@ export const offerRouter = t.router({
                 include: {
                     askContext: { include: { headerImage: true } },
                     bumps: true,
-                    user: { select: { userName: true, publicKey: true } },
+                    user: { select: { userName: true, publicKey: true, nostrPubKey: true } },
                     offer: true,
                     settledForOffer: true,
                     tags: {
@@ -34,20 +35,31 @@ export const offerRouter = t.router({
                 throw new Error('This ask si not active')
             }
 
-            return prisma.offer.create({
-                data: {
-                    ask: { connect: { id: input.askId } },
-                    author: { connect: { id: ctx.user.id } },
-                    offerContext: {
-                        create: {
-                            content: input.content,
-                            filePairs: {
-                                connect: input.filePairs.map((file) => ({ id: file.id })),
+            return prisma.offer
+                .create({
+                    data: {
+                        ask: { connect: { id: input.askId } },
+                        author: { connect: { id: ctx.user.id } },
+                        offerContext: {
+                            create: {
+                                content: input.content,
+                                filePairs: {
+                                    connect: input.filePairs.map((file) => ({ id: file.id })),
+                                },
                             },
                         },
                     },
-                },
-            })
+                })
+                .then(async (res) => {
+                    if (ask?.user?.nostrPubKey) {
+                        void sendMessageToPubKey(
+                            ask?.user?.nostrPubKey,
+                            `Your ask "${ask?.askContext?.content}" has a new offer from ${ctx.user.userName}: https://atrisats.com/ask/single/${ask?.askContext?.slug}`,
+                        )
+                    }
+
+                    return res
+                })
         }),
     listForAsk: t.procedure
         .use(isAuthed)

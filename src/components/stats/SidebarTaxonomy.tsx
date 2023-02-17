@@ -5,9 +5,10 @@ import List from '@mui/material/List'
 import ListItem from '@mui/material/ListItem'
 import ListItemButton from '@mui/material/ListItemButton'
 import ListItemIcon from '@mui/material/ListItemIcon'
-import { Autocomplete, Checkbox, Link, TextField, Typography } from '@mui/material'
+import { Autocomplete, Checkbox, Link, TextField, Tooltip, Typography } from '@mui/material'
 import { LinkBehaviour } from '~/components/common/LinkBehaviour'
-import { SatoshiIcon } from '~/components/common/SatishiIcon'
+import NoAdultContentIcon from '@mui/icons-material/NoAdultContent'
+import ExplicitIcon from '@mui/icons-material/Explicit'
 
 interface SidebarTaxonomyProps {}
 
@@ -66,8 +67,15 @@ export const SidebarTaxonomy = ({}: SidebarTaxonomyProps) => {
                                 </Link>
                                 <div className={'flex w-48 flex-row items-center gap-1'}>
                                     <i>nsfw:</i>
-                                    <b>{space.nsfw}</b>
-                                    <SatoshiIcon />
+                                    {space.nsfw ? (
+                                        <Tooltip title={'This space is nsfw'}>
+                                            <ExplicitIcon color={'warning'} />
+                                        </Tooltip>
+                                    ) : (
+                                        <Tooltip title={'This space is sfw'}>
+                                            <NoAdultContentIcon color={'info'} />
+                                        </Tooltip>
+                                    )}
                                 </div>
                             </div>
                         )

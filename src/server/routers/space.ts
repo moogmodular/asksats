@@ -39,7 +39,7 @@ export const spaceRouter = t.router({
     spaceInfo: t.procedure.input(z.object({ spaceName: z.string() })).query(async ({ ctx, input }) => {
         const space = await prisma.space.findUnique({
             where: { name: input.spaceName },
-            include: { headerImage: true },
+            include: { headerImage: true, creator: true },
         })
         return {
             ...space,

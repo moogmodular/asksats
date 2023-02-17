@@ -58,9 +58,11 @@ export const recentSettledTransaction = async (
 }
 
 export const minBumpForAsk = (sum: number, askKind: AskKind) => {
-    return {
-        PUBLIC: GLOBAL_MIN_BUMP_SATS,
-        PRIVATE: GLOBAL_MIN_BUMP_SATS,
-        BUMP_PUBLIC: sum * BUMP_PUBLIC_MIN_BUMP_FACTOR,
-    }[askKind]
+    return Math.floor(
+        {
+            PUBLIC: GLOBAL_MIN_BUMP_SATS,
+            PRIVATE: GLOBAL_MIN_BUMP_SATS,
+            BUMP_PUBLIC: sum * BUMP_PUBLIC_MIN_BUMP_FACTOR,
+        }[askKind],
+    )
 }

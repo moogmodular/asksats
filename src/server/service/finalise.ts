@@ -1,5 +1,5 @@
 import { prisma } from '~/server/prisma'
-import { MSATS_UNIT_FACTOR, PAYOUT_FACTOR } from '~/server/service/constants'
+import { MSATS_UNIT_FACTOR, PAYOUT_FACTOR, SPACE_OWNER, THE_BANK } from '~/server/service/constants'
 import { TRPCError } from '@trpc/server'
 import { getK1Hash } from '~/server/service/lnurl'
 import { slugify } from '~/utils/string'
@@ -24,6 +24,7 @@ export const doSettleAskBalanceTransaction = async (askId: string, offerId: stri
                 include: {
                     bumps: true,
                     askContext: true,
+                    space: true,
                 },
             })
 
@@ -51,7 +52,16 @@ export const doSettleAskBalanceTransaction = async (askId: string, offerId: stri
                 },
             })
 
-            return { ask, bounty, payers, recipient }
+            const spaceOwner = await tx.user.update({
+                where: { id: ask?.space?.creatorId ?? '' },
+                data: {
+                    balance: {
+                        increment: bounty * SPACE_OWNER,
+                    },
+                },
+            })
+
+            return { ask, bounty, payers, recipient, spaceOwner }
         })
         .then(async (res) => {
             if (res.recipient.nostrPubKey) {
@@ -60,7 +70,11 @@ export const doSettleAskBalanceTransaction = async (askId: string, offerId: stri
                     res.recipient.publicKey,
                     `Congratulations! An ask that you offered for has been settled for a total bounty of ${bounty} sats. \n
                     https://atrisats.com/ask/single/${res?.ask?.askContext?.slug} \n
-                    Your withdrawable amount for this ask is ${bounty * PAYOUT_FACTOR} = ${bounty} * ${PAYOUT_FACTOR}\n
+                    Your withdrawable amount for this ask is ${(bounty * PAYOUT_FACTOR) / MSATS_UNIT_FACTOR} = ${
+                        bounty / MSATS_UNIT_FACTOR
+                    } - ${(bounty * SPACE_OWNER) / MSATS_UNIT_FACTOR}(space owner) - ${
+                        (bounty * THE_BANK) / MSATS_UNIT_FACTOR
+                    }(Atrisats) \n
                     You can view your balance at https://atrisats.com and withdraw your funds to your wallet.`,
                 )
             }

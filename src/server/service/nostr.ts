@@ -76,8 +76,6 @@ export const sendMessageToServerOwner = async (message: string) => {
     event.id = getEventHash(event)
     event.sig = signEvent(event, websitePrivateKey)
 
-    console.log('ensuredRelaysAfterSomeTime', ensuredRelaysAfterSomeTime)
-
     pool.publish(ensuredRelaysAfterSomeTime, event)
 }
 

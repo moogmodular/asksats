@@ -10,8 +10,9 @@ export const INVOICE_LIMIT = 10
 export const SPACE_CREATION_COST = 1000
 export const BUMP_PUBLIC_MIN_BUMP_FACTOR = 0.1
 export const GLOBAL_MIN_BUMP_SATS = 10
-export const THE_BANK = 0.09
-export const PAYOUT_FACTOR = 1 - THE_BANK
+export const THE_BANK = 0.06
+export const SPACE_OWNER = 0.03
+export const PAYOUT_FACTOR = 1 - THE_BANK - SPACE_OWNER
 export const DEFAULT_EXCLUDED_TAG = [{ name: 'nsfw', id: '' }]
 export const askTextDefault =
     'Describe your Ask here... click on the *preview* tab to see how it will be displayed. You can use **markdown** ([cheat sheet](https://www.markdownguide.org/cheat-sheet/)) and if you need more than one image to describe it you can use external images like: ![imgae from wikipedia](https://upload.wikimedia.org/wikipedia/commons/b/b6/Image_created_with_a_mobile_phone.png)'

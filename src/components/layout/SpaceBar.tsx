@@ -4,6 +4,7 @@ import {
     AccordionDetails,
     AccordionSummary,
     Autocomplete,
+    Avatar,
     Button,
     CircularProgress,
     IconButton,
@@ -12,7 +13,6 @@ import {
 } from '@mui/material'
 import React, { useEffect, useState } from 'react'
 import { useRouter } from 'next/router'
-import PreviewIcon from '@mui/icons-material/Preview'
 import PlaylistAddIcon from '@mui/icons-material/PlaylistAdd'
 import { useActionStore } from '~/store/actionStore'
 import { SubHeaderToolbarHeader } from '~/components/layout/SubHeaderToolbar'
@@ -21,6 +21,15 @@ import useMediaQuery from '@mui/material/useMediaQuery'
 import EditIcon from '@mui/icons-material/Edit'
 import { useStore } from 'zustand'
 import { authedUserStore } from '~/store/authedUserStore'
+import ExplicitIcon from '@mui/icons-material/Explicit'
+import NoAdultContentIcon from '@mui/icons-material/NoAdultContent'
+import AccountCircleIcon from '@mui/icons-material/AccountCircle'
+import { IconPropertyDisplay } from '~/components/common/IconPropertyDisplay'
+import { format } from 'date-fns'
+import { standardDateFormat } from '~/utils/date'
+import PlayCircleFilledIcon from '@mui/icons-material/PlayCircleFilled'
+import { SPACE_CREATION_COST, SPACE_OWNER } from '~/server/service/constants'
+import InfoIcon from '@mui/icons-material/Info'
 
 type Space = RouterOutput['space']['list'][0]
 type SpaceWithImage = RouterOutput['space']['spaceInfo']
@@ -108,7 +117,7 @@ export const SpaceBar = ({}) => {
                 aria-controls="panel1bh-content"
                 id="panel1bh-header"
             >
-                <div className={'flex grow flex-row'}>
+                <div className={'flex grow flex-row items-center'}>
                     <Autocomplete
                         value={value}
                         disableClearable={true}
@@ -140,7 +149,17 @@ export const SpaceBar = ({}) => {
                                 className={'flex cursor-pointer flex-row justify-center justify-between p-2'}
                             >
                                 <div>{option.name}</div>
-                                <div>{option.nsfw && <PreviewIcon color="error" />}</div>
+                                <div>
+                                    {option.nsfw ? (
+                                        <Tooltip title={'This space is nsfw'}>
+                                            <ExplicitIcon color={'warning'} />
+                                        </Tooltip>
+                                    ) : (
+                                        <Tooltip title={'This space is sfw'}>
+                                            <NoAdultContentIcon color={'info'} />
+                                        </Tooltip>
+                                    )}
+                                </div>
                             </li>
                         )}
                         renderInput={(params) => (
@@ -169,6 +188,11 @@ export const SpaceBar = ({}) => {
                             <PlaylistAddIcon fontSize={'medium'} color={'primary'} />
                         </IconButton>
                     </Tooltip>
+                    <Tooltip
+                        title={`creating a space costs ${SPACE_CREATION_COST} but space creators/mods get a cut of [total bounty * ${SPACE_OWNER}] of the bounty`}
+                    >
+                        <InfoIcon />
+                    </Tooltip>
                 </div>
 
                 {matches ? <SubHeaderToolbarHeader /> : null}
@@ -181,7 +205,7 @@ export const SpaceBar = ({}) => {
                             <div className={'flex flex-col'}>
                                 <div className={'text-2xl'}>{spaceInfo.name}</div>
                             </div>
-                            <div className={'flex flex-row items-center gap-2'}>
+                            <div className={'flex flex-row items-center gap-4'}>
                                 {user?.id === spaceInfo.creatorId && (
                                     <Button
                                         id="cancel-ask-button"
@@ -195,16 +219,36 @@ export const SpaceBar = ({}) => {
                                         edit
                                     </Button>
                                 )}
-                                <div className={'text-lg font-bold'}>NSFW</div>
+                                {spaceInfo.nsfw ? (
+                                    <Tooltip title={'This space is nsfw'}>
+                                        <ExplicitIcon color={'warning'} />
+                                    </Tooltip>
+                                ) : (
+                                    <Tooltip title={'This space is sfw'}>
+                                        <NoAdultContentIcon color={'info'} />
+                                    </Tooltip>
+                                )}
                                 <div className={'text-lg'}>
-                                    {spaceInfo.nsfw ? (
-                                        <div>
-                                            <PreviewIcon color="error" />
-                                            Yes
+                                    <div className={'flex flex-row gap-2'}>
+                                        {spaceInfo.creator && (
+                                            <Avatar alt="User avatar" src={spaceInfo.creator.profileImage ?? ''} />
+                                        )}
+                                        <div className={'flex flex-col'}>
+                                            <IconPropertyDisplay
+                                                identifier={'userName'}
+                                                value={spaceInfo.creator?.userName}
+                                                link={true}
+                                            >
+                                                <AccountCircleIcon fontSize={'small'} />
+                                            </IconPropertyDisplay>
+                                            <IconPropertyDisplay
+                                                identifier={'createdAt'}
+                                                value={format(spaceInfo.createdAt ?? 0, standardDateFormat)}
+                                            >
+                                                <PlayCircleFilledIcon fontSize={'small'} />
+                                            </IconPropertyDisplay>
                                         </div>
-                                    ) : (
-                                        <div>No</div>
-                                    )}
+                                    </div>
                                 </div>
                             </div>
                         </div>

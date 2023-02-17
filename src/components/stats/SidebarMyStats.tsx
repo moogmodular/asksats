@@ -22,6 +22,8 @@ import { FileList } from '~/components/FileList'
 import { OfferList } from '~/components/ask/OfferList'
 import { BumpList } from '~/components/ask/BumpList'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
+import ExplicitIcon from '@mui/icons-material/Explicit'
+import NoAdultContentIcon from '@mui/icons-material/NoAdultContent'
 
 interface TabPanelProps {
     children?: React.ReactNode
@@ -172,9 +174,15 @@ export const SidebarMyStats = ({}: SidebarMyStatsProps) => {
                                         {space.name}
                                     </Link>
                                     <div className={'flex w-48 flex-row items-center gap-1'}>
-                                        <i>nsfw:</i>
-                                        <b>{space.nsfw}</b>
-                                        <SatoshiIcon />
+                                        {space.nsfw ? (
+                                            <Tooltip title={'This space is nsfw'}>
+                                                <ExplicitIcon color={'warning'} />
+                                            </Tooltip>
+                                        ) : (
+                                            <Tooltip title={'This space is sfw'}>
+                                                <NoAdultContentIcon color={'info'} />
+                                            </Tooltip>
+                                        )}
                                     </div>
                                     <Button
                                         id="cancel-ask-button"
