@@ -51,7 +51,7 @@ export const offerRouter = t.router({
                     if (ask?.user?.nostrPubKey) {
                         void sendMessageToPubKey(
                             ask?.user?.nostrPubKey,
-                            `Your ask "${ask?.askContext?.content}" has a new offer from ${ctx.user.userName}: https://atrisats.com/ask/single/${ask?.askContext?.slug}`,
+                            `Your ask "${ask?.askContext?.title}" has a new offer from ${ctx.user.userName}: \nhttps://atrisats.com/ask/single/${ask?.askContext?.slug}`,
                         )
                     }
 
