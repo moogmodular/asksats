@@ -47,7 +47,7 @@ export const doSettleAskBalanceTransaction = async (askId: string, offerId: stri
                 where: { id: offererId },
                 data: {
                     balance: {
-                        increment: bounty,
+                        increment: Math.floor(bounty),
                     },
                 },
             })
@@ -56,7 +56,7 @@ export const doSettleAskBalanceTransaction = async (askId: string, offerId: stri
                 where: { id: ask?.space?.creatorId ?? '' },
                 data: {
                     balance: {
-                        increment: bounty * SPACE_OWNER,
+                        increment: Math.floor(bounty * SPACE_OWNER),
                     },
                 },
             })
@@ -72,7 +72,7 @@ export const doSettleAskBalanceTransaction = async (askId: string, offerId: stri
                     https://atrisats.com/ask/single/${res?.ask?.askContext?.slug} \n
                     Your withdrawable amount for this ask is ${(bounty * PAYOUT_FACTOR) / MSATS_UNIT_FACTOR} = ${
                         bounty / MSATS_UNIT_FACTOR
-                    } - ${(bounty * SPACE_OWNER) / MSATS_UNIT_FACTOR}(space owner) - ${
+                    } - ${Math.floor(bounty * SPACE_OWNER) / MSATS_UNIT_FACTOR}(space owner) - ${
                         (bounty * THE_BANK) / MSATS_UNIT_FACTOR
                     }(Atrisats) \n
                     You can view your balance at https://atrisats.com and withdraw your funds to your wallet.`,
