@@ -293,7 +293,7 @@ export const Ask = ({ slug }: AskProps) => {
                                         </i>
                                     </div>
                                 )}
-                                {askData.ask.askKind !== 'PRIVATE' || askData.ask.user === user.id ? (
+                                {askData.ask.askKind !== 'PRIVATE' || askData?.ask?.user?.id === user.id ? (
                                     <OfferList
                                         askId={askData.ask.id ?? ''}
                                         canFavourite={
