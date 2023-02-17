@@ -15,8 +15,8 @@ export const userBalance = async (userId: string) => {
         where: { id: userId },
     })
     return {
-        availableBalance: (user?.balance ?? 0) / MSATS_UNIT_FACTOR,
-        lockedBalance: (user?.lockedBalance ?? 0) / MSATS_UNIT_FACTOR,
+        availableBalance: Math.floor((user?.balance ?? 0) / MSATS_UNIT_FACTOR),
+        lockedBalance: Math.floor((user?.lockedBalance ?? 0) / MSATS_UNIT_FACTOR),
     }
 }
 

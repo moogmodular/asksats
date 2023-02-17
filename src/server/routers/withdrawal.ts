@@ -11,7 +11,7 @@ import {
     SINGLE_TRANSACTION_CAP,
     TRANSACTION_MAX_AGE,
 } from '~/server/service/constants'
-import { recentSettledTransaction, userBalance } from '~/server/service/accounting'
+import { userBalance } from '~/server/service/accounting'
 import { isAuthed } from '~/server/middlewares/authed'
 import { doWithdrawalBalanceTransaction } from '~/server/service/finalise'
 
@@ -19,7 +19,7 @@ export const withdrawalRouter = t.router({
     getWithdrawalUrl: t.procedure.use(isAuthed).query(async ({ ctx }) => {
         const secret = k1()
         const currentBalance = await userBalance(ctx.user.id)
-        const maxAmount = Math.min(currentBalance.availableBalance, SINGLE_TRANSACTION_CAP)
+        const maxAmount = Math.floor(Math.min(currentBalance.availableBalance, SINGLE_TRANSACTION_CAP))
 
         const encoded = encodedUrl(`${process.env.LN_WITH_CREATE_URL}`, 'withdrawRequest', secret)
 
@@ -32,7 +32,7 @@ export const withdrawalRouter = t.router({
                 transactionStatus: 'PENDING',
                 transactionKind: 'WITHDRAWAL',
                 maxAgeSeconds: TRANSACTION_MAX_AGE,
-                mSatsTarget: maxAmount,
+                mSatsTarget: maxAmount * MSATS_UNIT_FACTOR,
                 bolt11: encoded,
                 description: '',
                 lndId: k1Hash,
@@ -77,7 +77,7 @@ export const withdrawalRouter = t.router({
                             defaultDescription: `Withdrawal for @${user?.userName} on ${
                                 process.env.DOMAIN
                             } for maximum ${maxAmount - 1}`,
-                            minWithdrawable: MIN_WITHDRAWAL_FLOOR,
+                            minWithdrawable: MIN_WITHDRAWAL_FLOOR * MSATS_UNIT_FACTOR,
                             maxWithdrawable: cappedAmount * MSATS_UNIT_FACTOR - 1000,
                         }
                         await prisma.transaction.update({
