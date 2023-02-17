@@ -11,7 +11,6 @@ import { offerRouter } from '~/server/routers/offer'
 import { assetRouter } from '~/server/routers/asset'
 import { commentRouter } from '~/server/routers/comment'
 import { statsRouter } from '~/server/routers/stats'
-import { taxonomyRouter } from '~/server/routers/taxonomy'
 import { blogRouter } from '~/server/routers/blog'
 import { invoiceRouter } from '~/server/routers/invoice'
 import { spaceRouter } from '~/server/routers/space'
@@ -31,7 +30,6 @@ export const appRouter = t.router({
     asset: assetRouter,
     comment: commentRouter,
     stats: statsRouter,
-    taxonomy: taxonomyRouter,
     blog: blogRouter,
     space: spaceRouter,
     nostr: nostrRouter,

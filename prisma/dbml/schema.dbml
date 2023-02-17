@@ -20,7 +20,6 @@ Table User {
   offers Offer [not null]
   bumps Bump [not null]
   askComment AskComment [not null]
-  excludedTags Tag [not null]
   blogItems BlogItem [not null]
   filePairs OfferFilePair [not null]
   space Space [not null]
@@ -93,29 +92,8 @@ Table Ask {
   comments AskComment [not null]
   settledForOffer Offer
   bumps Bump [not null]
-  tags TagsOnAsks [not null]
   space Space
   spaceName String
-}
-
-Table Tag {
-  id String [pk]
-  createdAt DateTime [default: `now()`, not null]
-  updatedAt DateTime [not null]
-  name String [unique, not null]
-  asks TagsOnAsks [not null]
-  excludedBy User [not null]
-}
-
-Table TagsOnAsks {
-  askId String [not null]
-  ask Ask [not null]
-  tagId String [not null]
-  tag Tag [not null]
-
-  indexes {
-    (askId, tagId) [pk]
-  }
 }
 
 Table AskContext {
@@ -258,10 +236,6 @@ Ref: Space.headerImageId - File.id
 Ref: Ask.userId > User.id
 
 Ref: Ask.spaceName > Space.name
-
-Ref: TagsOnAsks.askId > Ask.id [delete: Cascade]
-
-Ref: TagsOnAsks.tagId > Tag.id [delete: Cascade]
 
 Ref: AskContext.askId - Ask.id [delete: Cascade]
 

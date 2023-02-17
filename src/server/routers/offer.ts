@@ -21,9 +21,6 @@ export const offerRouter = t.router({
                     user: { select: { userName: true, publicKey: true, nostrPubKey: true } },
                     offer: true,
                     settledForOffer: true,
-                    tags: {
-                        include: { tag: true },
-                    },
                 },
             })
 

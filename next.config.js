@@ -73,10 +73,6 @@ module.exports = getConfig({
                 destination: '/',
             },
             {
-                source: '/ask/tag/:tag',
-                destination: '/',
-            },
-            {
                 source: '/ask/blog',
                 destination: '/',
             },

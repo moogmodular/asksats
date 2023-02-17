@@ -10,8 +10,8 @@ import { Prisma } from '@prisma/client'
 import { askListProps } from '~/store/listStore'
 import { minBumpForAsk, userBalance } from '~/server/service/accounting'
 import { TRPCError } from '@trpc/server'
-import { ASK_EDITABLE_TIME, DEFAULT_EXCLUDED_TAG, MSATS_UNIT_FACTOR } from '~/server/service/constants'
-import { byAskKind, byTags, byUser, getOrder, getSearch } from '~/server/service/ask'
+import { ASK_EDITABLE_TIME, MSATS_UNIT_FACTOR } from '~/server/service/constants'
+import { byAskKind, byUser, getOrder, getSearch } from '~/server/service/ask'
 import { AskStatus } from '~/components/ask/Ask'
 import {
     doCanceleAskBalanceTransaction,
@@ -153,10 +153,6 @@ export const askRouter = t.router({
         .use(isAuthedOrGuest)
         .input(askListProps)
         .query(async ({ ctx, input }) => {
-            const excludedTags = ctx?.user
-                ? await prisma.user.findUnique({ where: { id: ctx?.user?.id } }).excludedTags()
-                : undefined
-
             const listWithStatus = await prisma.ask
                 .findMany({
                     where: {
@@ -165,7 +161,6 @@ export const askRouter = t.router({
                         ...byAskStatus(input.filterFor),
                         ...byUser(input.userName),
                         ...(byAskKind(input.askKind) as Prisma.EnumAskKindFilter),
-                        ...byTags(excludedTags ?? DEFAULT_EXCLUDED_TAG, ctx?.user?.role ?? 'USER', input.tagName),
                     },
                     orderBy: getOrder(input.orderBy, input.orderByDirection),
                     take: input.pageSize + 1,
@@ -176,9 +171,6 @@ export const askRouter = t.router({
                         user: { select: { userName: true, publicKey: true, profileImage: true } },
                         offer: true,
                         settledForOffer: true,
-                        tags: {
-                            include: { tag: true },
-                        },
                         space: {
                             select: { name: true },
                         },
@@ -244,9 +236,6 @@ export const askRouter = t.router({
                     id: input.askId,
                 },
                 include: {
-                    tags: {
-                        include: { tag: true },
-                    },
                     askContext: {
                         include: {
                             headerImage: true,
@@ -273,23 +262,12 @@ export const askRouter = t.router({
         .use(isAuthed)
         .input(editAskInput)
         .mutation(async ({ ctx, input }) => {
-            const allTags = input.tags
-                ? await Promise.all(
-                      input.tags.map(async (tag) => {
-                          const existingTag = await prisma.tag.findUnique({ where: { name: tag } })
-
-                          if (existingTag) {
-                              return existingTag
-                          }
-
-                          return await prisma.tag.create({ data: { name: tag } })
-                      }),
-                  )
-                : []
-
             const askCheck = await prisma.ask.findUnique({
                 where: {
                     id: input.askId,
+                },
+                include: {
+                    askContext: true,
                 },
             })
 
@@ -305,40 +283,9 @@ export const askRouter = t.router({
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'ask not editable' })
             }
 
-            await prisma.ask.update({
-                where: {
-                    id: input.askId,
-                },
-                data: {
-                    tags: {
-                        deleteMany: {},
-                    },
-                },
-            })
-
-            const ask = await prisma.ask.update({
-                where: {
-                    id: input.askId,
-                },
-                data: {
-                    tags: {
-                        createMany: {
-                            data: allTags.map((tag) => {
-                                return {
-                                    tagId: tag!.id,
-                                }
-                            }),
-                        },
-                    },
-                },
-                include: {
-                    askContext: true,
-                },
-            })
-
             return await prisma.askContext.update({
                 where: {
-                    id: ask?.askContext?.id ?? '',
+                    id: askCheck?.askContext?.id ?? '',
                 },
                 data: {
                     content: input.content,
@@ -369,24 +316,9 @@ export const askRouter = t.router({
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'space not found' })
             }
 
-            const allTags = input.tags
-                ? await Promise.all(
-                      input.tags.map(async (tag) => {
-                          const existingTag = await prisma.tag.findUnique({ where: { name: tag } })
-
-                          if (existingTag) {
-                              return existingTag
-                          }
-
-                          return await prisma.tag.create({ data: { name: tag } })
-                      }),
-                  )
-                : []
-
             return await doCreateAskBalanceTransaction(
                 input.askKind,
                 space.name,
-                allTags,
                 ctx.user.id,
                 input.amount,
                 input.title,
@@ -404,7 +336,6 @@ export const askRouter = t.router({
                         bumps: true,
                         offer: true,
                         settledForOffer: true,
-                        tags: { include: { tag: true } },
                         space: true,
                     },
                 },

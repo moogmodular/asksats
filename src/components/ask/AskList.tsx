@@ -13,7 +13,6 @@ export const AskList = ({}: AskListProps) => {
 
     const router = useRouter()
     const [userName, setUserName] = useState<string | undefined>(undefined)
-    const [tag, setTag] = useState<string | undefined>(undefined)
     const [space, setSpace] = useState<string>('all')
 
     const handleLoadMore = useCallback(() => {
@@ -29,7 +28,6 @@ export const AskList = ({}: AskListProps) => {
             orderByDirection,
             searchTerm,
             spaceName: space,
-            tagName: tag,
             userName,
             pageSize: 9,
         },
@@ -51,23 +49,16 @@ export const AskList = ({}: AskListProps) => {
         if (type === 'user') {
             const un = identifierFromPath(router.asPath)
             setUserName(un)
-            setTag(undefined)
-        } else if (type === 'tag') {
-            const tag = identifierFromPath(router.asPath)
-            setTag(tag)
-            setUserName(undefined)
         } else if (type === 'timeline') {
             const space = identifierFromPath(router.asPath)
-            setTag(undefined)
             setUserName(undefined)
             setSpace(space)
         } else {
             setUserName(undefined)
-            setTag(undefined)
         }
 
         infiniteQuery.refetch()
-    }, [router, filterFor, orderBy, orderByDirection, searchTerm, tag, userName])
+    }, [router, filterFor, orderBy, orderByDirection, searchTerm, userName])
 
     return (
         <div

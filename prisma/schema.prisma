@@ -36,7 +36,6 @@ model User {
   offers        Offer[]
   bumps         Bump[]
   askComment    AskComment[]
-  excludedTags  Tag[]
   blogItems     BlogItem[]
   filePairs     OfferFilePair[]
   space         Space[]
@@ -136,7 +135,6 @@ model Ask {
   comments        AskComment[]
   settledForOffer Offer?       @relation("settledForOffer")
   bumps           Bump[]
-  tags            TagsOnAsks[]
   space           Space?       @relation(fields: [spaceName], references: [name])
   spaceName       String?
 }
@@ -145,26 +143,6 @@ enum AskStatus {
   OPEN
   SETTLED
   CANCELED
-}
-
-model Tag {
-  id         String       @id @default(uuid())
-  createdAt  DateTime     @default(now())
-  updatedAt  DateTime     @updatedAt
-  // props
-  name       String       @unique
-  // rel
-  asks       TagsOnAsks[]
-  excludedBy User[]
-}
-
-model TagsOnAsks {
-  askId String
-  ask   Ask    @relation(fields: [askId], references: [id], onDelete: Cascade)
-  tagId String
-  tag   Tag    @relation(fields: [tagId], references: [id], onDelete: Cascade)
-
-  @@id([askId, tagId])
 }
 
 enum AskKind {

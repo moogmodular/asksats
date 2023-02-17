@@ -19,7 +19,6 @@ export const askListProps = z.object({
     withoutFavouritesOnly: z.boolean().nullish(),
     cursor: z.string().nullish(),
     userName: z.string().nullish(),
-    tagName: z.string().nullish(),
 })
 
 export type FilterForInput = RouterInput['ask']['list']['filterFor']

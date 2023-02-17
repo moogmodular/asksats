@@ -8,7 +8,6 @@ import { RouterOutput } from '~/utils/trpc'
 import { useActionStore } from '~/store/actionStore'
 import { format } from 'date-fns'
 import { standardDateFormat } from '~/utils/date'
-import { TagList } from '~/components/common/TagList'
 import { Avatar, Button, Tooltip } from '@mui/material'
 import LocalOfferIcon from '@mui/icons-material/LocalOffer'
 import CheckIcon from '@mui/icons-material/Check'
@@ -68,9 +67,6 @@ export const AskPreview = ({ ask, index }: AskPreviewProps) => {
                                     </div>
                                 )}
                             </Link>
-                            <div className={'absolute left-2 top-2'}>
-                                <TagList tags={ask.tags ?? []} />
-                            </div>
                         </div>
                     </div>
                     <div className={'flex flex-col justify-between gap-4 p-4 text-btcgrey'}>

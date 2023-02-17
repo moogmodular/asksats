@@ -1,5 +1,3 @@
-import { Tag } from '@prisma/client'
-
 export const getOrder = (orderBy: 'creation', orderByDirection: 'asc' | 'desc') => {
     return {
         creation: { createdAt: orderByDirection },
@@ -32,41 +30,4 @@ export const byAskKind = (askKind: string | undefined | null) => {
               askKind: askKind,
           }
         : {}
-}
-
-export const equalsList = (list: Array<string>) => {
-    return list.map((item) => {
-        return {
-            name: {
-                equals: item,
-            },
-        }
-    })
-}
-
-export const byTags = (tags: Array<Partial<Tag>>, role: 'USER' | 'GUEST' | 'ADMIN', singleTag?: string | null) => {
-    return singleTag
-        ? {
-              tags: {
-                  some: {
-                      tag: {
-                          name: singleTag,
-                      },
-                  },
-                  none: {
-                      tag: {
-                          OR: equalsList(tags.map((tag) => tag.name ?? '')),
-                      },
-                  },
-              },
-          }
-        : {
-              tags: {
-                  none: {
-                      tag: {
-                          OR: equalsList(tags.map((tag) => tag.name ?? '')),
-                      },
-                  },
-              },
-          }
 }

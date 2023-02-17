@@ -12,7 +12,6 @@ import { useMessageStore } from '~/store/messageStore'
 import { useZodForm } from '~/utils/useZodForm'
 import { createBumpForAsk } from '~/components/ask/AskPreview'
 import { SatoshiIcon } from '~/components/common/SatishiIcon'
-import { TagList } from '~/components/common/TagList'
 import { useEffect, useState } from 'react'
 import { AskTypeDisplay } from '~/components/common/AskTypeDisplay'
 import EditIcon from '@mui/icons-material/Edit'
@@ -178,7 +177,6 @@ export const Ask = ({ slug }: AskProps) => {
                                         data-popover-target="popover-default"
                                         type={askData.ask.askKind ?? 'PRIVATE'}
                                     />
-                                    <TagList tags={askData.ask.tags ?? []} />
                                 </div>
                                 {askData?.ask?.user?.id === user?.id && askData.ask.askStatus === 'OPEN' && (
                                     <div className={'flex flex-row gap-4'}>

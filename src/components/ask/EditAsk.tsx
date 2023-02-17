@@ -4,7 +4,7 @@ import { LexicalComposer } from '@lexical/react/LexicalComposer'
 import { PlainTextPlugin } from '@lexical/react/LexicalPlainTextPlugin'
 import { ContentEditable } from '@lexical/react/LexicalContentEditable'
 import { $createParagraphNode, $createTextNode, $getRoot, EditorState, EditorThemeClasses } from 'lexical'
-import { ChangeEvent, SyntheticEvent, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { OnChangePlugin } from '@lexical/react/LexicalOnChangePlugin'
 import { $rootTextContent } from '@lexical/text'
 import { MDRender } from '~/components/common/MDRender'
@@ -12,9 +12,8 @@ import { RouterInput, trpc } from '~/utils/trpc'
 import LexicalErrorBoundary from '@lexical/react/LexicalErrorBoundary'
 import { useActionStore } from '~/store/actionStore'
 import { useMessageStore } from '~/store/messageStore'
-import { TagPill } from '~/components/common/TagPill'
 import { bumpInfoText } from '~/server/service/constants'
-import { Autocomplete, Button, Checkbox, FormControlLabel, Tabs, TextField, Tooltip, Typography } from '@mui/material'
+import { Button, Tabs, Tooltip } from '@mui/material'
 import useMediaQuery from '@mui/material/useMediaQuery'
 import InfoIcon from '@mui/icons-material/Info'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
@@ -25,7 +24,6 @@ type EditAskInput = RouterInput['ask']['edit']
 export const editAskInput = z.object({
     askId: z.string().uuid(),
     content: z.string().max(2000).optional(),
-    tags: z.array(z.string().max(32)).max(5).optional(),
     headerImageId: z.string().optional(),
 })
 interface EditAskProps {}
@@ -35,17 +33,11 @@ export const EditAsk = ({}: EditAskProps) => {
     const { showToast } = useMessageStore()
 
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
-    const [possibleTags, setPossibleTags] = useState<{ label: string; id: string; isNew: boolean }[]>([])
     const matches = useMediaQuery('(min-width:1024px)')
     const inputRef = useRef<HTMLInputElement>(null)
 
     const { data: askContextData } = trpc.ask.getAskContext.useQuery({ askId })
 
-    const [tags, setTags] = useState<{ label: string; id: string; isNew: boolean }[]>(
-        askContextData?.ask?.tags.map((tag) => {
-            return { label: tag.tag.name, id: tag.tagId, isNew: false }
-        }) ?? [],
-    )
     const [tempEditorState, setTempEditorState] = useState<string>(askContextData?.content ?? '')
     const [uploadedImage, setUploadedImage] = useState<string | null>(askContextData?.headerImageUrl ?? null)
 
@@ -66,7 +58,6 @@ export const EditAsk = ({}: EditAskProps) => {
         defaultValues: {
             askId: askId,
             content: askContextData?.content,
-            tags: askContextData?.ask?.tags.map((tag) => tag.tag.name) ?? [],
             headerImageId: askContextData?.headerImageId ?? '',
         },
     })
@@ -94,7 +85,6 @@ export const EditAsk = ({}: EditAskProps) => {
         try {
             await editAskMutation.mutateAsync({
                 askId: askId,
-                tags: tags.map((t) => t.label),
                 headerImageId: uploadedImageId ?? '',
                 content: tempEditorState,
             })
@@ -105,25 +95,6 @@ export const EditAsk = ({}: EditAskProps) => {
             showToast('error', error.message)
             await utils.invalidate()
         }
-    }
-
-    const handleSearchInput = async (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-        const searchTerm = e.target.value
-        await utils.taxonomy.searchTags.fetch({ search: searchTerm }).then((data) => {
-            const tagResults = data.map((tag) => {
-                return {
-                    label: tag.name,
-                    id: tag.id,
-                    isNew: false,
-                }
-            })
-            const contains = tagResults.some((name) => name.label === searchTerm)
-            if (!contains) {
-                setPossibleTags([{ label: searchTerm, isNew: true, id: '0' }, ...tagResults])
-            } else {
-                setPossibleTags(tagResults)
-            }
-        })
     }
 
     const handleFileChange = async (data: File | undefined) => {
@@ -160,28 +131,6 @@ export const EditAsk = ({}: EditAskProps) => {
         })
     }
 
-    const handleTagClick = (option: { label: string; id: string; isNew: boolean }) => {
-        setTags([...tags, option])
-        setPossibleTags([])
-        if (inputRef.current) {
-            inputRef.current.value = ''
-        }
-    }
-
-    const handleNsfwCheck = (checked: SyntheticEvent) => {
-        const tgt = checked.target as unknown as { checked: boolean }
-        const isChecked = tgt.checked
-        if (isChecked) {
-            setTags([...tags, { id: '', label: 'nsfw', isNew: false }])
-        } else {
-            setTags([...tags.filter((item) => item.label !== 'nsfw')])
-        }
-    }
-
-    const handleRemoveTag = (tag: string) => {
-        setTags([...tags.filter((item) => item.label !== tag)])
-    }
-
     return (
         <form className={'flex flex-col gap-4 py-4'}>
             <b className={'text-2xl'}>{askContextData?.title}</b>
@@ -201,28 +150,6 @@ export const EditAsk = ({}: EditAskProps) => {
                         <Tooltip title={bumpInfoText}>
                             <InfoIcon />
                         </Tooltip>
-                        <Autocomplete
-                            size={`${matches ? 'medium' : 'small'}`}
-                            disablePortal
-                            id="combo-box-demo"
-                            options={possibleTags}
-                            sx={{ width: 300 }}
-                            renderInput={(params) => (
-                                <TextField
-                                    {...params}
-                                    label="Add a tag"
-                                    onChange={(e) => handleSearchInput(e)}
-                                    ref={inputRef}
-                                />
-                            )}
-                            renderOption={(props, option) => {
-                                return <Typography onClick={() => handleTagClick(option)}>{option.label}</Typography>
-                            }}
-                        />
-                        <FormControlLabel
-                            control={<Checkbox onChange={(value) => handleNsfwCheck(value)} />}
-                            label="potentially #nsfw"
-                        />
                     </div>
                     <div className={'flex w-full flex-col justify-between gap-4 lg:flex-row'}>
                         <Button variant="contained" component="div" size={`${matches ? 'medium' : 'small'}`}>
@@ -238,20 +165,6 @@ export const EditAsk = ({}: EditAskProps) => {
                 </div>
             </div>
 
-            <div className={'flex flex-row gap-8'}>
-                <b>Tags:</b>
-                {tags.length > 0 ? (
-                    <div className={'flex flex-row gap-2'}>
-                        {tags.map((tag, index) => {
-                            return (
-                                <TagPill key={index} tagValue={tag.label} noLink={true} removeTag={handleRemoveTag} />
-                            )
-                        })}
-                    </div>
-                ) : (
-                    <span className={'h-8'}>&nbsp;</span>
-                )}
-            </div>
             <Tabs
                 value={editorView}
                 variant={'fullWidth'}

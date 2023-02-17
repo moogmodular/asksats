@@ -125,7 +125,6 @@ export const doCanceleAskBalanceTransaction = async (askId: string) =>
 export const doCreateAskBalanceTransaction = async (
     askKind: AskKind,
     space: string,
-    tags: { id: string }[],
     userId: string,
     amount: number,
     title: string,
@@ -144,15 +143,6 @@ export const doCreateAskBalanceTransaction = async (
                         },
                     },
                     askStatus: 'OPEN',
-                    tags: {
-                        createMany: {
-                            data: tags.map((tag) => {
-                                return {
-                                    tagId: tag!.id,
-                                }
-                            }),
-                        },
-                    },
                     bumps: {
                         create: {
                             bidder: { connect: { id: userId } },

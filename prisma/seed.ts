@@ -96,7 +96,6 @@ async function main() {
     await Promise.all([
         await prisma.ask.deleteMany(),
         await prisma.space.deleteMany(),
-        await prisma.tag.deleteMany(),
         await prisma.askContext.deleteMany(),
         await prisma.offer.deleteMany(),
         await prisma.offerContext.deleteMany(),
@@ -300,12 +299,6 @@ async function main() {
         return allSpaces[randomIntFromTo(0, allSpaces.length - 1)]?.name ?? 'artisats'
     }
 
-    await Promise.all(
-        ['nsfw', 'photo', 'sketch', 'logo', 'drawing', 'hi-rez', 'color-palette'].map(async (tagName) => {
-            return await prisma.tag.create({ data: { name: tagName } })
-        }),
-    )
-
     const newUsers = await Promise.all(
         wallets.map(async (wallet, index) => {
             const seed = await bip39.mnemonicToSeed(wallet.mnemonic).then((value: Buffer) => value.toString('hex'))
@@ -320,14 +313,11 @@ async function main() {
                     balance: 5000000,
                     space: { connect: { name: await getRandomSpace() } },
                     lockedBalance: 0,
-                    excludedTags: { connectOrCreate: { where: { name: 'nsfw' }, create: { name: 'nsfw' } } },
                     bio: faker.lorem.paragraph(3),
                 },
             })
         }),
     )
-
-    const freshTags = await prisma.tag.findMany()
 
     await Promise.all(
         newUsers.map(async (user, index) => {
@@ -406,16 +396,6 @@ async function main() {
                         name: await getRandomSpace(),
                     },
                 },
-                tags: {
-                    createMany: {
-                        data: [
-                            { tagId: freshTags[0]!.id },
-                            { tagId: freshTags[2]!.id },
-                            { tagId: freshTags[4]!.id },
-                            { tagId: freshTags[6]!.id },
-                        ],
-                    },
-                },
                 askContext: {
                     create: {
                         title: titleExpired,
@@ -448,16 +428,6 @@ async function main() {
                 space: {
                     connect: {
                         name: await getRandomSpace(),
-                    },
-                },
-                tags: {
-                    createMany: {
-                        data: [
-                            { tagId: freshTags[1]!.id },
-                            { tagId: freshTags[3]!.id },
-                            { tagId: freshTags[5]!.id },
-                            { tagId: freshTags[0]!.id },
-                        ],
                     },
                 },
                 askContext: {
@@ -604,16 +574,6 @@ async function main() {
                         name: await getRandomSpace(),
                     },
                 },
-                tags: {
-                    createMany: {
-                        data: [
-                            { tagId: freshTags[3]!.id },
-                            { tagId: freshTags[5]!.id },
-                            { tagId: freshTags[0]!.id },
-                            { tagId: freshTags[2]!.id },
-                        ],
-                    },
-                },
                 askContext: {
                     create: {
                         title: titleSettled,
@@ -652,16 +612,6 @@ async function main() {
                 space: {
                     connect: {
                         name: await getRandomSpace(),
-                    },
-                },
-                tags: {
-                    createMany: {
-                        data: [
-                            { tagId: freshTags[2]!.id },
-                            { tagId: freshTags[4]!.id },
-                            { tagId: freshTags[6]!.id },
-                            { tagId: freshTags[1]!.id },
-                        ],
                     },
                 },
                 askContext: {

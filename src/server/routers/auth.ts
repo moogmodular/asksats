@@ -103,9 +103,6 @@ export const authRouter = t.router({
                                 data: {
                                     userName: randomName,
                                     publicKey: input.key,
-                                    excludedTags: {
-                                        connectOrCreate: { where: { name: 'nsfw' }, create: { name: 'nsfw' } },
-                                    },
                                     profileImage: `data:image/png;base64,${image}`,
                                 },
                             })

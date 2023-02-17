@@ -106,7 +106,6 @@ const IndexPage: NextPageWithLayout = () => {
                         {
                             single: <Ask slug={router.query.slug as string} />,
                             timeline: <AskList />,
-                            tag: <AskList />,
                             user: <AskList />,
                             blog: <BlogList />,
                         }[routerPath(router.asPath)]
