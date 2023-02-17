@@ -4,6 +4,7 @@ import { PollingQRCode } from '~/components/common/PollingQRCode'
 import { useActionStore } from '~/store/actionStore'
 import { useStore } from 'zustand'
 import { authedUserStore } from '~/store/authedUserStore'
+import { Chip } from '@mui/material'
 
 type LoginUrlResponse = RouterOutput['auth']['loginUrl']
 
@@ -65,6 +66,27 @@ export const Authenticate = ({}) => {
                     })}
                 </div>
             )}
+            <div className={'flex flex-row'}>
+                <div className={'bg-primary p-4'}>
+                    <div className={'mb-3 font-bold'}>Recommended:</div>
+                    <div className={'flex flex-col gap-2'}>
+                        <div className={'flex flex-row gap-2'}>
+                            <b>mobile:</b>
+                            <Chip label="Breez" component="a" href="https://breez.technology/" clickable />
+                            <Chip label="Blixt" component="a" href="https://blixtwallet.github.io/" clickable />
+                            <Chip label="Blue Wallet" component="a" href="https://bluewallet.io/" clickable />
+                        </div>
+                        <div className={'flex flex-row gap-2'}>
+                            <b>desktop:</b>
+                            <Chip label="Alby" component="a" href="https://getalby.com//" clickable />
+                            <Chip label="Zap" component="a" href="https://zaphq.io/download/" clickable />
+                        </div>
+                    </div>
+                </div>
+
+                <img className={'aspect-square w-32'} src="/scan_qr.png" />
+            </div>
+
             <PollingQRCode bolt11={loginUrl.encoded} />
         </div>
     )
