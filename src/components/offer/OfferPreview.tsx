@@ -28,25 +28,25 @@ export const OfferPreview = ({ offer, canFavourite, index }: OfferPreviewProps) 
     }
 
     return (
-        <div id={`offer-display-host-${index}`} className={'flex flex-row items-center'}>
+        <div id={`offer-display-host-${index}`} className={'flex flex-row items-center gap-4'}>
+            {canFavourite && (
+                <Tooltip title={'Settle this ask'}>
+                    <Button
+                        id={`settle-ask-button`}
+                        aria-label="delete"
+                        component={'div'}
+                        color={'primary'}
+                        variant={'contained'}
+                        onClick={() => handleSettleAsk()}
+                        startIcon={<CheckIcon />}
+                    >
+                        settle
+                    </Button>
+                </Tooltip>
+            )}
             <Accordion key={offer.id}>
                 <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel2a-content" id="panel2a-header">
                     <div className={'flex flex-row items-center gap-4 text-sm'}>
-                        {canFavourite && (
-                            <Tooltip title={'Settle this ask'}>
-                                <Button
-                                    id={`settle-ask-button`}
-                                    aria-label="delete"
-                                    component={'div'}
-                                    color={'primary'}
-                                    variant={'contained'}
-                                    onClick={() => handleSettleAsk()}
-                                    startIcon={<CheckIcon />}
-                                >
-                                    settle
-                                </Button>
-                            </Tooltip>
-                        )}
                         <DesignServicesIcon />
                         <div>{format(offer.createdAt ?? 0, standardDateFormat)}</div>
                         <div>
