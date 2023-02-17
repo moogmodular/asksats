@@ -33,8 +33,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     const [tempEditorState, setTempEditorState] = useState<string>(offerTextDefault)
     const [editorView, setEditorView] = useState<'edit' | 'preview'>('edit')
     const [rawImagePairs, setRawImagePairs] = useState<{ originalImage: string; obfuscatedImage: string }[]>([])
-
-    const [isUploading, setIsUploading] = useState(false)
+    const [uploadingImages, setUploadingImages] = useState(false)
 
     const createOfferMutation = trpc.offer.create.useMutation()
     const getPreSignedPairUrlMutation = trpc.asset.preSignedPair.useMutation()
@@ -109,6 +108,7 @@ export const CreateOffer = ({}: CreateOfferProps) => {
     }
 
     const onSubmit = async () => {
+        setUploadingImages(true)
         const filePairIds = await Promise.all(
             rawImagePairs.map(async (pair) => {
                 const uploadData = await getPreSignedPairUrlMutation.mutateAsync()
@@ -143,12 +143,14 @@ export const CreateOffer = ({}: CreateOfferProps) => {
             utils.ask.invalidate()
             utils.offer.listForAsk.invalidate()
         }
+        setUploadingImages(false)
         utils.invalidate()
     }
 
     return (
         <form className={'flex flex-col gap-8 py-4'}>
             <b>Add up to 3 images to your offer</b>
+            {uploadingImages && <LinearProgress />}
             <div className={'flex flex-col justify-between gap-4 lg:flex-row'}>
                 {Array.from({ length: 3 }).map((_, index) => {
                     return (
@@ -162,7 +164,6 @@ export const CreateOffer = ({}: CreateOfferProps) => {
                     )
                 })}
             </div>
-            {isUploading && <LinearProgress />}
             <Tabs
                 value={editorView}
                 variant={'fullWidth'}
