@@ -39,7 +39,7 @@ export const EditImageDialog = ({ close, open, currentImage, editedImage, preset
             <ImageEditor currentImage={currentImage} editedImage={(img) => editedImage(img)} preset={preset} />
             <DialogActions>
                 <Button onClick={handleClose} variant={'contained'} component="div">
-                    Done
+                    Cancel
                 </Button>
             </DialogActions>
         </Dialog>
