@@ -155,14 +155,21 @@ export const withdrawalRouter = t.router({
                 lnd,
                 request: pr,
                 max_fee: Number(10),
-                pathfinding_timeout: 30000,
+                pathfinding_timeout: 60000,
             })
 
-            sub.once('confirmed', async (payment) => {
-                await doWithdrawalBalanceTransaction(k1, payment.mtokens, payment.fee_mtokens)
-            })
+            return await new Promise((resolve, reject) => {
+                sub.once('confirmed', async (payment) => {
+                    console.log('payment', payment)
+                    await doWithdrawalBalanceTransaction(k1, payment.mtokens, payment.fee_mtokens)
+                    resolve({ status: 'OK' })
+                })
 
-            return { status: 'OK' }
+                sub.once('failed', async (payment) => {
+                    console.log('failed payment', payment)
+                    resolve({ status: 'ERROR', reason: 'failed payment' })
+                })
+            })
         }),
     wasWithdrawalSettled: t.procedure
         .use(isAuthed)

@@ -263,6 +263,7 @@ export const doInvoiceBalanceTransaction = async (transactionId: string, targetA
 
 export const doWithdrawalBalanceTransaction = async (k1: string, targetAmountMSats: string, feeMSats: string) =>
     await prisma.$transaction(async (tx) => {
+        console.log('k1', k1, targetAmountMSats, feeMSats)
         const transaction = await tx.transaction.update({
             where: { k1Hash: getK1Hash(k1) },
             data: {
