@@ -140,7 +140,7 @@ export const Ask = ({ slug }: AskProps) => {
             {askData && askData.ask && (
                 <div
                     className={
-                        'no-scrollbar flex max-h-screen w-full flex-col gap-4 overflow-y-scroll pb-12 text-btcgrey'
+                        'no-scrollbar flex max-h-screen w-full flex-col gap-4 overflow-y-scroll px-0 pb-12 text-btcgrey lg:px-20'
                     }
                 >
                     <div className={'ask-header-block'}>

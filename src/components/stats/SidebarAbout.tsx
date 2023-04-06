@@ -26,7 +26,7 @@ export const SidebarAbout = ({}: SidebarAboutProps) => {
                     </IconButton>
                 </div>
                 <div className={'flex flex-row items-center'}>
-                    <b>Source (coming soon)</b>
+                    <b>Source</b>
                     <IconButton color="primary" id={'open-authenticate-button'}>
                         <Link href={`https://github.com/zerealschlauskwab/asksats`}>
                             <GitHubIcon fontSize={'large'} />

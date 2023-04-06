@@ -139,9 +139,15 @@ async function main() {
             enabled: true,
         },
         {
+            message:
+                "Withdrawals are fixed. We were experiencing some issues with withdrawals due to unbalanced channels. Withdrawals above ~300 stats did not get through. If you're still having troubles try withdrawing smaller chunks.",
+            type: 'success',
+            enabled: true,
+        },
+        {
             message: 'This site is in beta and under active development. Do not transfer any funds.',
             type: 'warning',
-            enabled: true,
+            enabled: false,
         },
     ] as ServerMessage[]
 
