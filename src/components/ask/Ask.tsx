@@ -35,6 +35,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb'
 import { useStore } from 'zustand'
 import { authedUserStore } from '~/store/authedUserStore'
+import { useOGDHeaderStore } from '~/store/ogdHeaderStore'
 
 type BumpSummary = RouterOutput['ask']['byContextSlug']['ask']['bumpSummary']
 export type AskStatus = 'OPEN' | 'SETTLED' | 'CANCELED'
@@ -80,6 +81,7 @@ export const Ask = ({ slug }: AskProps) => {
     const { createOffer, openImage, openEditAsk } = useActionStore()
     const { user } = useStore(authedUserStore)
     const { showToast } = useMessageStore()
+    const { setHeaderProps } = useOGDHeaderStore()
 
     const [createQuestionVisible, setCreateQuestionVisible] = useState(false)
 
@@ -103,6 +105,12 @@ export const Ask = ({ slug }: AskProps) => {
 
     useEffect(() => {
         setValue('amount', askData?.ask.minBump ?? 10)
+        setHeaderProps({
+            title: askData?.title ?? '',
+            description: askData?.content ?? '',
+            imageUrl: askData?.headerImageUrl ?? '',
+            url: window.location.href,
+        })
     }, [askData])
 
     const handleCreateBump = async (askId: string) => {
