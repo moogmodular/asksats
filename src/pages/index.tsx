@@ -33,7 +33,7 @@ import { EditAsk } from '~/components/ask/EditAsk'
 import { SpaceBar } from '~/components/layout/SpaceBar'
 import { CreateSpace } from '~/components/ask/CreateSpace'
 import { EditSpace } from '~/components/ask/EditSpace'
-import { CustomHead } from '~/components/layout/CustomHead'
+import { NextSeo } from 'next-seo'
 
 const IndexPage: NextPageWithLayout = () => {
     const { setUser, storeToken, storeLogin } = useStore(authedUserStore)
@@ -69,7 +69,29 @@ const IndexPage: NextPageWithLayout = () => {
 
     return (
         <ThemeProvider theme={theme}>
-            <CustomHead />
+            <NextSeo
+                title="ArtiSats.com"
+                description="Trade images for sats."
+                canonical="https://artisats.com"
+                openGraph={{
+                    url: 'https://artisats.com',
+                    title: 'ArtiSats.com',
+                    description: 'Trade images for sats.',
+                    images: [
+                        {
+                            url: '/artisats_big_logo.svg',
+                            alt: 'Artisats logo',
+                            type: 'image/svg',
+                        },
+                    ],
+                    siteName: 'ArtiSats',
+                }}
+                twitter={{
+                    handle: '@artisatscom',
+                    site: '@ArtiSats',
+                    cardType: 'summary_large_image',
+                }}
+            />
             <div className={'index-background flex max-h-screen flex-col lg:flex-row'}>
                 <div className={'flex w-full flex-col shadow-2xl lg:w-4/12'}>
                     <header className={'flex flex-row gap-1 bg-primary p-2 shadow-xl lg:gap-4 lg:p-4'}>

@@ -35,7 +35,7 @@ import InfoIcon from '@mui/icons-material/Info'
 import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb'
 import { useStore } from 'zustand'
 import { authedUserStore } from '~/store/authedUserStore'
-import { useOGDHeaderStore } from '~/store/ogdHeaderStore'
+import { NextSeo } from 'next-seo'
 
 type BumpSummary = RouterOutput['ask']['byContextSlug']['ask']['bumpSummary']
 export type AskStatus = 'OPEN' | 'SETTLED' | 'CANCELED'
@@ -81,7 +81,6 @@ export const Ask = ({ slug }: AskProps) => {
     const { createOffer, openImage, openEditAsk } = useActionStore()
     const { user } = useStore(authedUserStore)
     const { showToast } = useMessageStore()
-    const { setHeaderProps } = useOGDHeaderStore()
 
     const [createQuestionVisible, setCreateQuestionVisible] = useState(false)
 
@@ -105,13 +104,7 @@ export const Ask = ({ slug }: AskProps) => {
 
     useEffect(() => {
         setValue('amount', askData?.ask.minBump ?? 10)
-        setHeaderProps({
-            title: askData?.title ?? '',
-            description: askData?.content ?? '',
-            imageUrl: askData?.headerImageUrl ?? '',
-            url: window.location.href,
-        })
-    }, [askData, setHeaderProps])
+    }, [askData])
 
     const handleCreateBump = async (askId: string) => {
         await mutateCreateBump
@@ -151,6 +144,20 @@ export const Ask = ({ slug }: AskProps) => {
                         'no-scrollbar flex max-h-screen w-full flex-col gap-4 overflow-y-scroll px-0 pb-12 text-btcgrey lg:px-20'
                     }
                 >
+                    <NextSeo
+                        openGraph={{
+                            title: askData.title,
+                            description: askData.content,
+                            url: window.location.href,
+                            type: 'ask',
+                            images: [
+                                {
+                                    url: askData.headerImageUrl,
+                                    alt: askData.title,
+                                },
+                            ],
+                        }}
+                    />
                     <div className={'ask-header-block'}>
                         <div onClick={() => (askData.headerImageUrl ? openImage(askData.headerImageUrl) : {})}>
                             {askData.headerImageUrl ? (
