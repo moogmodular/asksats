@@ -2,9 +2,10 @@ import { trpc } from '~/utils/trpc'
 import { AskPreview } from '~/components/ask/AskPreview'
 import { useListStore } from '~/store/listStore'
 import { useRouter } from 'next/router'
-import { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useEffect, useState } from 'react'
 import { useBottomScrollListener } from 'react-bottom-scroll-listener'
 import { Button } from '@mui/material'
+import { NextSeo } from 'next-seo'
 
 interface AskListProps {}
 
@@ -67,6 +68,29 @@ export const AskList = ({}: AskListProps) => {
                 'no-scrollbar grid max-h-screen w-full grid-cols-1 gap-6 overflow-x-hidden overflow-y-scroll overscroll-auto pb-12 md:grid-cols-2 lg:gap-6 2xl:grid-cols-3'
             }
         >
+            <NextSeo
+                title="ArtiSats.com"
+                description="Trade images for sats."
+                canonical="https://artisats.com"
+                openGraph={{
+                    url: 'https://artisats.com',
+                    title: 'ArtiSats.com',
+                    description: 'Trade images for sats.',
+                    images: [
+                        {
+                            url: '/artisats_big_logo.svg',
+                            alt: 'Artisats logo',
+                            type: 'image/svg',
+                        },
+                    ],
+                    siteName: 'ArtiSats',
+                }}
+                twitter={{
+                    handle: '@artisatscom',
+                    site: '@ArtiSats',
+                    cardType: 'summary_large_image',
+                }}
+            />
             {infiniteQuery?.data?.pages.map((item) => {
                 return item.items.map((ask, index) => {
                     return <AskPreview key={ask.id} ask={ask} index={index} />
