@@ -111,7 +111,7 @@ export const Ask = ({ slug }: AskProps) => {
             imageUrl: askData?.headerImageUrl ?? '',
             url: window.location.href,
         })
-    }, [askData])
+    }, [askData, setHeaderProps])
 
     const handleCreateBump = async (askId: string) => {
         await mutateCreateBump
