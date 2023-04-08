@@ -153,7 +153,7 @@ export const Ask = ({ slug }: AskProps) => {
                             title: askData.title,
                             description: askData.content,
                             url: window.location.href,
-                            type: 'ask',
+                            type: 'article',
                             images: [
                                 {
                                     url: askData.headerImageUrl,
