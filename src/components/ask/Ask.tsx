@@ -36,6 +36,7 @@ import DoNotDisturbIcon from '@mui/icons-material/DoNotDisturb'
 import { useStore } from 'zustand'
 import { authedUserStore } from '~/store/authedUserStore'
 import { NextSeo } from 'next-seo'
+import { format } from 'date-fns'
 
 type BumpSummary = RouterOutput['ask']['byContextSlug']['ask']['bumpSummary']
 export type AskStatus = 'OPEN' | 'SETTLED' | 'CANCELED'
@@ -145,6 +146,9 @@ export const Ask = ({ slug }: AskProps) => {
                     }
                 >
                     <NextSeo
+                        title={`ArtiSats.com - ${askData.title}`}
+                        description={`${askData.content}`}
+                        canonical="https://artisats.com"
                         openGraph={{
                             title: askData.title,
                             description: askData.content,
@@ -156,6 +160,16 @@ export const Ask = ({ slug }: AskProps) => {
                                     alt: askData.title,
                                 },
                             ],
+                            siteName: 'ArtiSats',
+                            article: {
+                                authors: [askData.ask?.user?.userName ?? ''],
+                                publishedTime: format(askData.ask?.createdAt ?? 0, 'yyyy-MM-dd'),
+                            },
+                        }}
+                        twitter={{
+                            handle: '@artisatscom',
+                            site: '@ArtiSats',
+                            cardType: 'summary_large_image',
                         }}
                     />
                     <div className={'ask-header-block'}>
