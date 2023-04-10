@@ -104,7 +104,7 @@ export const CreateSpace = ({}: CreateSpaceProps) => {
                 ) : (
                     <span className={'aspect-square w-12 lg:w-36 lg:object-cover'}>&nbsp;</span>
                 )}
-                <div className={'flex h-full w-full w-3/5 flex-col justify-between gap-2'}>
+                <div className={'flex h-full w-full flex-col justify-between gap-2'}>
                     <TextField
                         id="create-ask-title"
                         className={'w-full lg:w-1/2'}

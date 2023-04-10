@@ -116,11 +116,11 @@ export const AssetPreview = ({ setImagePair, index }: AssetPreviewProps) => {
     return (
         <div
             id={`asset-preview-host-${index}`}
-            className={'flex flex-row gap-2 rounded-global border-2 border border-orange-300 p-4'}
+            className={'flex flex-row gap-2 rounded-global border-2 border-orange-300 p-4'}
         >
             <div
                 className={
-                    'flex h-28 w-36 items-center justify-center rounded-global border-2 border border-dashed border-orange-300'
+                    'flex h-28 w-36 items-center justify-center rounded-global border-2 border-dashed border-orange-300'
                 }
             >
                 {currentImage ? (
@@ -205,7 +205,7 @@ export const AssetPreview = ({ setImagePair, index }: AssetPreviewProps) => {
             </div>
             <div
                 className={
-                    'flex h-28 w-36 items-center justify-center rounded-global border-2 border border-dashed border-orange-300'
+                    'flex h-28 w-36 items-center justify-center rounded-global border-2 border-dashed border-orange-300'
                 }
             >
                 {editedImage ? (

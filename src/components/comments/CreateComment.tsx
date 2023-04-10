@@ -85,7 +85,7 @@ export const CreateComment = ({ askId, commentId, invalidate }: CreateCommentPro
     }
 
     return (
-        <div className={'comment-container mt-4 mb-4 flex w-1/2 flex-col gap-1'}>
+        <div className={'comment-container mb-4 mt-4 flex w-1/2 flex-col gap-1'}>
             <Tabs
                 value={editorView}
                 variant={'fullWidth'}
