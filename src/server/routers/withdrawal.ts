@@ -11,7 +11,7 @@ import {
     SINGLE_TRANSACTION_CAP,
     TRANSACTION_MAX_AGE,
 } from '~/server/service/constants'
-import { userBalance } from '~/server/service/accounting'
+import { belowWithdrawalLimit, recentSettledTransaction, userBalance } from '~/server/service/accounting'
 import { isAuthed } from '~/server/middlewares/authed'
 import { doWithdrawalBalanceTransaction } from '~/server/service/finalise'
 
@@ -119,9 +119,13 @@ export const withdrawalRouter = t.router({
                 throw new TRPCError({ code: 'BAD_REQUEST', message: 'user not found' })
             }
 
-            // if (await recentSettledTransaction(prisma, user.id, 'WITHDRAWAL')) {
-            //     throw new TRPCError({ code: 'FORBIDDEN', message: 'last withdrawal too recent' })
-            // }
+            if (!(await belowWithdrawalLimit(prisma, user.id))) {
+                throw new TRPCError({ code: 'FORBIDDEN', message: 'too many pending invoices' })
+            }
+
+            if (await recentSettledTransaction(prisma, user.id, 'WITHDRAWAL')) {
+                throw new TRPCError({ code: 'FORBIDDEN', message: 'last withdrawal too recent' })
+            }
 
             let decoded: any
             try {
