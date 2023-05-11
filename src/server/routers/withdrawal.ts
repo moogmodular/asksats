@@ -17,6 +17,10 @@ import { doWithdrawalBalanceTransaction } from '~/server/service/finalise'
 
 export const withdrawalRouter = t.router({
     getWithdrawalUrl: t.procedure.use(isAuthed).query(async ({ ctx }) => {
+        if (await recentSettledTransaction(prisma, ctx.user.id, 'WITHDRAWAL')) {
+            throw new TRPCError({ code: 'FORBIDDEN', message: 'last withdrawal too recent' })
+        }
+
         const secret = k1()
         const currentBalance = await userBalance(ctx.user.id)
         const maxAmount = Math.floor(Math.min(currentBalance.availableBalance, SINGLE_TRANSACTION_CAP))
