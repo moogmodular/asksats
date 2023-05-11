@@ -11,13 +11,18 @@ import {
     SINGLE_TRANSACTION_CAP,
     TRANSACTION_MAX_AGE,
 } from '~/server/service/constants'
-import { belowWithdrawalLimit, recentSettledTransaction, userBalance } from '~/server/service/accounting'
+import {
+    belowWithdrawalLimit,
+    recentSettledTransaction,
+    recentWithdrawal,
+    userBalance,
+} from '~/server/service/accounting'
 import { isAuthed } from '~/server/middlewares/authed'
 import { doWithdrawalBalanceTransaction } from '~/server/service/finalise'
 
 export const withdrawalRouter = t.router({
     getWithdrawalUrl: t.procedure.use(isAuthed).query(async ({ ctx }) => {
-        if (await recentSettledTransaction(prisma, ctx.user.id, 'WITHDRAWAL')) {
+        if (await recentWithdrawal(prisma, ctx.user.id)) {
             throw new TRPCError({ code: 'FORBIDDEN', message: 'last withdrawal too recent' })
         }
 

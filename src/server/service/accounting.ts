@@ -48,6 +48,25 @@ export const belowInvoiceLimit = async (prisma: PrismaClient, userId: string) =>
     return count < INVOICE_LIMIT
 }
 
+export const recentWithdrawal = async (prisma: PrismaClient, userId: string) => {
+    return prisma.transaction
+        .findMany({
+            where: {
+                userId,
+                transactionKind: 'WITHDRAWAL',
+            },
+            orderBy: {
+                createdAt: 'desc',
+            },
+        })
+        .then((transactions) => {
+            const lastTransaction = transactions[0]
+            return lastTransaction
+                ? differenceInSeconds(new Date(), lastTransaction.createdAt) < TRANSACTION_FREQUENCY_SECONDS_LIMIT_OUT
+                : false
+        })
+}
+
 export const recentSettledTransaction = async (
     prisma: PrismaClient,
     userId: string,
